@@ -13,8 +13,5 @@
     "psr-4": {
       "FP\\": "/"
     }
-  },
-  "require": {
-    "spatie/html-element": "^1.1"
   }
 }

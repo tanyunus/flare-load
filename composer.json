@@ -13,5 +13,8 @@
     "psr-4": {
       "FP\\": "includes/"
     }
+  },
+  "require-dev": {
+    "laravel/pint": "^1.26"
   }
 }

@@ -1,0 +1,15 @@
+{
+  "name": "vendor_name/flare-press",
+  "description": "WordPress plugin for uploading media directly to Cloudflare Images alongside the default uploader.",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Yunus Tan",
+      "email": "yunus.tan@outlook.com.tr"
+    }
+  ],
+  "require": {
+
+  }
+}

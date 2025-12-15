@@ -22,10 +22,29 @@ require_once FLARE_PRESS_PATH . 'vendor/autoload.php';
 
 
 use FP\Controllers\FPDashboard;
+use FP\Controllers\FPList;
+use FP\Controllers\FPUpload;
 
 function flarePressInit(): void
 {
+    if(!is_admin()){
+        return;
+    }
+
+    new FPList();
     new FPDashboard();
+    new FPUpload();
 }
 
 add_action( 'plugins_loaded', 'flarePressInit' );
+
+add_action('admin_print_footer_scripts', function($hook_suffix) {
+    //Enqueue upload page script
+    global $pagenow;
+    $currentAdminPage = basename(admin_url($pagenow));
+    if($currentAdminPage === 'upload.php'){
+        wp_enqueue_script('fp_upload_page_script',FLARE_PRESS_PATH. 'scripts/fp-upload-page.js');
+    }
+
+    wp_enqueue_script('fp_main_script',FLARE_PRESS_PATH. 'scripts/script.js');
+});

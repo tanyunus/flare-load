@@ -6,11 +6,12 @@ use DOMDocument;
 
 class FPQueryController
 {
-    public function __construct() {
+    public function __construct()
+    {
         // Modifying ajax response of attachment query
-        add_action('wp_ajax_query-attachments', function() {
-            add_action('wp_prepare_attachment_for_js', function($response, $attachment, $meta) {
-                if($this->getCfImageCfId($attachment->ID)) {
+        add_action('wp_ajax_query-attachments', function () {
+            add_action('wp_prepare_attachment_for_js', function ($response, $attachment, $meta) {
+                if ($this->getCfImageCfId($attachment->ID)) {
                     $response = $this->updateAjaxQueryResponse($response, $attachment);
                 }
 
@@ -20,7 +21,7 @@ class FPQueryController
 
         // Modifying ajax response right after upload
         add_filter('wp_prepare_attachment_for_js', function ($response, $attachment, $meta) {
-            if($this->getCfImageCfId($attachment->ID)) {
+            if ($this->getCfImageCfId($attachment->ID)) {
                 $response = $this->updateAjaxQueryResponse($response, $attachment);
             }
 
@@ -29,37 +30,40 @@ class FPQueryController
 
         // Modifying attachment query
         add_action('wp_get_attachment_image', function ($html, $attachment_id, $size, $icon, $attr) {
-            if($this->getCfImageCfId($attachment_id)) {
+            if ($this->getCfImageCfId($attachment_id)) {
                 $html = $this->updateQueriedAttachmentUrl($attachment_id, $html);
             }
 
             return $html;
-        }, 10, 5);
+        }, 1, 5);
 
         $this->addCfBadgeToListView();
     }
 
-    private function getCfImageCfId(int $attachmentId): string|false {
+    private function getCfImageCfId(int $attachmentId): string|false
+    {
         $attachmentMeta = wp_get_attachment_metadata($attachmentId);
 
         return $attachmentMeta[FPConstants::UPLOADED_IMAGE_CF_ID_NAME] ?? false;
     }
 
-    private function getCfImageFileName(int $attachmentId): string|false {
+    private function getCfImageFileName(int $attachmentId): string|false
+    {
         $attachmentMeta = wp_get_attachment_metadata($attachmentId);
 
         return $attachmentMeta[FPConstants::UPLOADED_IMAGE_CF_FILE_NAME] ?? false;
     }
 
-    private function getCfImages(): array {
+    private function getCfImages(): array
+    {
         $attachments = get_posts(array(
-            'post_type'      => 'attachment',
+            'post_type' => 'attachment',
             'posts_per_page' => -1,
-            'post_status'    => 'inherit',
-            'meta_query'     => array(
+            'post_status' => 'inherit',
+            'meta_query' => array(
                 array(
-                    'key'     => '_wp_attachment_metadata',
-                    'value'   => FPConstants::UPLOADED_IMAGE_CF_ID_NAME,
+                    'key' => '_wp_attachment_metadata',
+                    'value' => FPConstants::UPLOADED_IMAGE_CF_ID_NAME,
                     'compare' => 'LIKE'
                 )
             )
@@ -67,10 +71,10 @@ class FPQueryController
 
         $filteredAttachments = [];
 
-        foreach($attachments as $attachment) {
+        foreach ($attachments as $attachment) {
             $metaData = wp_get_attachment_metadata($attachment->ID);
 
-            if(isset($metaData[FPConstants::UPLOADED_IMAGE_CF_ID_NAME])) {
+            if (isset($metaData[FPConstants::UPLOADED_IMAGE_CF_ID_NAME])) {
                 $filteredAttachments[] = $attachment;
             }
         }
@@ -78,7 +82,8 @@ class FPQueryController
         return $filteredAttachments;
     }
 
-    private function getCfImageIds(): array {
+    private function getCfImageIds(): array
+    {
         $imageIds = [];
 
         foreach ($this->getCfImages() as $image) {
@@ -88,37 +93,40 @@ class FPQueryController
         return $imageIds;
     }
 
-    private function updateQueriedAttachmentUrl(int $attachmentId, string $html): string {
+    private function updateQueriedAttachmentUrl(int $attachmentId, string $html): string
+    {
         $cfUrl = get_the_guid($attachmentId);
 
-        $dom  = new DOMDocument();
+        $dom = new DOMDocument();
         libxml_use_internal_errors(true);
         $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
 
         $img = $dom->getElementsByTagName('img')->item(0);
         $img->setAttribute('src', $cfUrl);
+        $img->setAttribute('srcset', '');
 
         return $dom->saveHTML($img);
     }
 
-    private function updateAjaxQueryResponse(array $response, object $attachment): array {
+    private function updateAjaxQueryResponse(array $response, object $attachment): array
+    {
         $cfImageId = $this->getCfImageCfId($attachment->ID);
 
-        if($cfImageId) {
+        if ($cfImageId) {
             $imgUrl = $attachment->guid;
 
             $response['url'] = $imgUrl;
 
-            if(isset($response['sizes']['full'])) {
+            if (isset($response['sizes']['full'])) {
                 $response['sizes']['full']['url'] = $imgUrl;
             }
 
-            if(isset($response['sizes']['medium'])) {
+            if (isset($response['sizes']['medium'])) {
                 $response['sizes']['medium']['url'] = $imgUrl;
             }
 
-            if(isset($response['sizes']['thumbnail'])) {
+            if (isset($response['sizes']['thumbnail'])) {
                 $response['sizes']['thumbnail']['url'] = $imgUrl;
             }
 
@@ -129,17 +137,22 @@ class FPQueryController
         return $response;
     }
 
-    private function addCfBadgeToListView(): void {
-        add_filter( 'manage_media_columns', function ($columns) {
+    private function addCfBadgeToListView(): void
+    {
+        add_filter('manage_media_columns', function ($columns) {
             $columns[FPConstants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID] = '';
 
             return $columns;
-        } );
+        });
 
-        add_filter( 'manage_media_custom_column', function ($columnName, $columnID){
-            if($columnName == FPConstants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID && $this->getCfImageCfId($columnID)) {
-                echo '<span><img title="Uploaded to Cloudflare" alt="Cloudflare logo" height="18" src="/wordpress/wp-content/plugins/flare-press/images/cf_logo.png"></span>';
+        add_filter('manage_media_custom_column', function ($columnName, $imageId) {
+            if ($columnName === FPConstants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID && $this->getCfImageCfId($imageId)) {
+                echo '<span 
+                data-fp-file-name="' . $this->getCfImageFileName($imageId) . '"
+                data-fp-url="'. get_the_guid($imageId)  .'"
+                >
+                <img title="Uploaded to Cloudflare" alt="Cloudflare logo" height="18" src="/wordpress/wp-content/plugins/flare-press/images/cf_logo.png"></span>';
             }
-        }, 10, 2 );
+        }, 10, 2);
     }
 }

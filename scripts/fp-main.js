@@ -956,14 +956,14 @@ class FpMediaLibraryMonitor {
 }
 
 // Add cf badge function
-addCfBadge = function (cfImageElements) {
+function addCfBadge (cfImageElements) {
     cfImageElements.forEach(cfImageElement => {
         cfImageElement.element.classList.add('fp-cf-badge');
     });
 }
 
 // Upload form data modifier
-modifyUploadFormData = function (mediaLibraryMonitor) {
+function modifyUploadFormData (mediaLibraryMonitor) {
     const uploadSwitcher = document.querySelector('#fp_upload_switcher');
 
     if (!uploadSwitcher) {
@@ -979,7 +979,7 @@ modifyUploadFormData = function (mediaLibraryMonitor) {
 }
 
 // Upload switcher element creator function
-createUploadSwitcherElement = function () {
+function createUploadSwitcherElement () {
     const checkboxId = 'fp_upload_switcher';
 
     const labelElement = document.createElement('label');
@@ -999,7 +999,7 @@ createUploadSwitcherElement = function () {
 
 // Append upload switcher element right side of
 // add media button in media library page (upload.php)
-appendSwitcherToSideOfAddMediaButton = function (uploadSwitcherElement) {
+function appendSwitcherToSideOfAddMediaButton (uploadSwitcherElement) {
     const addMediaFileButton = document.querySelector(`#wp-media-grid > a.page-title-action`);
 
     if (!addMediaFileButton) {
@@ -1011,15 +1011,60 @@ appendSwitcherToSideOfAddMediaButton = function (uploadSwitcherElement) {
     return true;
 }
 
-handleUploadSwitcherElement = function() {
+function handleUploadSwitcherElement() {
     const uploadSwitcherElement = createUploadSwitcherElement();
 
     return appendSwitcherToSideOfAddMediaButton(uploadSwitcherElement);
 }
 
+function handleMediaLibaryListView() {
+    const mediaTable = document.querySelector('.wp-list-table.media');
+
+    if(!mediaTable) {
+        return;
+    }
+
+    const rowArray = Array.from(mediaTable.rows);
+
+    rowArray.forEach(row => {
+        const newRowDetails = {
+            fileName: "",
+            url: ""
+        }
+
+        const cellArray = Array.from(row.cells);
+        cellArray.forEach(cell => {
+            if(cell.classList.contains('fp_cf_badge_column') && cell.innerHTML) {
+                const cfLogoWrapper = cell.querySelector('[data-fp-file-name][data-fp-url]');
+
+                if(cfLogoWrapper) {
+                    newRowDetails.fileName = cfLogoWrapper.getAttribute('data-fp-file-name');
+                    newRowDetails.url = cfLogoWrapper.getAttribute('data-fp-url');
+                }
+
+                const titleCell = row.querySelector('.title.column-title[data-colname="File"]');
+                const fileNameElement = titleCell.querySelector('.filename');
+                const copyAttachmentButton = titleCell.querySelector('.copy-attachment-url');
+
+                let screenReaderText = titleCell.querySelector('.screen-reader-text');
+                screenReaderText = screenReaderText.cloneNode(true);
+
+                fileNameElement.innerHTML = "";
+                fileNameElement.appendChild(screenReaderText);
+                fileNameElement.innerHTML += newRowDetails.fileName;
+
+                copyAttachmentButton.dataset.clipboardText = newRowDetails.url;
+            }
+        })
+    })
+}
+
 // Listen dom load
 document.addEventListener('DOMContentLoaded', () => {
+    handleMediaLibaryListView();
+
     const mediaLibraryMonitor = new FpMediaLibraryMonitor();
+
     mediaLibraryMonitor.ready.then(async () => {
         if(handleUploadSwitcherElement()) {
             modifyUploadFormData(mediaLibraryMonitor);

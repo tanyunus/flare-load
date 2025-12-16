@@ -21,15 +21,7 @@ class FPAssets
     }
 
     private function enqueueScripts(): void {
-       //Enqueue modules
-        echo '<script src="'.FLARE_PRESS_PATH.'scripts/fp-media-library-monitor.js"></script>';
-
-        //Enqueue scripts
-        echo '<script src="'.FLARE_PRESS_PATH.'scripts/script.js"></script>';
-
-        if(AdminPage::is('upload.php')) {
-            echo '<script src="'.FLARE_PRESS_PATH.'scripts/fp-upload-page.js"></script>';
-        }
+        wp_enqueue_script('fp-main', FLARE_PRESS_PATH. 'scripts/fp-main.js');
     }
 
 }

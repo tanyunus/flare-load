@@ -140,7 +140,7 @@ class FPQueryController
     private function addCfBadgeToListView(): void
     {
         add_filter('manage_media_columns', function ($columns) {
-            $columns[FPConstants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID] = '';
+            $columns[FPConstants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID] = 'Location';
 
             return $columns;
         });
@@ -152,6 +152,8 @@ class FPQueryController
                 data-fp-url="'. get_the_guid($imageId)  .'"
                 >
                 <img title="Uploaded to Cloudflare" alt="Cloudflare logo" height="18" src="/wordpress/wp-content/plugins/flare-press/images/cf_logo.png"></span>';
+            } else {
+                echo 'This server';
             }
         }, 10, 2);
     }

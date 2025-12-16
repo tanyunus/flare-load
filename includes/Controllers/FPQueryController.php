@@ -11,7 +11,7 @@ class FPQueryController
         // Modifying ajax response of attachment query
         add_action('wp_ajax_query-attachments', function() {
             add_action('wp_prepare_attachment_for_js', function($response, $attachment, $meta) {
-                if($this->isCfImage($attachment->ID)) {
+                if($this->getCfImageCfId($attachment->ID)) {
                     $response = $this->updateAjaxQueryResponse($response, $attachment);
                 }
 
@@ -21,23 +21,16 @@ class FPQueryController
 
         // Modifying ajax response right after upload
         add_filter('wp_prepare_attachment_for_js', function ($response, $attachment, $meta) {
-            if($this->isCfImage($attachment->ID)) {
+            if($this->getCfImageCfId($attachment->ID)) {
                 $response = $this->updateAjaxQueryResponse($response, $attachment);
             }
 
             return $response;
         }, 10, 3);
 
-        // Adding CF image ids to window objecy via custom script
-        add_action('wp_print_scripts', function() {
-            if(AdminPage::is('upload.php')) {
-                $this->addCfImageIdsToWindow();
-            }
-        });
-
         // Modifying attachment query
         add_action('wp_get_attachment_image', function ($html, $attachment_id, $size, $icon, $attr) {
-            if($this->isCfImage($attachment_id)) {
+            if($this->getCfImageCfId($attachment_id)) {
                 $html = $this->updateQueriedAttachmentUrl($attachment_id, $html);
             }
 
@@ -45,10 +38,10 @@ class FPQueryController
         }, 10, 5);
     }
 
-    private function isCfImage(int $attachmentId): bool {
+    private function getCfImageCfId(int $attachmentId): string|false {
         $attachmentMeta = wp_get_attachment_metadata($attachmentId);
 
-        return isset($attachmentMeta[FPConstants::UPLOADED_IMAGE_CF_ID_NAME]);
+        return $attachmentMeta[FPConstants::UPLOADED_IMAGE_CF_ID_NAME] ?? false;
     }
 
     private function getCfImages(): array {
@@ -88,17 +81,6 @@ class FPQueryController
         return $imageIds;
     }
 
-    private function addCfImageIdsToWindow(): void {
-        $jsonEncodedIds = implode(",", $this->getCfImageIds());
-
-        ?>
-            <script>
-                window.fp = window.fp || {};
-                window.fp.cfImageIds = [<?php echo $jsonEncodedIds; ?>];
-            </script>
-        <?php
-    }
-
     private function updateQueriedAttachmentUrl(int $attachmentId, string $html): string {
         $cfUrl = get_the_guid($attachmentId);
 
@@ -114,7 +96,9 @@ class FPQueryController
     }
 
     private function updateAjaxQueryResponse(array $response, object $attachment): array {
-        if($this->isCfImage($attachment->ID)) {
+        $cfImageId = $this->getCfImageCfId($attachment->ID);
+
+        if($cfImageId) {
             $imgUrl = $attachment->guid;
 
             $response['url'] = $imgUrl;
@@ -130,6 +114,8 @@ class FPQueryController
             if(isset($response['sizes']['thumbnail'])) {
                 $response['sizes']['thumbnail']['url'] = $imgUrl;
             }
+
+            $response[FPConstants::UPLOADED_IMAGE_CF_ID_NAME] = $cfImageId;
         }
 
         return $response;

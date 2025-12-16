@@ -9,11 +9,17 @@ document.addEventListener('DOMContentLoaded', () => {
     window.fp.mediaLibraryMonitor.ready.then(() => {
         console.log('[FP] Media library monitor ready!');
 
-        window.addEventListener('fpMediaLibrary:thumbnailLoaded', (e) => {
-            console.log(`[FP] Attachment view created:`);
+        window.addEventListener('fpMediaLibrary:cfImageElementFound', () => {
+            console.log(`[FP] CF Image element found in DOM`);
 
-            addCfBadge();
+            addCfBadge(window.fp.mediaLibraryMonitor.getCfImageAttachmentsWithElements());
         });
+
+        window.addEventListener('fpMediaLibrary:cfImageElementAdded', () => {
+            console.log(`[FP] CF Image element added to DOM`);
+
+            addCfBadge(window.fp.mediaLibraryMonitor.getCfImageAttachmentsWithElements());
+        })
     });
 
     // Wait for uploader and then modify upload form data
@@ -83,16 +89,8 @@ function waitForUploader() {
     })
 }
 
-function addCfBadge() {
-    const cfImageIds = window.fp.cfImageIds;
-
-    if(!cfImageIds) {
-        return;
-    }
-
-    cfImageIds.forEach(id => {
-        const thumbnailElement = document.querySelector(`[data-id="${id}"]`);
-
-        thumbnailElement.classList.add('fp-cf-badge');
-    })
+function addCfBadge(cfImageElements) {
+    cfImageElements.forEach(cfImageElement => {
+        cfImageElement.element.classList.add('fp-cf-badge');
+    });
 }

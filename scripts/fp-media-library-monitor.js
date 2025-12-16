@@ -2,6 +2,7 @@ class FpMediaLibraryMonitor {
     constructor() {
         this.attachments = new Map();
         this.pendingThumbnails = new Map();
+        this.cfImageAttachments = new Map(); // Store attachments with fp_cf_image_id
         this.initialized = false;
         this.isMediaLibraryPage = window.location.pathname.includes('upload.php');
         this.ready = this.init();
@@ -10,6 +11,9 @@ class FpMediaLibraryMonitor {
     async init() {
         try {
             console.log('[FP] Initializing on:', window.location.pathname);
+
+            // Hook into AJAX responses to catch fp_cf_image_id
+            this.hookAjaxResponses();
 
             // Different initialization for media library page vs modal
             if (this.isMediaLibraryPage) {
@@ -27,6 +31,319 @@ class FpMediaLibraryMonitor {
         }
     }
 
+    hookAjaxResponses() {
+        // Hook into jQuery AJAX if available
+        if (window.jQuery) {
+            jQuery(document).ajaxComplete((event, xhr, settings) => {
+                if (settings.url && settings.url.includes('admin-ajax.php')) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        this.processAjaxResponse(response);
+                    } catch (e) {
+                        // Not JSON or parsing failed
+                    }
+                }
+            });
+        }
+
+        // Also hook into native fetch
+        const originalFetch = window.fetch;
+        window.fetch = async (...args) => {
+            const response = await originalFetch(...args);
+
+            // Check if it's admin-ajax
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('admin-ajax.php')) {
+                // Clone response to read it without consuming
+                const clone = response.clone();
+                try {
+                    const data = await clone.json();
+                    this.processAjaxResponse(data);
+                } catch (e) {
+                    // Not JSON
+                }
+            }
+
+            return response;
+        };
+
+        // Hook into XMLHttpRequest
+        const originalOpen = XMLHttpRequest.prototype.open;
+        const originalSend = XMLHttpRequest.prototype.send;
+        const monitor = this;
+
+        XMLHttpRequest.prototype.open = function(method, url) {
+            this._url = url;
+            return originalOpen.apply(this, arguments);
+        };
+
+        XMLHttpRequest.prototype.send = function() {
+            const xhr = this;
+
+            if (xhr._url && xhr._url.includes('admin-ajax.php')) {
+                xhr.addEventListener('load', function() {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        monitor.processAjaxResponse(response);
+                    } catch (e) {
+                        // Not JSON
+                    }
+                });
+            }
+
+            return originalSend.apply(this, arguments);
+        };
+    }
+
+    processAjaxResponse(response) {
+        if (!response) return;
+
+        // Check for query-attachments response
+        if (response.success && response.data) {
+            // Handle array of attachments
+            if (Array.isArray(response.data)) {
+                response.data.forEach(attachment => {
+                    this.checkAndStoreCfImage(attachment);
+                });
+            }
+            // Handle single attachment
+            else if (response.data.id) {
+                this.checkAndStoreCfImage(response.data);
+            }
+        }
+
+        // Also check if response itself is an attachment
+        if (response.id) {
+            this.checkAndStoreCfImage(response);
+        }
+    }
+
+    checkAndStoreCfImage(attachment) {
+        if (attachment.fp_cf_image_id) {
+            console.log('[FP] Found attachment with fp_cf_image_id:', attachment.id, attachment.fp_cf_image_id);
+
+            // Store with CF image data
+            this.cfImageAttachments.set(attachment.id, {
+                attachmentId: attachment.id,
+                cfImageId: attachment.fp_cf_image_id,
+                data: attachment,
+                timestamp: Date.now()
+            });
+
+            // Update main attachments map if exists
+            if (this.attachments.has(attachment.id)) {
+                const existing = this.attachments.get(attachment.id);
+                existing.fp_cf_image_id = attachment.fp_cf_image_id;
+                this.attachments.set(attachment.id, existing);
+            } else {
+                this.attachments.set(attachment.id, {
+                    id: attachment.id,
+                    url: attachment.url,
+                    title: attachment.title,
+                    fp_cf_image_id: attachment.fp_cf_image_id,
+                    fromAjax: true
+                });
+            }
+
+            this.emitEvent('cfImageFound', {
+                attachmentId: attachment.id,
+                cfImageId: attachment.fp_cf_image_id,
+                attachment: attachment
+            });
+
+            // Try to find its element immediately
+            this.findCfImageElement(attachment.id);
+        }
+    }
+
+    findCfImageElement(attachmentId) {
+        // Try different selectors
+        const selectors = [
+            `[data-id="${attachmentId}"]`,
+            `.attachment[data-id="${attachmentId}"]`,
+            `#attachment-${attachmentId}`,
+            `.attachment-${attachmentId}`
+        ];
+
+        let element = null;
+        for (const selector of selectors) {
+            element = document.querySelector(selector);
+            if (element) break;
+        }
+
+        if (element) {
+            console.log('[FP] Found element for CF image attachment:', attachmentId);
+
+            // Store element reference
+            const cfData = this.cfImageAttachments.get(attachmentId);
+            if (cfData) {
+                cfData.element = element;
+                this.cfImageAttachments.set(attachmentId, cfData);
+            }
+
+            this.emitEvent('cfImageElementFound', {
+                attachmentId: attachmentId,
+                element: element,
+                cfImageId: this.cfImageAttachments.get(attachmentId)?.cfImageId
+            });
+
+            // Add a data attribute to mark it
+            element.setAttribute('data-fp-cf-image-id', this.cfImageAttachments.get(attachmentId)?.cfImageId);
+
+            return element;
+        }
+
+        return null;
+    }
+
+    // Method to get all attachments with fp_cf_image_id
+    getCfImageAttachments() {
+        return Array.from(this.cfImageAttachments.values());
+    }
+
+    // Method to get a specific CF image attachment
+    getCfImageAttachment(attachmentId) {
+        return this.cfImageAttachments.get(attachmentId);
+    }
+
+    // Method to get CF image attachments with their DOM elements
+    getCfImageAttachmentsWithElements() {
+        const results = [];
+
+        this.cfImageAttachments.forEach((data, attachmentId) => {
+            // Try to find element if not already found
+            if (!data.element) {
+                data.element = this.findCfImageElement(attachmentId);
+            }
+
+            if (data.element) {
+                results.push({
+                    attachmentId: data.attachmentId,
+                    cfImageId: data.cfImageId,
+                    element: data.element,
+                    data: data.data
+                });
+            }
+        });
+
+        return results;
+    }
+
+    // Method to refresh CF image elements (useful after DOM updates)
+    refreshCfImageElements() {
+        console.log('[FP] Refreshing CF image elements...');
+
+        const found = [];
+        const notFound = [];
+
+        this.cfImageAttachments.forEach((data, attachmentId) => {
+            const element = this.findCfImageElement(attachmentId);
+            if (element) {
+                data.element = element;
+                this.cfImageAttachments.set(attachmentId, data);
+                found.push(attachmentId);
+            } else {
+                notFound.push(attachmentId);
+            }
+        });
+
+        console.log('[FP] CF image elements found:', found.length, 'Not found:', notFound.length);
+
+        return {
+            found: found,
+            notFound: notFound,
+            total: this.cfImageAttachments.size
+        };
+    }
+
+    // Method to wait for a CF image element to appear
+    waitForCfImageElement(attachmentId, timeout = 5000) {
+        return new Promise((resolve, reject) => {
+            // Check if already exists
+            const existing = this.findCfImageElement(attachmentId);
+            if (existing) {
+                resolve(existing);
+                return;
+            }
+
+            const startTime = Date.now();
+
+            const check = () => {
+                const element = this.findCfImageElement(attachmentId);
+                if (element) {
+                    resolve(element);
+                } else if (Date.now() - startTime > timeout) {
+                    reject(new Error(`Timeout waiting for CF image element ${attachmentId}`));
+                } else {
+                    setTimeout(check, 100);
+                }
+            };
+
+            check();
+        });
+    }
+
+    // Override processExistingAttachments to check for CF images
+    processExistingAttachments() {
+        const attachments = document.querySelectorAll('.attachment');
+        console.log(`[FP] Found ${attachments.length} existing attachments`);
+
+        attachments.forEach(element => {
+            const id = element.getAttribute('data-id');
+            if (id) {
+                // Check if this is a CF image attachment
+                if (this.cfImageAttachments.has(id)) {
+                    const cfData = this.cfImageAttachments.get(id);
+                    cfData.element = element;
+                    this.cfImageAttachments.set(id, cfData);
+                    element.setAttribute('data-fp-cf-image-id', cfData.cfImageId);
+                }
+
+                const img = element.querySelector('img');
+                if (img) {
+                    if (img.complete) {
+                        this.handleImageLoaded(id, img);
+                    } else {
+                        img.addEventListener('load', () => {
+                            this.handleImageLoaded(id, img);
+                        }, { once: true });
+                    }
+                }
+            }
+        });
+    }
+
+    // Override trackRenderedAttachment to check for CF images
+    trackRenderedAttachment(view) {
+        const id = view.model.get('id');
+
+        // Check if this is a CF image
+        if (view.model.get('fp_cf_image_id')) {
+            this.checkAndStoreCfImage({
+                id: id,
+                fp_cf_image_id: view.model.get('fp_cf_image_id'),
+                url: view.model.get('url'),
+                title: view.model.get('title')
+            });
+
+            // Find its element
+            setTimeout(() => {
+                this.findCfImageElement(id);
+            }, 100);
+        }
+
+        const img = view.$el.find('img')[0] || view.el.querySelector('img');
+
+        if (img) {
+            if (img.complete) {
+                this.handleImageLoaded(id, img);
+            } else {
+                img.addEventListener('load', () => {
+                    this.handleImageLoaded(id, img);
+                }, { once: true });
+            }
+        }
+    }
+
     async initForMediaLibraryPage() {
         // Wait for wp.media to be available
         await this.waitForMediaComponents();
@@ -41,6 +358,8 @@ class FpMediaLibraryMonitor {
         setTimeout(() => {
             this.processExistingAttachments();
             this.observeMediaGrid();
+            // Refresh CF image elements after initial load
+            this.refreshCfImageElements();
         }, 500);
     }
 
@@ -51,12 +370,13 @@ class FpMediaLibraryMonitor {
         this.hookUploader();
     }
 
+    // ... rest of the previous methods remain the same ...
+
     waitForMediaComponents(timeout = 10000) {
         return new Promise((resolve, reject) => {
             const startTime = Date.now();
 
             const check = () => {
-                // For upload.php, we need different components
                 if (this.isMediaLibraryPage) {
                     if (window.wp?.media && window.wp?.Uploader) {
                         resolve();
@@ -81,7 +401,6 @@ class FpMediaLibraryMonitor {
     }
 
     hookMediaGrid() {
-        // Hook into the media grid browser if available
         if (window.wp?.media?.view?.AttachmentsBrowser) {
             const originalBrowser = window.wp.media.view.AttachmentsBrowser;
             const monitor = this;
@@ -91,7 +410,6 @@ class FpMediaLibraryMonitor {
                     originalBrowser.prototype.initialize.apply(this, arguments);
                     console.log('[FP] AttachmentsBrowser initialized');
 
-                    // Listen to collection events
                     if (this.collection) {
                         monitor.hookCollection(this.collection);
                     }
@@ -99,7 +417,6 @@ class FpMediaLibraryMonitor {
             });
         }
 
-        // Also hook into Attachment views if they exist
         if (window.wp?.media?.view?.Attachment) {
             this.hookAttachmentViews();
         }
@@ -110,6 +427,17 @@ class FpMediaLibraryMonitor {
 
         collection.on('add', (model) => {
             console.log('[FP] Model added to collection:', model.get('id'));
+
+            // Check for fp_cf_image_id
+            if (model.get('fp_cf_image_id')) {
+                this.checkAndStoreCfImage({
+                    id: model.get('id'),
+                    fp_cf_image_id: model.get('fp_cf_image_id'),
+                    url: model.get('url'),
+                    title: model.get('title')
+                });
+            }
+
             this.handleLibraryAdd(model);
         });
 
@@ -123,9 +451,13 @@ class FpMediaLibraryMonitor {
             this.emitEvent('collectionSynced', {
                 count: collection.length
             });
+
+            // Refresh CF image elements after sync
+            setTimeout(() => {
+                this.refreshCfImageElements();
+            }, 500);
         });
 
-        // Process existing models
         if (collection.models && collection.models.length > 0) {
             console.log('[FP] Processing existing models:', collection.models.length);
             this.handleLibraryReset(collection);
@@ -149,10 +481,17 @@ class FpMediaLibraryMonitor {
                     type: this.model.get('type'),
                     subtype: this.model.get('subtype'),
                     sizes: this.model.get('sizes'),
+                    fp_cf_image_id: this.model.get('fp_cf_image_id'),
                     viewInitialized: Date.now()
                 };
 
                 monitor.attachments.set(attachmentData.id, attachmentData);
+
+                // Check if it has fp_cf_image_id
+                if (attachmentData.fp_cf_image_id) {
+                    monitor.checkAndStoreCfImage(attachmentData);
+                }
+
                 monitor.emitEvent('attachmentViewCreated', attachmentData);
 
                 this.on('ready', () => {
@@ -163,7 +502,6 @@ class FpMediaLibraryMonitor {
             render: function() {
                 const result = originalAttachment.prototype.render.apply(this, arguments);
 
-                // Additional tracking after render
                 setTimeout(() => {
                     monitor.trackRenderedAttachment(this);
                 }, 0);
@@ -173,42 +511,7 @@ class FpMediaLibraryMonitor {
         });
     }
 
-    trackRenderedAttachment(view) {
-        const id = view.model.get('id');
-        const img = view.$el.find('img')[0] || view.el.querySelector('img');
-
-        if (img) {
-            if (img.complete) {
-                this.handleImageLoaded(id, img);
-            } else {
-                img.addEventListener('load', () => {
-                    this.handleImageLoaded(id, img);
-                }, { once: true });
-            }
-        }
-    }
-
-    handleImageLoaded(id, img) {
-        const attachment = this.attachments.get(id) || {};
-        attachment.id = id;
-        attachment.thumbnailLoaded = Date.now();
-        attachment.thumbnailUrl = img.src;
-        attachment.thumbnailWidth = img.naturalWidth;
-        attachment.thumbnailHeight = img.naturalHeight;
-
-        this.attachments.set(id, attachment);
-
-        this.emitEvent('thumbnailLoaded', {
-            attachmentId: id,
-            url: img.src,
-            width: img.naturalWidth,
-            height: img.naturalHeight,
-            attachment
-        });
-    }
-
     observeMediaGrid() {
-        // Find the attachments container
         const containers = [
             '.attachments-browser .attachments',
             '.media-frame-content .attachments',
@@ -236,12 +539,25 @@ class FpMediaLibraryMonitor {
                         const id = node.getAttribute('data-id');
                         console.log('[FP] New attachment in DOM:', id);
 
+                        // Check if it's a CF image attachment
+                        if (this.cfImageAttachments.has(id)) {
+                            const cfData = this.cfImageAttachments.get(id);
+                            cfData.element = node;
+                            this.cfImageAttachments.set(id, cfData);
+                            node.setAttribute('data-fp-cf-image-id', cfData.cfImageId);
+
+                            this.emitEvent('cfImageElementAdded', {
+                                attachmentId: id,
+                                cfImageId: cfData.cfImageId,
+                                element: node
+                            });
+                        }
+
                         this.emitEvent('attachmentAddedToDOM', {
                             attachmentId: id,
                             element: node
                         });
 
-                        // Track thumbnail
                         const img = node.querySelector('img');
                         if (img) {
                             if (img.complete) {
@@ -293,6 +609,10 @@ class FpMediaLibraryMonitor {
                 try {
                     const data = JSON.parse(response.response);
                     if (data.success && data.data) {
+                        // Check for fp_cf_image_id in upload response
+                        if (data.data.fp_cf_image_id) {
+                            monitor.checkAndStoreCfImage(data.data);
+                        }
                         monitor.handleFileUploaded(data.data);
                     }
                 } catch (e) {
@@ -306,12 +626,16 @@ class FpMediaLibraryMonitor {
                     count: files.length,
                     files: files
                 });
+
+                // Refresh CF image elements after upload
+                setTimeout(() => {
+                    monitor.refreshCfImageElements();
+                }, 1000);
             });
 
             return ret;
         };
 
-        // Check if there's already an uploader instance on the page
         if (window.uploader) {
             console.log('[FP] Found existing uploader instance');
             this.hookExistingUploader(window.uploader);
@@ -331,31 +655,13 @@ class FpMediaLibraryMonitor {
             try {
                 const data = JSON.parse(response.response);
                 if (data.success && data.data) {
+                    if (data.data.fp_cf_image_id) {
+                        monitor.checkAndStoreCfImage(data.data);
+                    }
                     monitor.handleFileUploaded(data.data);
                 }
             } catch (e) {
                 console.error('[FP] Failed to parse upload response:', e);
-            }
-        });
-    }
-
-    processExistingAttachments() {
-        const attachments = document.querySelectorAll('.attachment');
-        console.log(`[FP] Found ${attachments.length} existing attachments`);
-
-        attachments.forEach(element => {
-            const id = element.getAttribute('data-id');
-            if (id) {
-                const img = element.querySelector('img');
-                if (img) {
-                    if (img.complete) {
-                        this.handleImageLoaded(id, img);
-                    } else {
-                        img.addEventListener('load', () => {
-                            this.handleImageLoaded(id, img);
-                        }, { once: true });
-                    }
-                }
             }
         });
     }
@@ -389,6 +695,25 @@ class FpMediaLibraryMonitor {
         }
     }
 
+    handleImageLoaded(id, img) {
+        const attachment = this.attachments.get(id) || {};
+        attachment.id = id;
+        attachment.thumbnailLoaded = Date.now();
+        attachment.thumbnailUrl = img.src;
+        attachment.thumbnailWidth = img.naturalWidth;
+        attachment.thumbnailHeight = img.naturalHeight;
+
+        this.attachments.set(id, attachment);
+
+        this.emitEvent('thumbnailLoaded', {
+            attachmentId: id,
+            url: img.src,
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+            attachment
+        });
+    }
+
     handleLibraryReset(collection) {
         const models = collection.models || [];
         console.log(`[FP] Library reset with ${models.length} items`);
@@ -397,8 +722,16 @@ class FpMediaLibraryMonitor {
             id: model.get('id'),
             title: model.get('title'),
             url: model.get('url'),
-            sizes: model.get('sizes')
+            sizes: model.get('sizes'),
+            fp_cf_image_id: model.get('fp_cf_image_id')
         }));
+
+        // Check for CF images
+        attachments.forEach(att => {
+            if (att.fp_cf_image_id) {
+                this.checkAndStoreCfImage(att);
+            }
+        });
 
         this.emitEvent('libraryReset', {
             count: models.length,
@@ -414,8 +747,13 @@ class FpMediaLibraryMonitor {
         const data = {
             id: model.get('id'),
             title: model.get('title'),
-            url: model.get('url')
+            url: model.get('url'),
+            fp_cf_image_id: model.get('fp_cf_image_id')
         };
+
+        if (data.fp_cf_image_id) {
+            this.checkAndStoreCfImage(data);
+        }
 
         this.emitEvent('libraryItemAdded', data);
         this.processModel(model);
@@ -427,7 +765,8 @@ class FpMediaLibraryMonitor {
             url: data.url,
             filename: data.filename,
             uploaded: Date.now(),
-            sizes: data.sizes
+            sizes: data.sizes,
+            fp_cf_image_id: data.fp_cf_image_id
         };
 
         this.attachments.set(data.id, attachment);
@@ -442,6 +781,7 @@ class FpMediaLibraryMonitor {
                 url: model.get('url'),
                 title: model.get('title'),
                 sizes: model.get('sizes'),
+                fp_cf_image_id: model.get('fp_cf_image_id'),
                 fromLibrary: true
             });
         }
@@ -461,7 +801,6 @@ class FpMediaLibraryMonitor {
         }
     }
 
-    // Utility methods remain the same...
     getAttachment(id) {
         return this.attachments.get(id);
     }
@@ -481,10 +820,61 @@ class FpMediaLibraryMonitor {
     getStats() {
         return {
             totalAttachments: this.attachments.size,
+            cfImageAttachments: this.cfImageAttachments.size,
             isMediaLibraryPage: this.isMediaLibraryPage,
             initialized: this.initialized
         };
     }
 }
 
+// Initialize
 window.fp.mediaLibraryMonitor = new FpMediaLibraryMonitor();
+
+// Example usage and event listeners
+/*window.fp.mediaLibraryMonitor.ready.then(() => {
+    console.log('[FP] Monitor ready! Setting up listeners...');
+
+    // Listen for CF image events
+    window.addEventListener('fpMediaLibrary:cfImageFound', (e) => {
+        console.log('[FP EVENT] CF Image found:', e.detail);
+    });
+
+    window.addEventListener('fpMediaLibrary:cfImageElementFound', (e) => {
+        console.log('[FP EVENT] CF Image element found:', e.detail);
+    });
+
+    window.addEventListener('fpMediaLibrary:cfImageElementAdded', (e) => {
+        console.log('[FP EVENT] CF Image element added to DOM:', e.detail);
+    });
+
+    // Other events
+    window.addEventListener('fpMediaLibrary:filesAdded', (e) => {
+        console.log('[FP EVENT] Files added:', e.detail);
+    });
+
+    window.addEventListener('fpMediaLibrary:fileUploaded', (e) => {
+        console.log('[FP EVENT] File uploaded:', e.detail);
+    });
+
+    window.addEventListener('fpMediaLibrary:thumbnailLoaded', (e) => {
+        console.log('[FP EVENT] Thumbnail loaded:', e.detail);
+    });
+});*/
+
+// Usage examples for CF image methods:
+/*
+// Get all CF image attachments
+const cfImages = window.fp.mediaLibraryMonitor.getCfImageAttachments();
+
+// Get CF images with their DOM elements
+const cfImagesWithElements = window.fp.mediaLibraryMonitor.getCfImageAttachmentsWithElements();
+
+// Get a specific CF image attachment
+const cfImage = window.fp.mediaLibraryMonitor.getCfImageAttachment('123');
+
+// Refresh CF image elements after DOM changes
+window.fp.mediaLibraryMonitor.refreshCfImageElements();
+
+// Wait for a CF image element to appear
+await window.fp.mediaLibraryMonitor.waitForCfImageElement('456');
+*/

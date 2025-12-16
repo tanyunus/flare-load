@@ -1,13 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Script for upload page loaded.');
+    console.log('[FP] Script for upload page loaded.');
 
     const addMediaFileButton = document.querySelector(`#wp-media-grid > a.page-title-action`);
     const uploadSwitcherElement = createUploadSwitcherElement();
-
     addMediaFileButton.after(uploadSwitcherElement);
 
+
+    window.fp.mediaLibraryMonitor.ready.then(() => {
+        console.log('[FP] Media library monitor ready!');
+
+        window.addEventListener('fpMediaLibrary:thumbnailLoaded', (e) => {
+            console.log(`[FP] Attachment view created:`);
+
+            addCfBadge();
+        });
+    });
+
+    // Wait for uploader and then modify upload form data
     waitForUploader().then(Uploader => modifyUploadFormData(Uploader, uploadSwitcherElement)).catch(error => {
-        console.error('Failed to initialize uploader hooks:', error);
+        console.error('[FP] Failed to initialize uploader hooks:', error);
     });
 });
 
@@ -69,5 +80,19 @@ function waitForUploader() {
         }
 
         check();
+    })
+}
+
+function addCfBadge() {
+    const cfImageIds = window.fp.cfImageIds;
+
+    if(!cfImageIds) {
+        return;
+    }
+
+    cfImageIds.forEach(id => {
+        const thumbnailElement = document.querySelector(`[data-id="${id}"]`);
+
+        thumbnailElement.classList.add('fp-cf-badge');
     })
 }

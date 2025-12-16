@@ -4,7 +4,7 @@ namespace FP\Controllers;
 
 use FP\Utils\AdminPage;
 
-class FPList
+class FPQueryController
 {
     public function __construct() {
         add_action('wp_ajax_query-attachments', function() {
@@ -31,13 +31,11 @@ class FPList
             }, 10, 3);
         }, 1);
 
-
         add_action('wp_print_scripts', function() {
             if(AdminPage::is('upload.php')) {
                 $this->addCfImageIdsToWindow();
             }
         });
-
     }
 
     private function isCfImage(int $attachmentId): bool {
@@ -69,7 +67,7 @@ class FPList
                 $filteredAttachments[] = $attachment;
             }
         }
-        error_log(print_r($filteredAttachments, true));
+
         return $filteredAttachments;
     }
 

@@ -4,7 +4,7 @@ namespace FP\Controllers;
 
 use Exception;
 
-class FPUploadModifier
+class UpdateImage
 {
     /**
      * @throws Exception

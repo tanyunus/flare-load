@@ -4,7 +4,7 @@ namespace FP\Controllers;
 
 use Exception;
 
-class FPUpload
+class FPUploadController
 {
     public function __construct()
     {
@@ -20,22 +20,20 @@ class FPUpload
                 $cfUploadResult = FPCFImagesApi::uploadSingleImage($imageFile, $fileName);
                 $publicVariantUrl = FPCFImagesApi::getVariantUrl('public', $cfUploadResult['result']['id']);
 
-                FPUploadModifier::updateAttachmentGuid($attachmentId, $publicVariantUrl);
-                FPUploadModifier::updateAttachmentFileValue($attachmentId, $publicVariantUrl);
+                UpdateImage::updateAttachmentGuid($attachmentId, $publicVariantUrl);
+                UpdateImage::updateAttachmentFileValue($attachmentId, $publicVariantUrl);
 
                 // Actions to be taken right after attachment meta added
                 add_filter('wp_generate_attachment_metadata', function ($metadata, $attachmentId, $context) use ($cfUploadResult, $publicVariantUrl) {
                     $cfVariants = FPCFImagesApi::getVariants();
 
-                    $newMetadata = FPUploadModifier::updateAttachmentMeta(
+                    $newMetadata = UpdateImage::updateAttachmentMeta(
                         $attachmentId,
                         $metadata,
                         $publicVariantUrl,
                         $cfUploadResult['result']['id'],
                         $cfVariants
                     );
-
-                    error_log(print_r($newMetadata, true));
 
                     return $newMetadata;
                 }, 10, 3);

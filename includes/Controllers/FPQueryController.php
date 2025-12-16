@@ -3,7 +3,6 @@
 namespace FP\Controllers;
 
 use DOMDocument;
-use FP\Utils\AdminPage;
 
 class FPQueryController
 {

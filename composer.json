@@ -19,6 +19,8 @@
   },
   "require": {
     "ext-curl": "*",
-    "ext-fileinfo": "*"
+    "ext-fileinfo": "*",
+    "ext-dom": "*",
+    "ext-libxml": "*"
   }
 }

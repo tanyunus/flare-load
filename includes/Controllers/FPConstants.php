@@ -25,4 +25,5 @@ class FPConstants
     public const DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME = 'fp_cf_account_id';
     public const DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME = 'fp_cf_account_hash';
     public const DASHBOARD_CF_API_TOKEN_FIELD_NAME = 'fp_cf_api_token';
+    public const DASHBOARD_CF_LIST_VIEW_COLUMN_ID = 'fp_cf_badge_column';
 }

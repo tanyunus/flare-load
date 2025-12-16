@@ -35,6 +35,8 @@ class FPQueryController
 
             return $html;
         }, 10, 5);
+
+        $this->addCfBadgeToListView();
     }
 
     private function getCfImageCfId(int $attachmentId): string|false {
@@ -125,5 +127,19 @@ class FPQueryController
         }
 
         return $response;
+    }
+
+    private function addCfBadgeToListView(): void {
+        add_filter( 'manage_media_columns', function ($columns) {
+            $columns[FPConstants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID] = '';
+
+            return $columns;
+        } );
+
+        add_filter( 'manage_media_custom_column', function ($columnName, $columnID){
+            if($columnName == FPConstants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID && $this->getCfImageCfId($columnID)) {
+                echo '<span><img title="Uploaded to Cloudflare" alt="Cloudflare logo" height="18" src="/wordpress/wp-content/plugins/flare-press/images/cf_logo.png"></span>';
+            }
+        }, 10, 2 );
     }
 }

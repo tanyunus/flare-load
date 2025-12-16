@@ -2,11 +2,13 @@
 
 namespace FP\Controllers;
 
+use DOMDocument;
 use FP\Utils\AdminPage;
 
 class FPQueryController
 {
     public function __construct() {
+        // Modifying ajax response of attachment query
         add_action('wp_ajax_query-attachments', function() {
             add_action('wp_prepare_attachment_for_js', function($response, $attachment, $meta) {
                 if($this->isCfImage($attachment->ID)) {
@@ -31,11 +33,21 @@ class FPQueryController
             }, 10, 3);
         }, 1);
 
+        // Adding CF image ids to window objecy via custom script
         add_action('wp_print_scripts', function() {
             if(AdminPage::is('upload.php')) {
                 $this->addCfImageIdsToWindow();
             }
         });
+
+        // Modifying attachment query
+        add_action('wp_get_attachment_image', function ($html, $attachment_id, $size, $icon, $attr) {
+            if($this->isCfImage($attachment_id)) {
+                $html = $this->updateQueriedAttachmentUrl($attachment_id, $html);
+            }
+
+            return $html;
+        }, 10, 5);
     }
 
     private function isCfImage(int $attachmentId): bool {
@@ -90,5 +102,19 @@ class FPQueryController
                 window.fp.cfImageIds = [<?php echo $jsonEncodedIds; ?>];
             </script>
         <?php
+    }
+
+    private function updateQueriedAttachmentUrl(int $attachmentId, string $html): string {
+        $cfUrl = get_the_guid($attachmentId);
+
+        $dom  = new DOMDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+
+        $img = $dom->getElementsByTagName('img')->item(0);
+        $img->setAttribute('src', $cfUrl);
+
+        return $dom->saveHTML($img);
     }
 }

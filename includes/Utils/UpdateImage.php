@@ -1,8 +1,10 @@
 <?php
 
-namespace FP\Controllers;
+namespace FP\Utils;
 
 use Exception;
+use FP\Controllers\FPConstants;
+use FP\Controllers\FPCFImagesApi;
 
 class UpdateImage
 {

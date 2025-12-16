@@ -3,6 +3,7 @@
 namespace FP\Controllers;
 
 use Exception;
+use FP\Utils\UpdateImage;
 
 class FPUploadController
 {

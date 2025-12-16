@@ -4,10 +4,13 @@ class FpMediaLibraryMonitor {
         this.attachments = new Map();
         this.pendingThumbnails = new Map();
         this.cfImageAttachments = new Map();
-        this.uploadParams = {}; // Store custom upload parameters
-        this.uploadParamsCallbacks = []; // Store callbacks for dynamic params
+        this.uploadParams = {};
+        this.uploadParamsCallbacks = [];
         this.initialized = false;
+        this.existingUploaderHooked = false;
+        this.uploaderPrototypeHooked = false; // ADD THIS
         this.isMediaLibraryPage = window.location.pathname.includes('upload.php');
+        this.isMediaNewPage = window.location.pathname.includes('media-new.php');
         this.ready = this.init();
     }
 
@@ -18,9 +21,11 @@ class FpMediaLibraryMonitor {
             // Hook into AJAX responses to catch fp_cf_image_id
             this.hookAjaxResponses();
 
-            // Different initialization for media library page vs modal
+            // Different initialization for different pages
             if (this.isMediaLibraryPage) {
                 await this.initForMediaLibraryPage();
+            } else if (this.isMediaNewPage) {
+                await this.initForMediaNewPage(); // Don't wait for components
             } else {
                 await this.initForMediaModal();
             }
@@ -30,6 +35,8 @@ class FpMediaLibraryMonitor {
             return true;
         } catch (error) {
             console.error('[FP] Failed to initialize MediaLibraryMonitor:', error);
+            // Don't throw, still mark as initialized
+            this.initialized = true;
             return false;
         }
     }
@@ -112,78 +119,84 @@ class FpMediaLibraryMonitor {
 
     hookUploader() {
         if (!window.wp?.Uploader) {
-            console.log('[FP] wp.Uploader not available');
+            console.log('[FP] wp.Uploader not available yet');
             return;
         }
 
-        const originalInit = window.wp.Uploader.prototype.init;
+        if (this.uploaderPrototypeHooked) {
+            console.log('[FP] Uploader prototype already hooked');
+            return;
+        }
+
+        this.uploaderPrototypeHooked = true;
         const monitor = this;
 
-        window.wp.Uploader.prototype.init = function () {
+        // Store original init
+        const originalInit = window.wp.Uploader.prototype.init;
+
+        window.wp.Uploader.prototype.init = function() {
             const ret = originalInit.apply(this, arguments);
 
             console.log('[FP] Uploader initialized');
 
-            this.uploader.bind('Init', (up) => {
-                console.log('[FP] Plupload initialized');
-            });
+            // Mark this instance as hooked
+            if (!this._fpHooked) {
+                this._fpHooked = true;
 
-            // Add BeforeUpload to inject custom params
-            this.uploader.bind('BeforeUpload', (up, file) => {
-                // Get all params for this file
-                const customParams = monitor.getUploadParams(file);
-
-                // Merge with existing params
-                up.settings.multipart_params = {
-                    ...up.settings.multipart_params,
-                    ...customParams
-                };
-
-                console.log('[FP] BeforeUpload - Injected params:', customParams);
-
-                monitor.emitEvent('beforeUpload', {
-                    file: file,
-                    params: up.settings.multipart_params
+                this.uploader.bind('Init', (up) => {
+                    console.log('[FP] Plupload initialized');
                 });
-            });
 
-            this.uploader.bind('FilesAdded', (up, files) => {
-                console.log('[FP] Files added:', files.length);
-                monitor.emitEvent('filesAdded', {files});
-            });
+                // DON'T unbind - just add our handler
+                this.uploader.bind('BeforeUpload', (up, file) => {
+                    const customParams = monitor.getUploadParams(file);
 
-            this.uploader.bind('FileUploaded', (up, file, response) => {
-                console.log('[FP] File uploaded:', file.name);
-                try {
-                    const data = JSON.parse(response.response);
-                    if (data.success && data.data) {
-                        // Check for fp_cf_image_id in upload response
-                        if (data.data.fp_cf_image_id) {
-                            monitor.checkAndStoreCfImage(data.data);
+                    up.settings.multipart_params = {
+                        ...up.settings.multipart_params,
+                        ...customParams
+                    };
+
+                    console.log('[FP] BeforeUpload - Injected params:', customParams);
+
+                    monitor.emitEvent('beforeUpload', {
+                        file: file,
+                        params: up.settings.multipart_params
+                    });
+                });
+
+                this.uploader.bind('FilesAdded', (up, files) => {
+                    console.log('[FP] Files added:', files.length);
+                    monitor.emitEvent('filesAdded', { files });
+                });
+
+                this.uploader.bind('FileUploaded', (up, file, response) => {
+                    console.log('[FP] File uploaded:', file.name);
+                    try {
+                        const data = JSON.parse(response.response);
+                        if (data.success && data.data) {
+                            if (data.data.fp_cf_image_id) {
+                                monitor.checkAndStoreCfImage(data.data);
+                            }
+                            monitor.handleFileUploaded(data.data);
                         }
-                        monitor.handleFileUploaded(data.data);
+                    } catch (e) {
+                        console.error('[FP] Failed to parse upload response:', e);
                     }
-                } catch (e) {
-                    console.error('[FP] Failed to parse upload response:', e);
-                }
-            });
-
-            this.uploader.bind('UploadComplete', (up, files) => {
-                console.log('[FP] Upload complete:', files.length);
-                monitor.emitEvent('uploadComplete', {
-                    count: files.length,
-                    files: files
                 });
 
-                // Refresh CF image elements after upload
-                setTimeout(() => {
-                    monitor.refreshCfImageElements();
-                }, 1000);
-            });
+                this.uploader.bind('UploadComplete', (up, files) => {
+                    console.log('[FP] Upload complete:', files.length);
+                    monitor.emitEvent('uploadComplete', {
+                        count: files.length,
+                        files: files
+                    });
+                });
+            }
 
             return ret;
         };
 
+        // Also check for existing uploader instance
         if (window.uploader) {
             console.log('[FP] Found existing uploader instance');
             this.hookExistingUploader(window.uploader);
@@ -193,6 +206,16 @@ class FpMediaLibraryMonitor {
     hookExistingUploader(uploader) {
         const monitor = this;
 
+        // Check if already hooked
+        if (uploader._fpHooked) {
+            console.log('[FP] This uploader instance already hooked');
+            return;
+        }
+
+        console.log('[FP] Hooking existing uploader instance');
+        uploader._fpHooked = true;
+
+        // DON'T unbind - just add our handlers
         uploader.bind('BeforeUpload', (up, file) => {
             const customParams = monitor.getUploadParams(file);
 
@@ -211,7 +234,7 @@ class FpMediaLibraryMonitor {
 
         uploader.bind('FilesAdded', (up, files) => {
             console.log('[FP] Files added to existing uploader:', files.length);
-            monitor.emitEvent('filesAdded', {files});
+            monitor.emitEvent('filesAdded', { files });
         });
 
         uploader.bind('FileUploaded', (up, file, response) => {
@@ -228,25 +251,85 @@ class FpMediaLibraryMonitor {
                 console.error('[FP] Failed to parse upload response:', e);
             }
         });
+
+        uploader.bind('UploadComplete', (up, files) => {
+            console.log('[FP] Upload complete:', files.length);
+            monitor.emitEvent('uploadComplete', {
+                count: files.length,
+                files: files
+            });
+        });
     }
 
-    // Convenience method to wait for uploader (similar to your waitForUploader)
-    waitForUploader(timeout = 10000) {
-        return new Promise((resolve, reject) => {
-            const startTime = Date.now();
+    setupUploaderHooksWhenReady() {
+        const monitor = this;
+        let attemptCount = 0;
+        const maxAttempts = 100; // Try for 10 seconds
 
-            const check = () => {
-                if (window.wp?.Uploader) {
-                    resolve(window.wp.Uploader);
-                } else if (Date.now() - startTime > timeout) {
-                    reject(new Error('Timeout waiting for wp.Uploader'));
-                } else {
-                    setTimeout(check, 100);
-                }
-            };
+        const tryHook = () => {
+            attemptCount++;
 
-            check();
+            // Check if wp.Uploader exists
+            if (window.wp?.Uploader) {
+                console.log('[FP] wp.Uploader found, hooking...');
+                monitor.hookUploader();
+                return true;
+            }
+
+            // Check if window.uploader exists (direct instance)
+            if (window.uploader) {
+                console.log('[FP] window.uploader found, hooking...');
+                monitor.hookExistingUploader(window.uploader);
+                monitor.existingUploaderHooked = true;
+                return true;
+            }
+
+            if (attemptCount < maxAttempts) {
+                setTimeout(tryHook, 100);
+            } else {
+                console.warn('[FP] wp.Uploader not found after 10 seconds on media-new.php');
+            }
+
+            return false;
+        };
+
+        // Start checking
+        tryHook();
+
+        // Also set up a MutationObserver for the file input
+        this.observeFileInput();
+    }
+
+    observeFileInput() {
+        const monitor = this;
+
+        // Watch for the plupload container to be created
+        const observer = new MutationObserver((mutations) => {
+            // Check if uploader now exists
+            if (window.uploader && !monitor.existingUploaderHooked) {
+                console.log('[FP] Uploader detected via DOM mutation');
+                monitor.hookExistingUploader(window.uploader);
+                monitor.existingUploaderHooked = true;
+            }
+
+            // Check if wp.Uploader now exists
+            if (window.wp?.Uploader && !monitor.uploaderPrototypeHooked) {
+                console.log('[FP] wp.Uploader detected via DOM mutation');
+                monitor.hookUploader();
+                monitor.uploaderPrototypeHooked = true;
+            }
         });
+
+        // Observe the document body for changes
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        // Stop observing after 15 seconds
+        setTimeout(() => {
+            observer.disconnect();
+        }, 15000);
     }
 
     // ... rest of the methods remain the same ...
@@ -523,11 +606,21 @@ class FpMediaLibraryMonitor {
         this.hookUploader();
     }
 
+    async initForMediaNewPage() {
+        console.log('[FP] Initializing for media-new.php');
+
+        // Don't wait for components, hook them when they appear
+        this.setupUploaderHooksWhenReady();
+
+        console.log('[FP] media-new.php initialization complete (uploader will be hooked when available)');
+    }
+
     waitForMediaComponents(timeout = 10000) {
         return new Promise((resolve, reject) => {
             const startTime = Date.now();
 
             const check = () => {
+                // Note: media-new.php doesn't use this anymore
                 if (this.isMediaLibraryPage) {
                     if (window.wp?.media && window.wp?.Uploader) {
                         resolve();
@@ -950,6 +1043,7 @@ class FpMediaLibraryMonitor {
             uploadParams: this.uploadParams,
             uploadCallbacks: this.uploadParamsCallbacks.length,
             isMediaLibraryPage: this.isMediaLibraryPage,
+            isMediaNewPage: this.isMediaNewPage,  // ADD THIS LINE
             initialized: this.initialized
         };
     }
@@ -1011,10 +1105,30 @@ function appendSwitcherToSideOfAddMediaButton (uploadSwitcherElement) {
     return true;
 }
 
+function appendSwitcherToSideOfTitle(uploadSwitcherElement) {
+    const mediaNewPageTitle = document.querySelector('body.media-new-php h1');
+
+    if(!mediaNewPageTitle) {
+        return false;
+    }
+
+    mediaNewPageTitle.after(uploadSwitcherElement);
+
+    return true;
+}
+
 function handleUploadSwitcherElement() {
     const uploadSwitcherElement = createUploadSwitcherElement();
 
-    return appendSwitcherToSideOfAddMediaButton(uploadSwitcherElement);
+    if(appendSwitcherToSideOfAddMediaButton(uploadSwitcherElement)) {
+        return true;
+    }
+
+    if(appendSwitcherToSideOfTitle(uploadSwitcherElement)) {
+        return true;
+    }
+
+    return false;
 }
 
 function handleMediaLibaryListView() {

@@ -37,6 +37,23 @@ class FPQueryController
             return $html;
         }, 1, 5);
 
+        // Modify ajax response of attachment query on upload page
+        add_action('wp_get_attachment_image_src', function ($image, $attachment_id, $size, $icon) {
+            if($this->getCfImageCfId($attachment_id)) {
+                $image[0] = get_the_guid($attachment_id);
+            }
+
+            return $image;
+        }, 10, 4);
+
+        add_action('wp_get_attachment_url', function ($attachment_url, $attachment_id) {
+            if($this->getCfImageCfId($attachment_id)) {
+                $attachment_url = get_the_guid($attachment_id);
+            }
+
+            return $attachment_url;
+        }, 10, 2);
+
         $this->addCfBadgeToListView();
     }
 

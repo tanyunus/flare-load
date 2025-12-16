@@ -24,3 +24,7 @@
     background-color: #fff;
     border-top-left-radius: 12px;
 }
+
+body.media-new-php h1 {
+    display: inline-block;
+}

@@ -27,8 +27,7 @@ class FPUploadController
                 // Actions to be taken right after attachment meta added
                 add_filter('wp_generate_attachment_metadata', function ($metadata, $attachmentId, $context) use ($cfUploadResult, $publicVariantUrl, $fileName) {
                     $cfVariants = FPCFImagesApi::getVariants();
-
-                    return UpdateImage::updateAttachmentMeta(
+                    $updatedMetadata = UpdateImage::updateAttachmentMeta(
                         $attachmentId,
                         $metadata,
                         $fileName,
@@ -36,11 +35,17 @@ class FPUploadController
                         $cfUploadResult['result']['id'],
                         $cfVariants
                     );
-                }, 10, 3);
+
+                    clean_attachment_cache($attachmentId);
+
+                    return $updatedMetadata;
+                }, 1, 3);
+
+                UpdateImage::deleteImageFromDisk($imageFile);
             } catch (Exception $e) {
                 error_log($e->getMessage());
             }
-        });
+        }, 1, 3);
     }
 
     private function isAttachmentToBeUploadedToCf(): bool

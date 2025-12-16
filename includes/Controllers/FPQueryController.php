@@ -8,17 +8,6 @@ class FPQueryController
 {
     public function __construct()
     {
-        // Modifying ajax response of attachment query
-        add_action('wp_ajax_query-attachments', function () {
-            add_action('wp_prepare_attachment_for_js', function ($response, $attachment, $meta) {
-                if ($this->getCfImageCfId($attachment->ID)) {
-                    $response = $this->updateAjaxQueryResponse($response, $attachment);
-                }
-
-                return $response;
-            }, 10, 3);
-        }, 1);
-
         // Modifying ajax response right after upload
         add_filter('wp_prepare_attachment_for_js', function ($response, $attachment, $meta) {
             if ($this->getCfImageCfId($attachment->ID)) {
@@ -26,19 +15,19 @@ class FPQueryController
             }
 
             return $response;
-        }, 10, 3);
+        }, 5, 3);
 
         // Modifying attachment query
-        add_action('wp_get_attachment_image', function ($html, $attachment_id, $size, $icon, $attr) {
+        add_filter('wp_get_attachment_image', function ($html, $attachment_id, $size, $icon, $attr) {
             if ($this->getCfImageCfId($attachment_id)) {
                 $html = $this->updateQueriedAttachmentUrl($attachment_id, $html);
             }
 
             return $html;
-        }, 1, 5);
+        }, 15, 5);
 
         // Modify ajax response of attachment query on upload page
-        add_action('wp_get_attachment_image_src', function ($image, $attachment_id, $size, $icon) {
+        add_filter('wp_get_attachment_image_src', function ($image, $attachment_id, $size, $icon) {
             if($this->getCfImageCfId($attachment_id)) {
                 $image[0] = get_the_guid($attachment_id);
             }
@@ -46,13 +35,13 @@ class FPQueryController
             return $image;
         }, 10, 4);
 
-        add_action('wp_get_attachment_url', function ($attachment_url, $attachment_id) {
+        add_filter('wp_get_attachment_url', function ($attachment_url, $attachment_id) {
             if($this->getCfImageCfId($attachment_id)) {
                 $attachment_url = get_the_guid($attachment_id);
             }
 
             return $attachment_url;
-        }, 10, 2);
+        }, 5, 2);
 
         $this->addCfBadgeToListView();
     }
@@ -132,6 +121,8 @@ class FPQueryController
 
         if ($cfImageId) {
             $imgUrl = $attachment->guid;
+
+            error_log($imgUrl);
 
             $response['url'] = $imgUrl;
 

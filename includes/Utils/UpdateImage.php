@@ -51,7 +51,7 @@ class UpdateImage
                 continue;
             }
 
-            $sizes['fp_cf' . $variant['id']] = [
+            $sizes['fp_cf_' . $variant['id']] = [
                 'file' => FPCFImagesApi::getVariantUrl($variant['id'], $attachmentId),
                 'width' => $variant['options']['width'],
                 'height' => $variant['options']['height'],
@@ -67,5 +67,15 @@ class UpdateImage
         $metaData['sizes'] = $sizes;
 
         return $metaData;
+    }
+
+    public static function deleteImageFromDisk(string $imagePath): bool {
+        $fileRealPath = realpath($imagePath);
+
+        if(!is_writable($fileRealPath)) {
+            return false;
+        }
+
+        return unlink($fileRealPath);
     }
 }

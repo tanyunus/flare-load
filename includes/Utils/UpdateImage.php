@@ -31,6 +31,7 @@ class UpdateImage
     public static function updateAttachmentMeta(
         int $attachmentId,
         array $metaData,
+        string $fileName,
         string $cfImageUrl,
         string $cfImageId,
         array $cfVariants
@@ -41,6 +42,7 @@ class UpdateImage
 
         $metaData['file'] = $cfImageUrl;
         $metaData[FPConstants::UPLOADED_IMAGE_CF_ID_NAME] = $cfImageId;
+        $metaData[FPConstants::UPLOADED_IMAGE_CF_FILE_NAME] = $fileName;
 
         foreach ($cfVariants as $variant) {
             $variantUrl = FPCFImagesApi::getVariantUrl($variant['id'], $attachmentId);

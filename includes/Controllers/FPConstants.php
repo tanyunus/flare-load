@@ -7,6 +7,7 @@ class FPConstants
     //UPLOAD
     public const UPLOAD_TO_CF_INDICATOR = 'fp_upload_to_cf';
     public const UPLOADED_IMAGE_CF_ID_NAME = 'fp_cf_image_id';
+    public const UPLOADED_IMAGE_CF_FILE_NAME = 'fp_cf_file_name';
 
     // CF API
     public const CF_API_URL = 'https://api.cloudflare.com/client/v4/accounts/';

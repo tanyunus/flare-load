@@ -44,6 +44,12 @@ class FPQueryController
         return $attachmentMeta[FPConstants::UPLOADED_IMAGE_CF_ID_NAME] ?? false;
     }
 
+    private function getCfImageFileName(int $attachmentId): string|false {
+        $attachmentMeta = wp_get_attachment_metadata($attachmentId);
+
+        return $attachmentMeta[FPConstants::UPLOADED_IMAGE_CF_FILE_NAME] ?? false;
+    }
+
     private function getCfImages(): array {
         $attachments = get_posts(array(
             'post_type'      => 'attachment',
@@ -116,6 +122,7 @@ class FPQueryController
             }
 
             $response[FPConstants::UPLOADED_IMAGE_CF_ID_NAME] = $cfImageId;
+            $response['filename'] = $this->getCfImageFileName($attachment->ID);
         }
 
         return $response;

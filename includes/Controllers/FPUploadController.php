@@ -25,18 +25,17 @@ class FPUploadController
                 UpdateImage::updateAttachmentFileValue($attachmentId, $publicVariantUrl);
 
                 // Actions to be taken right after attachment meta added
-                add_filter('wp_generate_attachment_metadata', function ($metadata, $attachmentId, $context) use ($cfUploadResult, $publicVariantUrl) {
+                add_filter('wp_generate_attachment_metadata', function ($metadata, $attachmentId, $context) use ($cfUploadResult, $publicVariantUrl, $fileName) {
                     $cfVariants = FPCFImagesApi::getVariants();
 
-                    $newMetadata = UpdateImage::updateAttachmentMeta(
+                    return UpdateImage::updateAttachmentMeta(
                         $attachmentId,
                         $metadata,
+                        $fileName,
                         $publicVariantUrl,
                         $cfUploadResult['result']['id'],
                         $cfVariants
                     );
-
-                    return $newMetadata;
                 }, 10, 3);
             } catch (Exception $e) {
                 error_log($e->getMessage());

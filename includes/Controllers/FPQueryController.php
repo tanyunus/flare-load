@@ -12,26 +12,21 @@ class FPQueryController
         add_action('wp_ajax_query-attachments', function() {
             add_action('wp_prepare_attachment_for_js', function($response, $attachment, $meta) {
                 if($this->isCfImage($attachment->ID)) {
-                    $imgUrl = $attachment->guid;
-
-                    $response['url'] = $imgUrl;
-
-                    if(isset($response['sizes']['full'])) {
-                        $response['sizes']['full']['url'] = $imgUrl;
-                    }
-
-                    if(isset($response['sizes']['medium'])) {
-                        $response['sizes']['medium']['url'] = $imgUrl;
-                    }
-
-                    if(isset($response['sizes']['thumbnail'])) {
-                        $response['sizes']['thumbnail']['url'] = $imgUrl;
-                    }
+                    $response = $this->updateAjaxQueryResponse($response, $attachment);
                 }
 
                 return $response;
             }, 10, 3);
         }, 1);
+
+        // Modifying ajax response right after upload
+        add_filter('wp_prepare_attachment_for_js', function ($response, $attachment, $meta) {
+            if($this->isCfImage($attachment->ID)) {
+                $response = $this->updateAjaxQueryResponse($response, $attachment);
+            }
+
+            return $response;
+        }, 10, 3);
 
         // Adding CF image ids to window objecy via custom script
         add_action('wp_print_scripts', function() {
@@ -116,5 +111,27 @@ class FPQueryController
         $img->setAttribute('src', $cfUrl);
 
         return $dom->saveHTML($img);
+    }
+
+    private function updateAjaxQueryResponse(array $response, object $attachment): array {
+        if($this->isCfImage($attachment->ID)) {
+            $imgUrl = $attachment->guid;
+
+            $response['url'] = $imgUrl;
+
+            if(isset($response['sizes']['full'])) {
+                $response['sizes']['full']['url'] = $imgUrl;
+            }
+
+            if(isset($response['sizes']['medium'])) {
+                $response['sizes']['medium']['url'] = $imgUrl;
+            }
+
+            if(isset($response['sizes']['thumbnail'])) {
+                $response['sizes']['thumbnail']['url'] = $imgUrl;
+            }
+        }
+
+        return $response;
     }
 }

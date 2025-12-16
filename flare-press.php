@@ -23,8 +23,8 @@ require_once FLARE_PRESS_PATH . 'vendor/autoload.php';
 
 use FP\Controllers\FPAssets;
 use FP\Controllers\FPDashboard;
-use FP\Controllers\FPList;
-use FP\Controllers\FPUpload;
+use FP\Controllers\FPQueryController;
+use FP\Controllers\FPUploadController;
 
 function flarePressInit(): void
 {
@@ -32,11 +32,10 @@ function flarePressInit(): void
         return;
     }
 
-    new FPList();
+    new FPQueryController();
     new FPDashboard();
-    new FPUpload();
+    new FPUploadController();
     new FPAssets();
 }
 
 add_action( 'plugins_loaded', 'flarePressInit' );
-

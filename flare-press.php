@@ -24,7 +24,6 @@ define('FLARE_PRESS_URL', plugin_dir_url(__FILE__));
 
 require_once FLARE_PRESS_PATH . 'autoload.php';
 
-
 add_action('plugins_loaded', 'flarePressInit');
 
 function flarePressInit(): void

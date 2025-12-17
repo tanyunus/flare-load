@@ -7,6 +7,7 @@ use Exception;
 use FlarePress\Api\CloudflareImagesApi;
 use FlarePress\Data\Constants;
 use FlarePress\Util\Utils;
+use ParagonIE\Sodium\Core\Util;
 use WP_Post;
 
 class Attachment
@@ -19,6 +20,7 @@ class Attachment
 
         try {
             $imageFile = get_attached_file($attachmentId);
+            $fileSize = wp_filesize($imageFile);
             $fileName = basename($imageFile);
             $cfUploadResult = CloudflareImagesApi::uploadImage($imageFile, $fileName);
             $publicVariantUrl = CloudflareImagesApi::getVariantUrl('public', $cfUploadResult['result']['id']);
@@ -27,7 +29,7 @@ class Attachment
             Utils::updateAttachedFile($attachmentId, $publicVariantUrl);
 
             // Actions to be taken right after attachment meta added
-            add_filter('wp_generate_attachment_metadata', function ($metadata, $attachmentId, $context) use ($cfUploadResult, $publicVariantUrl, $fileName) {
+            add_filter('wp_generate_attachment_metadata', function ($metadata, $attachmentId, $context) use ($cfUploadResult, $publicVariantUrl, $fileName, $fileSize) {
                 $cfVariants = CloudflareImagesApi::getVariants();
 
                 $updatedMetadata = self::updateAttachmentMeta(
@@ -36,11 +38,12 @@ class Attachment
                     $fileName,
                     $publicVariantUrl,
                     $cfUploadResult['result']['id'],
-                    $cfVariants
+                    $cfVariants,
+                    $fileSize
                 );
 
                 clean_attachment_cache($attachmentId);
-
+                error_log(print_r($updatedMetadata, true));
                 return $updatedMetadata;
             }, 1, 3);
 
@@ -81,13 +84,12 @@ class Attachment
         string $fileName,
         string $cfImageUrl,
         string $cfImageId,
-        array  $cfVariants
+        array  $cfVariants,
+        int $fileSize
     ): array
     {
         $sizes = [];
         $mimeType = $metaData['sizes']['medium']['mime-type'] ?? '';
-        $fileSize = $metaData['sizes']['medium']['file-size'] ?? ''; // TODO: Implement real size calculation of cdn file
-
         $metaData['file'] = $cfImageUrl;
         $metaData[Constants::UPLOADED_IMAGE_CF_ID_NAME] = $cfImageId;
         $metaData[Constants::UPLOADED_IMAGE_CF_FILE_NAME] = $fileName;
@@ -104,9 +106,11 @@ class Attachment
                 'width' => $variant['options']['width'],
                 'height' => $variant['options']['height'],
                 'mime-type' => $mimeType,
-                'file-size' => $fileSize,
+                'filesize' => $fileSize,
             ];
         }
+
+        $metaData['filesize'] = $fileSize;
 
         if (empty($sizes)) {
             throw new Exception("Attachment size update error: No size data found.");
@@ -177,4 +181,6 @@ class Attachment
 
         return empty($options[Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME]);
     }
+
+
 }

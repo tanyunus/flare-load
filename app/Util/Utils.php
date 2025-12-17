@@ -7,6 +7,8 @@ use FlarePress\Data\Constants;
 
 class Utils
 {
+    private static array $attachmentMeta = [];
+
     /**
      * Translates given string in this plugin's own translation domain
      *
@@ -40,9 +42,7 @@ class Utils
      */
     public static function getCloudflareIdOfAttachment(int $attachmentId): string|false
     {
-        $attachmentMeta = wp_get_attachment_metadata($attachmentId);
-
-        return $attachmentMeta[Constants::UPLOADED_IMAGE_CF_ID_NAME] ?? false;
+        return self::getAttachmentMeta($attachmentId)[Constants::UPLOADED_IMAGE_CF_ID_NAME] ?? false;
     }
 
     /**
@@ -151,5 +151,19 @@ class Utils
         if ( file_exists( $file ) ) {
             include $file;
         }
+    }
+
+    public static function getAttachmentFileSizeHumanReadableFormat(int $attachmentId): string {
+        $fileSize = self::getAttachmentMeta($attachmentId)['filesize'] ?? '';
+
+        return size_format( $fileSize ) ?? '';
+    }
+
+    private static function getAttachmentMeta(int $attachmentId): array {
+        if(empty(self::$attachmentMeta)) {
+            self::$attachmentMeta = wp_get_attachment_metadata($attachmentId);
+        }
+
+        return self::$attachmentMeta;
     }
 }

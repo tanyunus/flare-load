@@ -2,14 +2,8 @@
 
 namespace FP\Controllers;
 
-use FP\Utils\Template;
-
 class FPDashboard {
     public function __construct() {
-        add_action( 'admin_menu', [$this, 'initFPSettings'] );
-    }
-
-    public function initFPSettings(): void {
         $this->addSettingsPage();
         $this->addSection();
         $this->registerAccountIDField();
@@ -29,7 +23,7 @@ class FPDashboard {
     }
 
     public function fpAdminDashboardView(): void {
-        Template::render(FPConstants::DASHBOARD_VIEW);
+        Utils::renderTemplate(FPConstants::DASHBOARD_VIEW);
     }
 
     private function addSection(): void {

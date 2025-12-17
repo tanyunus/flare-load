@@ -107,7 +107,7 @@ function fp_add_attachment(int $attachmentId): void
  */
 function fp_manage_media_columns(array $columns): array
 {
-    $columns[Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID] = Utils::translate(Constants::DASHBOARD_CF_LOCATION_COLUMN_NAME);
+    $columns[Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID] = Utils::localize(Constants::UI_CF_LOCATION_COLUMN_NAME);
 
     return $columns;
 }

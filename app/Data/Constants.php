@@ -16,21 +16,30 @@ class Constants
     public const CF_API_MODULE_VARIANTS = '/variants';
 
     // Views
-    public const DASHBOARD_VIEW = 'admin/dashboard';
+    public const DASHBOARD_VIEW = 'dashboard';
     public const DASHBOARD_MENU_SLUG = 'flare-press-settings';
     public const DASHBOARD_MENU_TITLE = 'FlarePress';
     public const DASHBOARD_SETTINGS_GROUP_NAME = 'fp_settings_group';
-    public const DASHBOARD_SECTION_ID = 'fp_settings_section_id';
+    public const DASHBOARD_UPLOAD_SETTINGS_NAME = 'fp_upload_settings';
+    public const DASHBOARD_UPLOAD_SETTINGS_SECTION_ID = 'fp_upload_settings_section';
+    public const DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME = 'fp_keep_files_on_disk_after_upload';
+    public const DASHBOARD_KEEP_AFTER_DELETE_FIELD_NAME = 'fp_keep_files_on_disk_after_delete';
+    public const DASHBOARD_FILE_MANAGEMENT_FIELD_NAME = 'fp_keep_files_on_disk_after_delete';
+    public const DASHBOARD_API_SETTINGS_SECTION_ID = 'fp_api_settings_section';
     public const DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME = 'fp_cf_account_id';
     public const DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME = 'fp_cf_account_hash';
     public const DASHBOARD_CF_API_TOKEN_FIELD_NAME = 'fp_cf_api_token';
     public const DASHBOARD_CF_LIST_VIEW_COLUMN_ID = 'fp_cf_badge_column';
 
-    // Translatable strings
-    public const DASHBOARD_PAGE_TITLE = 'FlarePress Settings';
-    public const DASHBOARD_CF_BADGE_TITLE = 'Uploaded to Cloudflare';
-    public const DASHBOARD_CF_LOCATION_THIS_SERVER = 'This server';
-    public const DASHBOARD_CF_LOCATION_COLUMN_NAME = 'Location';
+    // UI strings
+    public const UI_PAGE_TITLE = 'FlarePress Settings';
+    public const UI_CF_BADGE_TITLE = 'Uploaded to Cloudflare';
+    public const UI_CF_LOCATION_THIS_SERVER = 'This server';
+    public const UI_CF_LOCATION_COLUMN_NAME = 'Location';
+    public const UI_FILE_MANAGEMENT_FIELD_TITLE = 'File management';
+    public const UI_KEEP_FILES_AFTER_UPLOAD_FIELD_LABEL = 'Keep files on disk after upload';
+    public const UI_KEEP_FILES_AFTER_DELETE_FIELD_LABEL = 'Keep files on disk after delete';
+
 
     // Other
     public const FP_TRANSLATION_DOMAIN = 'fp_translations';

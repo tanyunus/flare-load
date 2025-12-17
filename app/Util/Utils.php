@@ -13,7 +13,7 @@ class Utils
      * @param string $string
      * @return string
      */
-    public static function translate(string $string): string
+    public static function localize(string $string): string
     {
         return __($string, Constants::FP_TRANSLATION_DOMAIN);
     }
@@ -146,7 +146,7 @@ class Utils
      */
     public static function renderTemplate(string $template, array $data = []): void {
         extract( $data );
-        $file = FLARE_PRESS_PATH . 'views/' . $template . '.php';
+        $file = FLARE_PRESS_PATH . 'app/Views/' . $template . '.php';
 
         if ( file_exists( $file ) ) {
             include $file;

@@ -17,7 +17,7 @@ class Upload
         try {
             $imageFile = get_attached_file($attachmentId);
             $fileName = basename($imageFile);
-            $cfUploadResult = CloudflareImagesApi::uploadSingleImage($imageFile, $fileName);
+            $cfUploadResult = CloudflareImagesApi::uploadImage($imageFile, $fileName);
             $publicVariantUrl = CloudflareImagesApi::getVariantUrl('public', $cfUploadResult['result']['id']);
 
             Utils::updateAttachmentGuid($attachmentId, $publicVariantUrl);

@@ -29,6 +29,7 @@ class Constants
     // Translatable strings
     public const DASHBOARD_PAGE_TITLE = 'FlarePress Settings';
     public const DASHBOARD_CF_BADGE_TITLE = 'Uploaded to Cloudflare';
+    public const DASHBOARD_CF_LOCATION_THIS_SERVER = 'This server';
 
     // Other
     public const FP_TRANSLATION_DOMAIN = 'fp_translations';

@@ -9,6 +9,7 @@ License:     GPL-2.0+
 Text Domain: flare-press
 */
 
+use FlarePress\Api\CloudflareImagesApi;
 use FlarePress\Controllers\Dashboard;
 use FlarePress\Controllers\Query;
 use FlarePress\Controllers\Upload;
@@ -40,6 +41,7 @@ function flarePressInit(): void
     add_filter('wp_get_attachment_url', 'fp_wp_get_attachment_url', 5, 2);
     add_filter('manage_media_columns', 'fp_manage_media_columns');
     add_filter('manage_media_custom_column', 'fp_manage_media_custom_column', 10, 2);
+    add_filter('pre_delete_attachment', 'fp_pre_delete_attachment', 10, 3);
     add_action('add_attachment', 'fp_add_attachment', 1, 3);
     add_action('admin_menu', 'fp_admin_menu');
     add_action('admin_print_footer_scripts', 'fp_admin_print_footer_scripts');
@@ -113,15 +115,7 @@ function fp_manage_media_columns(array $columns): array {
  * Add location info under Location column in media library list view
  */
 function fp_manage_media_custom_column(string $columnName, int $attachmentId): void {
-    if ($columnName === Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID && Utils::getCloudflareIdOfAttachment($attachmentId)) {
-        echo '<span 
-                data-fp-file-name="' . Utils::getAttachmentFileName($attachmentId) . '"
-                data-fp-url="'. get_the_guid($attachmentId)  .'"
-                >
-                <img title="Uploaded to Cloudflare" alt="Cloudflare logo" height="18" src="/wordpress/wp-content/plugins/flare-press/images/cf_logo.png"></span>';
-    } else {
-        echo 'This server';
-    }
+    Dashboard::addLocationInfoToListViewRow($columnName, $attachmentId);
 }
 
 /**
@@ -143,4 +137,18 @@ function fp_admin_print_footer_scripts(): void {
  */
 function fp_admin_enqueue_scripts(): void {
     wp_enqueue_style('fp_main_style',FLARE_PRESS_PATH. 'includes/assets/styles/style.css');
+}
+
+/**
+ * Delete attachment image from Cloudflare storage before WordPress' actual deletion takes place
+ *
+ */
+function fp_pre_delete_attachment(WP_Post|false|null $delete, WP_Post $post, bool $forceDelete): WP_Post|false|null {
+    $cfImageId = Utils::getCloudflareIdOfAttachment($post->ID);
+
+    if($cfImageId) {
+        CloudflareImagesApi::deleteImage($cfImageId);
+    }
+
+    return $delete;
 }

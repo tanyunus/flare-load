@@ -2,6 +2,7 @@
 
 namespace FlarePress\Api;
 
+use CURLFile;
 use Exception;
 use FlarePress\Data\Constants;
 
@@ -10,18 +11,37 @@ class CloudflareImagesApi
     /**
      * @throws Exception
      */
-    public static function uploadSingleImage(string $imageFile, string $imageFileName): array {
-        $payload = ['file' => new \CURLFile($imageFile, mime_content_type($imageFile), $imageFileName)];
+    public static function uploadImage(string $imageFile, string $imageFileName): array {
+        $payload = ['file' => new CURLFile($imageFile, mime_content_type($imageFile), $imageFileName)];
 
-        $response = self::sendData($payload);
+        $response = self::sendData($payload, self::buildRequestUrl(), 'POST');
         $response = json_decode($response, true);
 
         if(json_last_error() !== JSON_ERROR_NONE){
-            throw new Exception('Single image upload error: Json error: ' . json_last_error_msg());
+            throw new Exception('[FlarePress] Cloudflare image upload error: Json error: ' . json_last_error_msg());
         }
 
         if(!$response['success']){
-            throw new Exception('Single image upload error: ' . $response['errors'][0]['message']);
+            throw new Exception('[FlarePress] Cloudflare image upload error: ' . $response['errors'][0]['message']);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public static function deleteImage(string $cloudFlareImageId): array {
+        $response = self::sendData([], self::buildRequestUrl($cloudFlareImageId), 'DELETE');
+
+        $response = json_decode($response, true);
+
+        if(json_last_error() !== JSON_ERROR_NONE){
+            throw new Exception('[FlarePress] Cloudflare image delete error: Json error: ' . json_last_error_msg());
+        }
+
+        if(!$response['success']){
+            throw new Exception('[FlarePress] Cloudflare image delete error: ' . $response['errors'][0]['message']);
         }
 
         return $response;
@@ -54,42 +74,51 @@ class CloudflareImagesApi
      * @throws Exception
      */
     public static function getVariants(): array {
-        $response = self::sendData([], Constants::CF_API_MODULE_VARIANTS);
+        $response = self::sendData([], self::buildRequestUrl(Constants::CF_API_MODULE_VARIANTS), 'GET');
         $response = json_decode($response, true);
 
         if(json_last_error() !== JSON_ERROR_NONE){
-            throw new Exception(json_last_error_msg());
+            throw new Exception('[FlarePress] Variant retrieval error: Json error: ' . json_last_error_msg());
         }
 
         if(!$response['success']){
-            throw new Exception($response['errors'][0]['message']);
+            throw new Exception('[FlarePress] Variant retrieval error: ' . $response['errors'][0]['message']);
         }
 
         return $response['result']['variants'];
     }
 
     /**
-     * Makes a POST request to the given URL and returns the response.
+     * Makes a request to the given URL and returns the response.
      *
      * @param array $payload
-     * @param string $module
+     * @param string $url
+     * @param string $method
      * @param array $headers
      * @return string
      * @throws Exception
      */
-    private static function sendData(array $payload = [], string $module = '', array $headers = []): string
+    private static function sendData(array $payload, string $url, string $method, array $headers = []): string
     {
         try {
             $ch = curl_init();
             $apiToken = self::getApiToken();
             $headers[] = "Authorization: Bearer {$apiToken}";
 
-            curl_setopt($ch, CURLOPT_URL, self::buildRequestUrl($module));
+            curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
+            switch ($method) {
+                case 'POST':
+                    curl_setopt($ch, CURLOPT_POST, 1);
+                    break;
+                case 'DELETE':
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+                default;
+            }
+
             if(!empty($payload)){
-                curl_setopt($ch, CURLOPT_POST, 1);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
             }
 
@@ -111,13 +140,13 @@ class CloudflareImagesApi
         }
     }
 
-    private static function buildRequestUrl(string $module): string {
+    private static function buildRequestUrl(string $additional = ''): string {
         $accountId = get_option(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME);
 
         $url = Constants::CF_API_URL . $accountId . '/images/' . Constants::CF_API_VERSION;
 
-        if(!empty($module)) {
-            $url .= '/' . $module;
+        if(!empty($additional)) {
+            $url .= '/' . $additional;
         }
 
         return $url;

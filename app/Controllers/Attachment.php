@@ -44,7 +44,9 @@ class Attachment
                 return $updatedMetadata;
             }, 1, 3);
 
-            Utils::deleteFileFromDisk($imageFile);
+            if(self::shouldDeleteLocalFile()) {
+                Utils::deleteFileFromDisk($imageFile);
+            }
         } catch (Exception $e) {
             error_log($e->getMessage());
         }
@@ -54,7 +56,7 @@ class Attachment
     {
         $cfImageId = Utils::getCloudflareIdOfAttachment($post->ID);
 
-        if ($cfImageId) {
+        if ($cfImageId && self::shouldDeleteCloudflareFile()) {
             try {
                 CloudflareImagesApi::deleteImage($cfImageId);
             } catch (Exception $e) {
@@ -162,5 +164,17 @@ class Attachment
         }
 
         return $sizeArray;
+    }
+
+    private static function shouldDeleteLocalFile(): bool {
+        $options = get_option(Constants::DASHBOARD_UPLOAD_SETTINGS_NAME, []);
+
+        return empty($options[Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME]);
+    }
+
+    private static function shouldDeleteCloudflareFile(): bool {
+        $options = get_option(Constants::DASHBOARD_UPLOAD_SETTINGS_NAME, []);
+
+        return empty($options[Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME]);
     }
 }

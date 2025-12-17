@@ -98,7 +98,7 @@ class CloudflareImagesApi
      * @return string
      * @throws Exception
      */
-    private static function sendData(array $payload, string $url, string $method, array $headers = []): string
+    private static function sendData(array $payload, string $url, string $method = '', array $headers = []): string
     {
         try {
             $ch = curl_init();
@@ -112,14 +112,14 @@ class CloudflareImagesApi
             switch ($method) {
                 case 'POST':
                     curl_setopt($ch, CURLOPT_POST, 1);
+
+                    if(!empty($payload)){
+                        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+                    }
                     break;
                 case 'DELETE':
                     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
                 default;
-            }
-
-            if(!empty($payload)){
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
             }
 
             $response = curl_exec($ch);

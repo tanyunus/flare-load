@@ -2,12 +2,14 @@
 
 namespace FlarePress\Controllers;
 
+use DOMDocument;
 use Exception;
 use FlarePress\Api\CloudflareImagesApi;
 use FlarePress\Data\Constants;
 use FlarePress\Util\Utils;
+use WP_Post;
 
-class Upload
+class Attachment
 {
     public static function handleAddAttachment($attachmentId): void {
         if (!self::isAttachmentToBeUploadedToCf()) {
@@ -47,11 +49,29 @@ class Upload
         }
     }
 
+    public static function handleDeleteAttachment(WP_Post|false|null $delete, WP_Post $post, bool $forceDelete): WP_Post|false|null {
+        $cfImageId = Utils::getCloudflareIdOfAttachment($post->ID);
+
+        if($cfImageId) {
+            try {
+                CloudflareImagesApi::deleteImage($cfImageId);
+            } catch (Exception $e) {
+                error_log('[FlarePress] Attachment deletion error: ' . $e->getMessage());
+            }
+
+        }
+
+        return $delete;
+    }
+
     private static function isAttachmentToBeUploadedToCf(): bool
     {
         return $_POST[Constants::UPLOAD_TO_CF_INDICATOR] ?? false;
     }
 
+    /**
+     * @throws Exception
+     */
     private static function updateAttachmentMeta(
         int $attachmentId,
         array $metaData,
@@ -93,13 +113,49 @@ class Upload
         return $metaData;
     }
 
-    public static function deleteImageFromDisk(string $imagePath): bool {
-        $fileRealPath = realpath($imagePath);
+    public static function updateQueriedAttachmentUrl(int $attachmentId, string $html): string
+    {
+        $cfUrl = get_the_guid($attachmentId);
 
-        if(!is_writable($fileRealPath)) {
-            return false;
+        $dom = new DOMDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+
+        $img = $dom->getElementsByTagName('img')->item(0);
+        $img->setAttribute('src', $cfUrl);
+        $img->setAttribute('srcset', '');
+
+        return $dom->saveHTML($img);
+    }
+
+    public static function updateAjaxQueryResponse(array $response, object $attachment): array
+    {
+        $cfImageId = Utils::getCloudflareIdOfAttachment($attachment->ID);
+
+        if ($cfImageId) {
+            $imgUrl = $attachment->guid;
+
+            error_log($imgUrl);
+
+            $response['url'] = $imgUrl;
+
+            if (isset($response['sizes']['full'])) {
+                $response['sizes']['full']['url'] = $imgUrl;
+            }
+
+            if (isset($response['sizes']['medium'])) {
+                $response['sizes']['medium']['url'] = $imgUrl;
+            }
+
+            if (isset($response['sizes']['thumbnail'])) {
+                $response['sizes']['thumbnail']['url'] = $imgUrl;
+            }
+
+            $response[Constants::UPLOADED_IMAGE_CF_ID_NAME] = $cfImageId;
+            $response['filename'] = Utils::getAttachmentFileName($attachment->ID);
         }
 
-        return unlink($fileRealPath);
+        return $response;
     }
 }

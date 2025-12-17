@@ -10,9 +10,8 @@ Text Domain: flare-press
 */
 
 use FlarePress\Api\CloudflareImagesApi;
+use FlarePress\Controllers\Attachment;
 use FlarePress\Controllers\Dashboard;
-use FlarePress\Controllers\Query;
-use FlarePress\Controllers\Upload;
 use FlarePress\Data\Constants;
 use FlarePress\Util\Utils;
 
@@ -54,7 +53,7 @@ function flarePressInit(): void
 function fp_wp_prepare_attachment_for_js(array $response, WP_Post $attachment): array
 {
     if (Utils::getCloudflareIdOfAttachment($attachment->ID)) {
-        $response = Query::updateAjaxQueryResponse($response, $attachment);
+        $response = Attachment::updateAjaxQueryResponse($response, $attachment);
     }
 
     return $response;
@@ -66,7 +65,7 @@ function fp_wp_prepare_attachment_for_js(array $response, WP_Post $attachment): 
 function fp_wp_get_attachment_image(string $html, int $attachmentId): string
 {
     if (Utils::getCloudflareIdOfAttachment($attachmentId)) {
-        $html = Query::updateQueriedAttachmentUrl($attachmentId, $html);
+        $html = Attachment::updateQueriedAttachmentUrl($attachmentId, $html);
     }
 
     return $html;
@@ -99,7 +98,7 @@ function fp_wp_get_attachment_url(string $attachmentUrl, int $attachmentId): str
  * Control attachment upload process
  */
 function fp_add_attachment(int $attachmentId): void {
-    Upload::handleAddAttachment($attachmentId);
+    Attachment::handleAddAttachment($attachmentId);
 }
 
 /**
@@ -129,26 +128,19 @@ function fp_admin_menu(): void {
  * Add scripts for dashboard
  */
 function fp_admin_print_footer_scripts(): void {
-    wp_enqueue_script('fp-main', FLARE_PRESS_PATH. 'includes/assets/scripts/fp-main.js');
+    wp_enqueue_script('fp-main-script', FLARE_PRESS_PATH. 'includes/assets/scripts/fp-main.js');
 }
 
 /**
  * Add styles for dashboard
  */
 function fp_admin_enqueue_scripts(): void {
-    wp_enqueue_style('fp_main_style',FLARE_PRESS_PATH. 'includes/assets/styles/style.css');
+    wp_enqueue_style('fp-main-style',FLARE_PRESS_PATH. 'includes/assets/styles/fp-main.css');
 }
 
 /**
  * Delete attachment image from Cloudflare storage before WordPress' actual deletion takes place
- *
  */
 function fp_pre_delete_attachment(WP_Post|false|null $delete, WP_Post $post, bool $forceDelete): WP_Post|false|null {
-    $cfImageId = Utils::getCloudflareIdOfAttachment($post->ID);
-
-    if($cfImageId) {
-        CloudflareImagesApi::deleteImage($cfImageId);
-    }
-
-    return $delete;
+    return Attachment::handleDeleteAttachment($delete, $post, $forceDelete);
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace FP\Controllers;
+namespace FlarePress\Data;
 
-class FPConstants
+class Constants
 {
     //UPLOAD
     public const UPLOAD_TO_CF_INDICATOR = 'fp_upload_to_cf';

@@ -1,8 +1,11 @@
 <?php
 
-namespace FP\Controllers;
+namespace FlarePress\Controllers;
 
-class FPDashboard {
+use FlarePress\Data\Constants;
+use FlarePress\Util\Utils;
+
+class Dashboard {
     public function __construct() {
         $this->addSettingsPage();
         $this->addSection();
@@ -13,17 +16,17 @@ class FPDashboard {
 
     private function addSettingsPage(): void {
         add_options_page(
-            FPConstants::DASHBOARD_PAGE_TITLE,
-            FPConstants::DASHBOARD_MENU_TITLE,
+            Constants::DASHBOARD_PAGE_TITLE,
+            Constants::DASHBOARD_MENU_TITLE,
             'manage_options',
-            FPConstants::DASHBOARD_MENU_SLUG,
+            Constants::DASHBOARD_MENU_SLUG,
             [$this, 'fpAdminDashboardView'],
             5
         );
     }
 
     public function fpAdminDashboardView(): void {
-        Utils::renderTemplate(FPConstants::DASHBOARD_VIEW);
+        Utils::renderTemplate(Constants::DASHBOARD_VIEW);
     }
 
     private function addSection(): void {
@@ -31,51 +34,51 @@ class FPDashboard {
             'fp_settings_section_id',
             '',
             '',
-            FPConstants::DASHBOARD_MENU_SLUG
+            Constants::DASHBOARD_MENU_SLUG
         );
     }
 
     private function registerAccountIDField(): void {
-        register_setting(FPConstants::DASHBOARD_SETTINGS_GROUP_NAME, FPConstants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME, [$this, 'sanitizeText']);
+        register_setting(Constants::DASHBOARD_SETTINGS_GROUP_NAME, Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME, [$this, 'sanitizeText']);
 
         add_settings_field(
-            FPConstants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME,
+            Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME,
             'Cloudflare Account ID',
             function() {
-                $this->renderInputField(FPConstants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME);
+                $this->renderInputField(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME);
             },
-            FPConstants::DASHBOARD_MENU_SLUG,
-            FPConstants::DASHBOARD_SECTION_ID,
+            Constants::DASHBOARD_MENU_SLUG,
+            Constants::DASHBOARD_SECTION_ID,
         );
     }
 
     private function registerAccountHashField(): void {
-        register_setting(FPConstants::DASHBOARD_SETTINGS_GROUP_NAME, FPConstants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME, [$this, 'sanitizeText']);
+        register_setting(Constants::DASHBOARD_SETTINGS_GROUP_NAME, Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME, [$this, 'sanitizeText']);
 
         add_settings_field(
-                FPConstants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME,
+                Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME,
                 'Cloudflare Account Hash',
                 function() {
                     $description = 'You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/images/hosted</i>';
-                    $this->renderInputField(FPConstants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME, $description);
+                    $this->renderInputField(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME, $description);
                 },
-                FPConstants::DASHBOARD_MENU_SLUG,
-                FPConstants::DASHBOARD_SECTION_ID,
+                Constants::DASHBOARD_MENU_SLUG,
+                Constants::DASHBOARD_SECTION_ID,
         );
     }
 
     private function registerApiTokenField(): void {
-        register_setting(FPConstants::DASHBOARD_SETTINGS_GROUP_NAME, FPConstants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, [$this, 'sanitizeText']);
+        register_setting(Constants::DASHBOARD_SETTINGS_GROUP_NAME, Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, [$this, 'sanitizeText']);
 
         add_settings_field(
-            FPConstants::DASHBOARD_CF_API_TOKEN_FIELD_NAME,
+            Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME,
             'Cloudflare Account API Token',
             function() {
                 $description = 'You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/api-tokens</i>';
-                $this->renderInputField(FPConstants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, $description);
+                $this->renderInputField(Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, $description);
             },
-            FPConstants::DASHBOARD_MENU_SLUG,
-            FPConstants::DASHBOARD_SECTION_ID,
+            Constants::DASHBOARD_MENU_SLUG,
+            Constants::DASHBOARD_SECTION_ID,
         );
     }
 

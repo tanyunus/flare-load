@@ -1,8 +1,9 @@
 <?php
 
-namespace FP\Controllers;
+namespace FlarePress\Util;
 
 use Exception;
+use FlarePress\Data\Constants;
 
 class Utils
 {
@@ -14,7 +15,7 @@ class Utils
      */
     public static function translate(string $string): string
     {
-        return __($string, FPConstants::FP_TRANSLATION_DOMAIN);
+        return __($string, Constants::FP_TRANSLATION_DOMAIN);
     }
 
     /**
@@ -41,7 +42,7 @@ class Utils
     {
         $attachmentMeta = wp_get_attachment_metadata($attachmentId);
 
-        return $attachmentMeta[FPConstants::UPLOADED_IMAGE_CF_ID_NAME] ?? false;
+        return $attachmentMeta[Constants::UPLOADED_IMAGE_CF_ID_NAME] ?? false;
     }
 
     /**
@@ -54,7 +55,7 @@ class Utils
     {
         $attachmentMeta = wp_get_attachment_metadata($attachmentId);
 
-        return $attachmentMeta[FPConstants::UPLOADED_IMAGE_CF_FILE_NAME] ?? false;
+        return $attachmentMeta[Constants::UPLOADED_IMAGE_CF_FILE_NAME] ?? false;
     }
 
     /**
@@ -71,7 +72,7 @@ class Utils
             'meta_query' => array(
                 array(
                     'key' => '_wp_attachment_metadata',
-                    'value' => FPConstants::UPLOADED_IMAGE_CF_ID_NAME,
+                    'value' => Constants::UPLOADED_IMAGE_CF_ID_NAME,
                     'compare' => 'LIKE'
                 )
             )
@@ -82,7 +83,7 @@ class Utils
         foreach ($attachments as $attachment) {
             $metaData = wp_get_attachment_metadata($attachment->ID);
 
-            if (isset($metaData[FPConstants::UPLOADED_IMAGE_CF_ID_NAME])) {
+            if (isset($metaData[Constants::UPLOADED_IMAGE_CF_ID_NAME])) {
                 $filteredAttachments[] = $attachment;
             }
         }
@@ -137,9 +138,9 @@ class Utils
     }
 
     /**
-     * Renders given HTML template with provided data.
+     * Renders given HTML template file with provided data.
      *
-     * @param string $template HTML template.
+     * @param string $template HTML template file name under views folder.
      * @param array $data
      * @return void
      */

@@ -1,10 +1,13 @@
 <?php
 
-namespace FP\Controllers;
+namespace FlarePress\Controllers;
 
 use Exception;
+use FlarePress\Api\CloudflareImagesApi;
+use FlarePress\Data\Constants;
+use FlarePress\Util\Utils;
 
-class FPUploadController
+class UploadController
 {
     public static function handleAddAttachment($attachmentId): void {
         if (!self::isAttachmentToBeUploadedToCf()) {
@@ -14,15 +17,15 @@ class FPUploadController
         try {
             $imageFile = get_attached_file($attachmentId);
             $fileName = basename($imageFile);
-            $cfUploadResult = FPCFImagesApi::uploadSingleImage($imageFile, $fileName);
-            $publicVariantUrl = FPCFImagesApi::getVariantUrl('public', $cfUploadResult['result']['id']);
+            $cfUploadResult = CloudflareImagesApi::uploadSingleImage($imageFile, $fileName);
+            $publicVariantUrl = CloudflareImagesApi::getVariantUrl('public', $cfUploadResult['result']['id']);
 
             Utils::updateAttachmentGuid($attachmentId, $publicVariantUrl);
             Utils::updateAttachedFile($attachmentId, $publicVariantUrl);
 
             // Actions to be taken right after attachment meta added
             add_filter('wp_generate_attachment_metadata', function ($metadata, $attachmentId, $context) use ($cfUploadResult, $publicVariantUrl, $fileName) {
-                $cfVariants = FPCFImagesApi::getVariants();
+                $cfVariants = CloudflareImagesApi::getVariants();
 
                 $updatedMetadata = self::updateAttachmentMeta(
                     $attachmentId,
@@ -46,7 +49,7 @@ class FPUploadController
 
     private static function isAttachmentToBeUploadedToCf(): bool
     {
-        return $_POST[FPConstants::UPLOAD_TO_CF_INDICATOR] ?? false;
+        return $_POST[Constants::UPLOAD_TO_CF_INDICATOR] ?? false;
     }
 
     private static function updateAttachmentMeta(
@@ -62,18 +65,18 @@ class FPUploadController
         $fileSize = $metaData['sizes']['medium']['file-size'] ?? ''; // TODO: Implement real size calculation of cdn file
 
         $metaData['file'] = $cfImageUrl;
-        $metaData[FPConstants::UPLOADED_IMAGE_CF_ID_NAME] = $cfImageId;
-        $metaData[FPConstants::UPLOADED_IMAGE_CF_FILE_NAME] = $fileName;
+        $metaData[Constants::UPLOADED_IMAGE_CF_ID_NAME] = $cfImageId;
+        $metaData[Constants::UPLOADED_IMAGE_CF_FILE_NAME] = $fileName;
 
         foreach ($cfVariants as $variant) {
-            $variantUrl = FPCFImagesApi::getVariantUrl($variant['id'], $attachmentId);
+            $variantUrl = CloudflareImagesApi::getVariantUrl($variant['id'], $attachmentId);
 
             if(!$variantUrl) {
                 continue;
             }
 
             $sizes['fp_cf_' . $variant['id']] = [
-                'file' => FPCFImagesApi::getVariantUrl($variant['id'], $attachmentId),
+                'file' => CloudflareImagesApi::getVariantUrl($variant['id'], $attachmentId),
                 'width' => $variant['options']['width'],
                 'height' => $variant['options']['height'],
                 'mime-type' => $mimeType,

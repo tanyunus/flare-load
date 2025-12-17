@@ -1,10 +1,11 @@
 <?php
 
-namespace FP\Controllers;
+namespace FlarePress\Api;
 
 use Exception;
+use FlarePress\Data\Constants;
 
-class FPCFImagesApi
+class CloudflareImagesApi
 {
     /**
      * @throws Exception
@@ -37,7 +38,7 @@ class FPCFImagesApi
      * @param string $variant Variant slug/id as string
      * @param string $imageId Image id of the image uploaded to Cloudflare
      *
-     * @return string URL constructed to serve desired variant
+     * @return string|false URL constructed to serve desired variant or false.
      */
     public static function getVariantUrl(string $variant, string $imageId): string|false {
         $accountHash = self::getAccountHash();
@@ -46,14 +47,14 @@ class FPCFImagesApi
             return false;
         }
 
-        return FPConstants::CF_CDN_URL . self::getAccountHash() . '/' . $imageId . '/' . $variant;
+        return Constants::CF_CDN_URL . self::getAccountHash() . '/' . $imageId . '/' . $variant;
     }
 
     /**
      * @throws Exception
      */
     public static function getVariants(): array {
-        $response = self::sendData([], FPConstants::CF_API_MODULE_VARIANTS);
+        $response = self::sendData([], Constants::CF_API_MODULE_VARIANTS);
         $response = json_decode($response, true);
 
         if(json_last_error() !== JSON_ERROR_NONE){
@@ -111,9 +112,9 @@ class FPCFImagesApi
     }
 
     private static function buildRequestUrl(string $module): string {
-        $accountId = get_option(FPConstants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME);
+        $accountId = get_option(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME);
 
-        $url = FPConstants::CF_API_URL . $accountId . '/images/' . FPConstants::CF_API_VERSION;
+        $url = Constants::CF_API_URL . $accountId . '/images/' . Constants::CF_API_VERSION;
 
         if(!empty($module)) {
             $url .= '/' . $module;
@@ -123,10 +124,10 @@ class FPCFImagesApi
     }
 
     private static function getApiToken(): string {
-        return get_option(FPConstants::DASHBOARD_CF_API_TOKEN_FIELD_NAME);
+        return get_option(Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME);
     }
 
     private static function getAccountHash(): string|false {
-        return get_option(FPConstants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME);
+        return get_option(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME);
     }
 }

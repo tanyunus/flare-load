@@ -1,10 +1,12 @@
 <?php
 
-namespace FP\Controllers;
+namespace FlarePress\Controllers;
 
 use DOMDocument;
+use FlarePress\Data\Constants;
+use FlarePress\Util\Utils;
 
-class FPQueryController
+class QueryController
 {
     public static function updateQueriedAttachmentUrl(int $attachmentId, string $html): string
     {
@@ -45,7 +47,7 @@ class FPQueryController
                 $response['sizes']['thumbnail']['url'] = $imgUrl;
             }
 
-            $response[FPConstants::UPLOADED_IMAGE_CF_ID_NAME] = $cfImageId;
+            $response[Constants::UPLOADED_IMAGE_CF_ID_NAME] = $cfImageId;
             $response['filename'] = Utils::getAttachmentFileName($attachment->ID);
         }
 

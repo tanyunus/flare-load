@@ -7,7 +7,7 @@ use FlarePress\Api\CloudflareImagesApi;
 use FlarePress\Data\Constants;
 use FlarePress\Util\Utils;
 
-class UploadController
+class Upload
 {
     public static function handleAddAttachment($attachmentId): void {
         if (!self::isAttachmentToBeUploadedToCf()) {

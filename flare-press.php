@@ -10,8 +10,8 @@ Text Domain: flare-press
 */
 
 use FlarePress\Controllers\Dashboard;
-use FlarePress\Controllers\QueryController;
-use FlarePress\Controllers\UploadController;
+use FlarePress\Controllers\Query;
+use FlarePress\Controllers\Upload;
 use FlarePress\Data\Constants;
 use FlarePress\Util\Utils;
 
@@ -52,7 +52,7 @@ function flarePressInit(): void
 function fp_wp_prepare_attachment_for_js(array $response, WP_Post $attachment): array
 {
     if (Utils::getCloudflareIdOfAttachment($attachment->ID)) {
-        $response = QueryController::updateAjaxQueryResponse($response, $attachment);
+        $response = Query::updateAjaxQueryResponse($response, $attachment);
     }
 
     return $response;
@@ -64,7 +64,7 @@ function fp_wp_prepare_attachment_for_js(array $response, WP_Post $attachment): 
 function fp_wp_get_attachment_image(string $html, int $attachmentId): string
 {
     if (Utils::getCloudflareIdOfAttachment($attachmentId)) {
-        $html = QueryController::updateQueriedAttachmentUrl($attachmentId, $html);
+        $html = Query::updateQueriedAttachmentUrl($attachmentId, $html);
     }
 
     return $html;
@@ -97,7 +97,7 @@ function fp_wp_get_attachment_url(string $attachmentUrl, int $attachmentId): str
  * Control attachment upload process
  */
 function fp_add_attachment(int $attachmentId): void {
-    UploadController::handleAddAttachment($attachmentId);
+    Upload::handleAddAttachment($attachmentId);
 }
 
 /**

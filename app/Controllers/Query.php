@@ -6,7 +6,7 @@ use DOMDocument;
 use FlarePress\Data\Constants;
 use FlarePress\Util\Utils;
 
-class QueryController
+class Query
 {
     public static function updateQueriedAttachmentUrl(int $attachmentId, string $html): string
     {

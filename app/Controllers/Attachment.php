@@ -11,7 +11,8 @@ use WP_Post;
 
 class Attachment
 {
-    public static function handleAddAttachment($attachmentId): void {
+    public static function handleAddAttachment($attachmentId): void
+    {
         if (!self::isAttachmentToBeUploadedToCf()) {
             return;
         }
@@ -49,16 +50,16 @@ class Attachment
         }
     }
 
-    public static function handleDeleteAttachment(WP_Post|false|null $delete, WP_Post $post, bool $forceDelete): WP_Post|false|null {
+    public static function handleDeleteAttachment(WP_Post|false|null $delete, WP_Post $post, bool $forceDelete): WP_Post|false|null
+    {
         $cfImageId = Utils::getCloudflareIdOfAttachment($post->ID);
 
-        if($cfImageId) {
+        if ($cfImageId) {
             try {
                 CloudflareImagesApi::deleteImage($cfImageId);
             } catch (Exception $e) {
                 error_log('[FlarePress] Attachment deletion error: ' . $e->getMessage());
             }
-
         }
 
         return $delete;
@@ -73,13 +74,14 @@ class Attachment
      * @throws Exception
      */
     private static function updateAttachmentMeta(
-        int $attachmentId,
-        array $metaData,
+        int    $attachmentId,
+        array  $metaData,
         string $fileName,
         string $cfImageUrl,
         string $cfImageId,
-        array $cfVariants
-    ): array {
+        array  $cfVariants
+    ): array
+    {
         $sizes = [];
         $mimeType = $metaData['sizes']['medium']['mime-type'] ?? '';
         $fileSize = $metaData['sizes']['medium']['file-size'] ?? ''; // TODO: Implement real size calculation of cdn file
@@ -91,7 +93,7 @@ class Attachment
         foreach ($cfVariants as $variant) {
             $variantUrl = CloudflareImagesApi::getVariantUrl($variant['id'], $attachmentId);
 
-            if(!$variantUrl) {
+            if (!$variantUrl) {
                 continue;
             }
 
@@ -104,7 +106,7 @@ class Attachment
             ];
         }
 
-        if(empty($sizes)) {
+        if (empty($sizes)) {
             throw new Exception("Attachment size update error: No size data found.");
         }
 
@@ -136,26 +138,29 @@ class Attachment
         if ($cfImageId) {
             $imgUrl = $attachment->guid;
 
-            error_log($imgUrl);
-
             $response['url'] = $imgUrl;
-
-            if (isset($response['sizes']['full'])) {
-                $response['sizes']['full']['url'] = $imgUrl;
-            }
-
-            if (isset($response['sizes']['medium'])) {
-                $response['sizes']['medium']['url'] = $imgUrl;
-            }
-
-            if (isset($response['sizes']['thumbnail'])) {
-                $response['sizes']['thumbnail']['url'] = $imgUrl;
-            }
-
+            $response['sizes'] = self::updateSizes($response['sizes'], $imgUrl);
             $response[Constants::UPLOADED_IMAGE_CF_ID_NAME] = $cfImageId;
             $response['filename'] = Utils::getAttachmentFileName($attachment->ID);
         }
 
         return $response;
+    }
+
+    private static function updateSizes(array $sizeArray, string $imgUrl): array
+    {
+        if (isset($sizeArray['full'])) {
+            $sizeArray['full']['url'] = $imgUrl;
+        }
+
+        if (isset($sizeArray['medium'])) {
+            $sizeArray['medium']['url'] = $imgUrl;
+        }
+
+        if (isset($sizeArray['thumbnail'])) {
+            $sizeArray['thumbnail']['url'] = $imgUrl;
+        }
+
+        return $sizeArray;
     }
 }

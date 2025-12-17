@@ -9,7 +9,6 @@ License:     GPL-2.0+
 Text Domain: flare-press
 */
 
-use FlarePress\Api\CloudflareImagesApi;
 use FlarePress\Controllers\Attachment;
 use FlarePress\Controllers\Dashboard;
 use FlarePress\Data\Constants;
@@ -86,8 +85,9 @@ function fp_wp_get_attachment_image_src(array|false $image, int $attachmentId): 
 /**
  * Modify attachment url
  */
-function fp_wp_get_attachment_url(string $attachmentUrl, int $attachmentId): string {
-    if(Utils::getCloudflareIdOfAttachment($attachmentId)) {
+function fp_wp_get_attachment_url(string $attachmentUrl, int $attachmentId): string
+{
+    if (Utils::getCloudflareIdOfAttachment($attachmentId)) {
         $attachmentUrl = get_the_guid($attachmentId);
     }
 
@@ -97,15 +97,17 @@ function fp_wp_get_attachment_url(string $attachmentUrl, int $attachmentId): str
 /**
  * Control attachment upload process
  */
-function fp_add_attachment(int $attachmentId): void {
+function fp_add_attachment(int $attachmentId): void
+{
     Attachment::handleAddAttachment($attachmentId);
 }
 
 /**
  * Add Location column to media library list view
  */
-function fp_manage_media_columns(array $columns): array {
-    $columns[Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID] = 'Location';
+function fp_manage_media_columns(array $columns): array
+{
+    $columns[Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID] = Utils::translate(Constants::DASHBOARD_CF_LOCATION_COLUMN_NAME);
 
     return $columns;
 }
@@ -113,34 +115,39 @@ function fp_manage_media_columns(array $columns): array {
 /**
  * Add location info under Location column in media library list view
  */
-function fp_manage_media_custom_column(string $columnName, int $attachmentId): void {
+function fp_manage_media_custom_column(string $columnName, int $attachmentId): void
+{
     Dashboard::addLocationInfoToListViewRow($columnName, $attachmentId);
 }
 
 /**
  * Initialize dashboard
  */
-function fp_admin_menu(): void {
+function fp_admin_menu(): void
+{
     new Dashboard();
 }
 
 /**
  * Add scripts for dashboard
  */
-function fp_admin_print_footer_scripts(): void {
-    wp_enqueue_script('fp-main-script', FLARE_PRESS_PATH. 'includes/assets/scripts/fp-main.js');
+function fp_admin_print_footer_scripts(): void
+{
+    wp_enqueue_script('fp-main-script', FLARE_PRESS_PATH . 'includes/assets/scripts/fp-main.js');
 }
 
 /**
  * Add styles for dashboard
  */
-function fp_admin_enqueue_scripts(): void {
-    wp_enqueue_style('fp-main-style',FLARE_PRESS_PATH. 'includes/assets/styles/fp-main.css');
+function fp_admin_enqueue_scripts(): void
+{
+    wp_enqueue_style('fp-main-style', FLARE_PRESS_PATH . 'includes/assets/styles/fp-main.css');
 }
 
 /**
  * Delete attachment image from Cloudflare storage before WordPress' actual deletion takes place
  */
-function fp_pre_delete_attachment(WP_Post|false|null $delete, WP_Post $post, bool $forceDelete): WP_Post|false|null {
+function fp_pre_delete_attachment(WP_Post|false|null $delete, WP_Post $post, bool $forceDelete): WP_Post|false|null
+{
     return Attachment::handleDeleteAttachment($delete, $post, $forceDelete);
 }

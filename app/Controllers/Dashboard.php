@@ -117,7 +117,7 @@ class Dashboard
                         'sanitize_callback' => function ($input) {
                             $sanitized = [];
                             $sanitized[Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME] = isset($input[Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME]) ? 1 : 0;
-                            $sanitized[Constants::DASHBOARD_KEEP_AFTER_DELETE_FIELD_NAME] = isset($input[Constants::DASHBOARD_KEEP_AFTER_DELETE_FIELD_NAME]) ? 1 : 0;
+                            $sanitized[Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME] = isset($input[Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME]) ? 1 : 0;
                             return $sanitized;
                         }
                 ]
@@ -181,15 +181,18 @@ class Dashboard
                         <?php checked(!empty($options[Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME])); ?> />
                 <?php echo Utils::localize(Constants::UI_KEEP_FILES_AFTER_UPLOAD_FIELD_LABEL); ?>
             </label>
+            <p class="description">FlarePress deletes local attachment file after uploading it to Cloudflare.<br/>Enable this setting if you prefer to keep the local copy.</p>
             <br/>
             <label>
                 <input type="checkbox"
-                       name="<?php echo Constants::DASHBOARD_UPLOAD_SETTINGS_NAME ?>[<?php echo Constants::DASHBOARD_KEEP_AFTER_DELETE_FIELD_NAME ?>]"
+                       name="<?php echo Constants::DASHBOARD_UPLOAD_SETTINGS_NAME ?>[<?php echo Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME ?>]"
                        value="1"
-                        <?php checked(!empty($options[Constants::DASHBOARD_KEEP_AFTER_DELETE_FIELD_NAME])); ?> />
-                <?php echo Utils::localize(Constants::UI_KEEP_FILES_AFTER_DELETE_FIELD_LABEL); ?>
+                        <?php checked(!empty($options[Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME])); ?> />
+                <?php echo Utils::localize(Constants::UI_KEEP_FILES_ON_CF_AFTER_DELETE_FIELD_LABEL); ?>
             </label>
+            <p class="description">FlarePress deletes the copy of the attachment from Cloudflare during the deletion process.<br/>Enable this setting if you prefer to keep the file on Cloudflare.</p>
         </fieldset>
+
         <?php
     }
 

@@ -23,7 +23,7 @@ class Constants
     public const DASHBOARD_UPLOAD_SETTINGS_NAME = 'fp_upload_settings';
     public const DASHBOARD_UPLOAD_SETTINGS_SECTION_ID = 'fp_upload_settings_section';
     public const DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME = 'fp_keep_files_on_disk_after_upload';
-    public const DASHBOARD_KEEP_AFTER_DELETE_FIELD_NAME = 'fp_keep_files_on_disk_after_delete';
+    public const DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME = 'fp_keep_files_on_cf_after_delete';
     public const DASHBOARD_FILE_MANAGEMENT_FIELD_NAME = 'fp_keep_files_on_disk_after_delete';
     public const DASHBOARD_API_SETTINGS_SECTION_ID = 'fp_api_settings_section';
     public const DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME = 'fp_cf_account_id';
@@ -38,7 +38,7 @@ class Constants
     public const UI_CF_LOCATION_COLUMN_NAME = 'Location';
     public const UI_FILE_MANAGEMENT_FIELD_TITLE = 'File management';
     public const UI_KEEP_FILES_AFTER_UPLOAD_FIELD_LABEL = 'Keep files on disk after upload';
-    public const UI_KEEP_FILES_AFTER_DELETE_FIELD_LABEL = 'Keep files on disk after delete';
+    public const UI_KEEP_FILES_ON_CF_AFTER_DELETE_FIELD_LABEL = 'Keep files on Cloudflare after delete';
 
 
     // Other

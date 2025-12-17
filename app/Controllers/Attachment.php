@@ -20,30 +20,36 @@ class Attachment
 
         try {
             $imageFile = get_attached_file($attachmentId);
-            $fileSize = wp_filesize($imageFile);
             $fileName = basename($imageFile);
             $cfUploadResult = CloudflareImagesApi::uploadImage($imageFile, $fileName);
+
+            $fileSize = wp_filesize($imageFile);
             $publicVariantUrl = CloudflareImagesApi::getVariantUrl('public', $cfUploadResult['result']['id']);
+
+            $newMetaData = [
+                'fileSize' => $fileSize,
+                'fileName' => $fileName,
+                'cloudFlareId' => $cfUploadResult['result']['id'],
+                'publicVariantUrl' => CloudflareImagesApi::getVariantUrl('public', $cfUploadResult['result']['id']),
+            ];
 
             Utils::updateAttachmentGuid($attachmentId, $publicVariantUrl);
             Utils::updateAttachedFile($attachmentId, $publicVariantUrl);
 
+
             // Actions to be taken right after attachment meta added
-            add_filter('wp_generate_attachment_metadata', function ($metadata, $attachmentId, $context) use ($cfUploadResult, $publicVariantUrl, $fileName, $fileSize) {
+            add_filter('wp_generate_attachment_metadata', function ($metadata, $attachmentId, $context) use ($newMetaData) {
                 $cfVariants = CloudflareImagesApi::getVariants();
+
+                $newMetaData['cfVariants'] = $cfVariants;
 
                 $updatedMetadata = self::updateAttachmentMeta(
                     $attachmentId,
                     $metadata,
-                    $fileName,
-                    $publicVariantUrl,
-                    $cfUploadResult['result']['id'],
-                    $cfVariants,
-                    $fileSize
+                    $newMetaData
                 );
 
                 clean_attachment_cache($attachmentId);
-                error_log(print_r($updatedMetadata, true));
                 return $updatedMetadata;
             }, 1, 3);
 
@@ -81,20 +87,16 @@ class Attachment
     private static function updateAttachmentMeta(
         int    $attachmentId,
         array  $metaData,
-        string $fileName,
-        string $cfImageUrl,
-        string $cfImageId,
-        array  $cfVariants,
-        int $fileSize
+        array  $newMetaData,
     ): array
     {
         $sizes = [];
         $mimeType = $metaData['sizes']['medium']['mime-type'] ?? '';
-        $metaData['file'] = $cfImageUrl;
-        $metaData[Constants::UPLOADED_IMAGE_CF_ID_NAME] = $cfImageId;
-        $metaData[Constants::UPLOADED_IMAGE_CF_FILE_NAME] = $fileName;
+        $metaData['file'] = $newMetaData['publicVariantUrl'];
+        $metaData[Constants::UPLOADED_IMAGE_CF_ID_NAME] = $newMetaData['cloudFlareId'];
+        $metaData[Constants::UPLOADED_IMAGE_CF_FILE_NAME] = $newMetaData['fileName'];
 
-        foreach ($cfVariants as $variant) {
+        foreach ($newMetaData['cfVariants'] as $variant) {
             $variantUrl = CloudflareImagesApi::getVariantUrl($variant['id'], $attachmentId);
 
             if (!$variantUrl) {
@@ -106,11 +108,13 @@ class Attachment
                 'width' => $variant['options']['width'],
                 'height' => $variant['options']['height'],
                 'mime-type' => $mimeType,
-                'filesize' => $fileSize,
+                'filesize' => $newMetaData['fileSize'],
             ];
         }
 
-        $metaData['filesize'] = $fileSize;
+        $metaData['filesize'] = $newMetaData['fileSize'];
+        $metaData['width'] = $newMetaData['cfVariants']['public']['options']['width'];
+        $metaData['height'] = $newMetaData['cfVariants']['public']['options']['height'];
 
         if (empty($sizes)) {
             throw new Exception("Attachment size update error: No size data found.");

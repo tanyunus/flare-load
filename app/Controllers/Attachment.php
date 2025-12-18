@@ -7,8 +7,6 @@ use Exception;
 use FlarePress\Api\CloudflareImagesApi;
 use FlarePress\Data\Constants;
 use FlarePress\Util\Utils;
-use ParagonIE\Sodium\Core\Util;
-use WP_Error;
 use WP_Post;
 
 class Attachment
@@ -135,6 +133,10 @@ class Attachment
     {
         $cfUrl = get_the_guid($attachmentId);
 
+        if(Utils::isAdminPage('upload.php')) {
+            $cfUrl = self::getCfThumbnail($attachmentId)['path'] ?? $cfUrl;
+        }
+
         $dom = new DOMDocument();
         libxml_use_internal_errors(true);
         $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
@@ -169,7 +171,7 @@ class Attachment
             $sizeArray['full']['url'] = $imgUrl;
         }
 
-        $thumbnail = wp_get_attachment_metadata($attachmentId)[Constants::UPLOADED_IMAGE_CF_THUMBNAIL_NAME]['path'] ?? $imgUrl;
+        $thumbnail = self::getCfThumbnail($attachmentId)['path'] ?? $imgUrl;
         $sizeArray['medium']['url'] = $thumbnail;
 
         return $sizeArray;
@@ -218,12 +220,22 @@ class Attachment
 
     private static function deleteCfThumbnail(int $attachmentId): void
     {
-        $thumbnail = wp_get_attachment_metadata($attachmentId)[Constants::UPLOADED_IMAGE_CF_THUMBNAIL_NAME]['path'] ?? '';
+        $thumbnail = self::getCfThumbnail($attachmentId)['path'] ?? '';
 
         if(empty($thumbnail)) {
             return;
         }
 
         Utils::deleteFileFromDisk($thumbnail);
+    }
+
+    private static function getCfThumbnail(int $attachmentId): array {
+        $attachmentMeta =  wp_get_attachment_metadata($attachmentId);
+
+        if(!$attachmentMeta) {
+            return [];
+        }
+
+        return $attachmentMeta[Constants::UPLOADED_IMAGE_CF_THUMBNAIL_NAME] ?? [];
     }
 }

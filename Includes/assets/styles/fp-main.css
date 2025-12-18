@@ -4,6 +4,12 @@
     user-select: none;
 }
 
+.fp-media-modal-switcher {
+    display: block;
+    margin-left: 0;
+    margin-top: 24px;
+}
+
 .media-frame.mode-grid .fp-cf-badge.attachment.details:focus,
 .media-frame.mode-grid .fp-cf-badge.attachment:focus,
 .media-frame.mode-grid .fp-cf-badge.selected.attachment:focus {

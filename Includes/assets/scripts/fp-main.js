@@ -54,44 +54,15 @@ class FpMediaLibraryMonitor {
         console.log('[FP] Upload params updated:', this.uploadParams);
     }
 
-    // New method to set upload params based on an element
-    setUploadParamsFromElement(element, paramName, valueExtractor = null) {
-        if (!element) {
-            console.error('[FP] Element not provided for upload params');
-            return;
-        }
-
-        // Default value extractor for checkboxes/inputs
-        if (!valueExtractor) {
-            valueExtractor = (el) => {
-                if (el) {
-                    if (el.type === 'checkbox') {
-                        return +el.checked; // Convert to 0 or 1
-                    }
-                    return el.value;
-                }
-                return el.value || el.textContent;
-            };
-        }
-
-        // Add a dynamic callback that reads from element
-        this.uploadParamsCallbacks.push((file) => {
-            return {
-                [paramName]: valueExtractor(element)
-            };
-        });
-
-        console.log('[FP] Added dynamic upload param from element:', paramName);
-    }
-
     // Method to get all upload params for a file
     getUploadParams(file) {
         let params = {...this.uploadParams};
 
         // Apply all dynamic callbacks
-        this.uploadParamsCallbacks.forEach(callback => {
+        this.uploadParamsCallbacks.forEach((callback, index) => {
             try {
                 const dynamicParams = callback(file);
+                console.log(`[FP] Dynamic callback ${index} returned:`, dynamicParams);
                 if (dynamicParams) {
                     params = {...params, ...dynamicParams};
                 }
@@ -107,6 +78,7 @@ class FpMediaLibraryMonitor {
             type: file.type
         });
 
+        console.log('[FP] Final upload params:', params);
         return params;
     }
 
@@ -134,10 +106,12 @@ class FpMediaLibraryMonitor {
         // Store original init
         const originalInit = window.wp.Uploader.prototype.init;
 
-        window.wp.Uploader.prototype.init = function() {
+        window.wp.Uploader.prototype.init = function () {
             const ret = originalInit.apply(this, arguments);
 
             console.log('[FP] Uploader initialized');
+
+            monitor.emitEvent('UploaderInit', {});
 
             // Mark this instance as hooked
             if (!this._fpHooked) {
@@ -166,7 +140,7 @@ class FpMediaLibraryMonitor {
 
                 this.uploader.bind('FilesAdded', (up, files) => {
                     console.log('[FP] Files added:', files.length);
-                    monitor.emitEvent('filesAdded', { files });
+                    monitor.emitEvent('filesAdded', {files});
                 });
 
                 this.uploader.bind('FileUploaded', (up, file, response) => {
@@ -234,7 +208,7 @@ class FpMediaLibraryMonitor {
 
         uploader.bind('FilesAdded', (up, files) => {
             console.log('[FP] Files added to existing uploader:', files.length);
-            monitor.emitEvent('filesAdded', { files });
+            monitor.emitEvent('filesAdded', {files});
         });
 
         uploader.bind('FileUploaded', (up, file, response) => {
@@ -1049,34 +1023,34 @@ class FpMediaLibraryMonitor {
 }
 
 // Add cf badge function
-function addCfBadge (cfImageElements) {
+function addCfBadge(cfImageElements) {
     cfImageElements.forEach(cfImageElement => {
         cfImageElement.element.classList.add('fp-cf-badge');
     });
 }
 
 // Upload form data modifier
-function modifyUploadFormData (mediaLibraryMonitor) {
-    const uploadSwitcher = document.querySelector('#fp_upload_switcher');
+function modifyUploadFormData(mediaLibraryMonitor) {
+    // Clear any existing params first
+    mediaLibraryMonitor.clearUploadParams();
 
-    if (!uploadSwitcher) {
-        return;
-    }
-
-    uploadSwitcher.addEventListener('change', () => {
-        mediaLibraryMonitor.setUploadParamsFromElement(
-            uploadSwitcher,
-            'fp_upload_to_cf'
-        );
+    // Add a dynamic callback that always checks the current checkbox state
+    mediaLibraryMonitor.modifyUploadFormData({}, (file) => {
+        const checkbox = document.querySelector('#fp_upload_switcher');
+        const value = checkbox ? +checkbox.checked : 0;
+        console.log('[FP] Reading checkbox state:', value, 'Checkbox element:', checkbox);
+        return {
+            fp_upload_to_cf: value
+        };
     });
 }
 
 // Upload switcher element creator function
-function createUploadSwitcherElement () {
+function createUploadSwitcherElement(additionalClassName = '') {
     const checkboxId = 'fp_upload_switcher';
 
     const labelElement = document.createElement('label');
-    labelElement.className = 'fp-upload-switcher';
+    labelElement.className = 'fp-upload-switcher' + ' ' + additionalClassName;
     labelElement.htmlFor = 'fp_upload_switcher';
 
     const checkBoxElement = document.createElement('input');
@@ -1092,7 +1066,7 @@ function createUploadSwitcherElement () {
 
 // Append upload switcher element right side of
 // add media button in media library page (upload.php)
-function appendSwitcherToSideOfAddMediaButton (uploadSwitcherElement) {
+function appendSwitcherToSideOfAddMediaButton(uploadSwitcherElement) {
     const addMediaFileButton = document.querySelector(`#wp-media-grid > a.page-title-action`);
 
     if (!addMediaFileButton) {
@@ -1107,7 +1081,7 @@ function appendSwitcherToSideOfAddMediaButton (uploadSwitcherElement) {
 function appendSwitcherToSideOfTitle(uploadSwitcherElement) {
     const mediaNewPageTitle = document.querySelector('body.media-new-php h1');
 
-    if(!mediaNewPageTitle) {
+    if (!mediaNewPageTitle) {
         return false;
     }
 
@@ -1119,21 +1093,17 @@ function appendSwitcherToSideOfTitle(uploadSwitcherElement) {
 function handleUploadSwitcherElement() {
     const uploadSwitcherElement = createUploadSwitcherElement();
 
-    if(appendSwitcherToSideOfAddMediaButton(uploadSwitcherElement)) {
+    if (appendSwitcherToSideOfAddMediaButton(uploadSwitcherElement)) {
         return true;
     }
 
-    if(appendSwitcherToSideOfTitle(uploadSwitcherElement)) {
-        return true;
-    }
-
-    return false;
+    return appendSwitcherToSideOfTitle(uploadSwitcherElement);
 }
 
 function handleMediaLibaryListView() {
     const mediaTable = document.querySelector('.wp-list-table.media');
 
-    if(!mediaTable) {
+    if (!mediaTable) {
         return;
     }
 
@@ -1147,10 +1117,10 @@ function handleMediaLibaryListView() {
 
         const cellArray = Array.from(row.cells);
         cellArray.forEach(cell => {
-            if(cell.classList.contains('fp_cf_badge_column') && cell.innerHTML) {
+            if (cell.classList.contains('fp_cf_badge_column') && cell.innerHTML) {
                 const cfLogoWrapper = cell.querySelector('[data-fp-file-name][data-fp-url]');
 
-                if(cfLogoWrapper) {
+                if (cfLogoWrapper) {
                     newRowDetails.fileName = cfLogoWrapper.getAttribute('data-fp-file-name');
                     newRowDetails.url = cfLogoWrapper.getAttribute('data-fp-url');
                 }
@@ -1172,16 +1142,108 @@ function handleMediaLibaryListView() {
     })
 }
 
+function handleUploadSwitcherElementForMediaModal(mediaLibraryMonitor) {
+    // Watch for media modal to open
+    const observer = new MutationObserver((mutations) => {
+        const mediaModal = document.querySelector('.media-modal');
+        if (mediaModal && mediaModal.style.display !== 'none') {
+            // Check if upload view is active
+            const uploadView = mediaModal.querySelector('.media-frame-content .uploader-inline');
+            if (uploadView && uploadView.style.display !== 'none') {
+                appendSwitcherToUploadWindow(mediaModal);
+            }
+        }
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class']
+    });
+}
+
+function appendSwitcherToUploadWindow(mediaModal) {
+    if (!mediaModal) {
+        return false;
+    }
+
+    // Check if already exists
+    let existingSwitcher = mediaModal.querySelector('#fp_upload_switcher');
+    if (existingSwitcher) {
+        return true;
+    }
+
+    // Find the upload UI
+    const uploadUI = mediaModal.querySelector('.media-frame-content .uploader-inline-content');
+    if (!uploadUI) {
+        return false;
+    }
+
+    const selectFilesButton = uploadUI.querySelector('button.browser');
+    if (!selectFilesButton) {
+        return false;
+    }
+
+    const uploadSwitcherElement = createUploadSwitcherElement('fp-media-modal-switcher');
+
+    // Insert after the button's parent paragraph
+    const buttonContainer = selectFilesButton.closest('p') || selectFilesButton.parentElement;
+    buttonContainer.after(uploadSwitcherElement);
+
+    return true;
+}
+
+function watchMediaFrameTabs() {
+    // Listen for media frame state changes
+    if (window.wp && window.wp.media) {
+        const originalFrame = window.wp.media;
+
+        window.wp.media = function(options) {
+            const frame = originalFrame(options);
+
+            frame.on('content:render', function() {
+                setTimeout(() => {
+                    const mediaModal = document.querySelector('.media-modal');
+                    if (mediaModal) {
+                        const uploadView = mediaModal.querySelector('.media-frame-content .uploader-inline');
+                        if (uploadView && uploadView.style.display !== 'none') {
+                            appendSwitcherToUploadWindow(mediaModal);
+                        }
+                    }
+                }, 100);
+            });
+
+            return frame;
+        };
+
+        // Copy static properties
+        Object.setPrototypeOf(window.wp.media, originalFrame);
+        Object.keys(originalFrame).forEach(key => {
+            if (!(key in window.wp.media)) {
+                window.wp.media[key] = originalFrame[key];
+            }
+        });
+    }
+}
+
 // Listen dom load
 document.addEventListener('DOMContentLoaded', () => {
     handleMediaLibaryListView();
 
     const mediaLibraryMonitor = new FpMediaLibraryMonitor();
 
+    watchMediaFrameTabs();
+    handleUploadSwitcherElementForMediaModal(mediaLibraryMonitor);
+
     mediaLibraryMonitor.ready.then(async () => {
-        if(handleUploadSwitcherElement()) {
-            modifyUploadFormData(mediaLibraryMonitor);
-        }
+        // Set up upload form data modifier once (it will work for all checkboxes)
+        modifyUploadFormData(mediaLibraryMonitor);
+
+        // Then handle the UI
+        handleUploadSwitcherElement();
+
+        handleUploadSwitcherElementForMediaModal(mediaLibraryMonitor);
 
         window.addEventListener('fpMediaLibrary:cfImageElementFound', () => {
             addCfBadge(mediaLibraryMonitor.getCfImageAttachmentsWithElements());
@@ -1189,6 +1251,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.addEventListener('fpMediaLibrary:cfImageElementAdded', () => {
             addCfBadge(mediaLibraryMonitor.getCfImageAttachmentsWithElements());
-        })
+        });
     });
 });
+

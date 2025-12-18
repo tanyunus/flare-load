@@ -602,7 +602,6 @@ class FpMediaLibraryMonitor {
     async initForMediaModal() {
         await this.waitForMediaComponents();
         this.hookAttachmentViews();
-        this.hookMediaFrames();
         this.hookUploader();
     }
 

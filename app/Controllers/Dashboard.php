@@ -196,7 +196,7 @@ class Dashboard
         <?php
     }
 
-    public function addLocationInfoToListViewRow(string $columnName, $attachmentId): void
+    public static function addLocationInfoToListViewRow(string $columnName, $attachmentId): void
     {
         if ($columnName === Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID && Utils::getCloudflareIdOfAttachment($attachmentId)) {
             echo '<span 

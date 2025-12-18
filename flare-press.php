@@ -28,21 +28,20 @@ add_action('plugins_loaded', 'flarePressInit');
 
 function flarePressInit(): void
 {
-    if (!is_admin()) {
-        return;
-    }
-
     add_filter('wp_prepare_attachment_for_js', 'fp_wp_prepare_attachment_for_js', 5, 3);
     add_filter('wp_get_attachment_image', 'fp_wp_get_attachment_image', 15, 5);
     add_filter('wp_get_attachment_image_src', 'fp_wp_get_attachment_image_src', 10, 4);
     add_filter('wp_get_attachment_url', 'fp_wp_get_attachment_url', 5, 2);
-    add_filter('manage_media_columns', 'fp_manage_media_columns');
-    add_filter('manage_media_custom_column', 'fp_manage_media_custom_column', 10, 2);
-    add_filter('pre_delete_attachment', 'fp_pre_delete_attachment', 10, 3);
-    add_action('add_attachment', 'fp_add_attachment', 1, 3);
-    add_action('admin_menu', 'fp_admin_menu');
-    add_action('admin_print_footer_scripts', 'fp_admin_print_footer_scripts');
-    add_action('admin_enqueue_scripts', 'fp_admin_enqueue_scripts');
+
+    if (is_admin()) {
+        add_filter('manage_media_columns', 'fp_manage_media_columns');
+        add_filter('manage_media_custom_column', 'fp_manage_media_custom_column', 10, 2);
+        add_filter('pre_delete_attachment', 'fp_pre_delete_attachment', 10, 3);
+        add_action('add_attachment', 'fp_add_attachment', 1, 3);
+        add_action('admin_menu', 'fp_admin_menu');
+        add_action('admin_print_footer_scripts', 'fp_admin_print_footer_scripts');
+        add_action('admin_enqueue_scripts', 'fp_admin_enqueue_scripts');
+    }
 }
 
 /**

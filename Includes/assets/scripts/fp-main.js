@@ -78,6 +78,8 @@ class FpMediaLibraryMonitor {
             type: file.type
         });
 
+        params.fp_upload_to_cf = window.fp_upload_to_cf;
+
         console.log('[FP] Final upload params:', params);
         return params;
     }
@@ -1039,6 +1041,7 @@ function modifyUploadFormData(mediaLibraryMonitor) {
         const checkbox = document.querySelector('#fp_upload_switcher');
         const value = checkbox ? +checkbox.checked : 0;
         console.log('[FP] Reading checkbox state:', value, 'Checkbox element:', checkbox);
+
         return {
             fp_upload_to_cf: value
         };
@@ -1191,6 +1194,14 @@ function appendSwitcherToUploadWindow(mediaModal) {
     const buttonContainer = selectFilesButton.closest('p') || selectFilesButton.parentElement;
     buttonContainer.after(uploadSwitcherElement);
 
+    window.fp_upload_to_cf = 0;
+
+    const newUploadSwitcherElement = document.querySelector('#fp_upload_switcher');
+
+    newUploadSwitcherElement.addEventListener('change', () => {
+        window.fp_upload_to_cf = newUploadSwitcherElement.checked ? 1 : 0;
+    });
+
     return true;
 }
 
@@ -1234,7 +1245,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const mediaLibraryMonitor = new FpMediaLibraryMonitor();
 
     watchMediaFrameTabs();
-    handleUploadSwitcherElementForMediaModal(mediaLibraryMonitor);
 
     mediaLibraryMonitor.ready.then(async () => {
         // Set up upload form data modifier once (it will work for all checkboxes)

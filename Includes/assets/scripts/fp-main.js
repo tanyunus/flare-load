@@ -1078,6 +1078,8 @@ function appendSwitcherToSideOfAddMediaButton(uploadSwitcherElement) {
 
     addMediaFileButton.after(uploadSwitcherElement);
 
+    addCfUploadIndicatorToWindow();
+
     return true;
 }
 
@@ -1089,6 +1091,8 @@ function appendSwitcherToSideOfTitle(uploadSwitcherElement) {
     }
 
     mediaNewPageTitle.after(uploadSwitcherElement);
+
+    addCfUploadIndicatorToWindow();
 
     return true;
 }
@@ -1194,13 +1198,7 @@ function appendSwitcherToUploadWindow(mediaModal) {
     const buttonContainer = selectFilesButton.closest('p') || selectFilesButton.parentElement;
     buttonContainer.after(uploadSwitcherElement);
 
-    window.fp_upload_to_cf = 0;
-
-    const newUploadSwitcherElement = document.querySelector('#fp_upload_switcher');
-
-    newUploadSwitcherElement.addEventListener('change', () => {
-        window.fp_upload_to_cf = newUploadSwitcherElement.checked ? 1 : 0;
-    });
+    addCfUploadIndicatorToWindow();
 
     return true;
 }
@@ -1236,6 +1234,16 @@ function watchMediaFrameTabs() {
             }
         });
     }
+}
+
+function addCfUploadIndicatorToWindow() {
+    window.fp_upload_to_cf = 0;
+
+    const newUploadSwitcherElement = document.querySelector('#fp_upload_switcher');
+
+    newUploadSwitcherElement.addEventListener('change', () => {
+        window.fp_upload_to_cf = newUploadSwitcherElement.checked ? 1 : 0;
+    });
 }
 
 // Listen dom load

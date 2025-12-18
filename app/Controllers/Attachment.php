@@ -21,9 +21,7 @@ class Attachment
 
         try {
             $imageFile = get_attached_file($attachmentId);
-            error_log($imageFile);
             $thumbnail = self::createThumbnailSizeOfImage($imageFile);
-            error_log($thumbnail['path']);
             $fileName = basename($imageFile);
             $cfUploadResult = CloudflareImagesApi::uploadImage($imageFile, $fileName);
 
@@ -218,13 +216,14 @@ class Attachment
         return $saveResult;
     }
 
-    private static function deleteCfThumbnail(int $attachmentId): bool {
+    private static function deleteCfThumbnail(int $attachmentId): void
+    {
         $thumbnail = wp_get_attachment_metadata($attachmentId)[Constants::UPLOADED_IMAGE_CF_THUMBNAIL_NAME]['path'] ?? '';
 
         if(empty($thumbnail)) {
-            return true;
+            return;
         }
 
-        return Utils::deleteFileFromDisk($thumbnail);
+        Utils::deleteFileFromDisk($thumbnail);
     }
 }

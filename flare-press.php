@@ -28,10 +28,12 @@ add_action('plugins_loaded', 'flarePressInit');
 
 function flarePressInit(): void
 {
-    add_filter('wp_prepare_attachment_for_js', 'fp_wp_prepare_attachment_for_js', 5, 3);
-    add_filter('wp_get_attachment_image', 'fp_wp_get_attachment_image', 15, 5);
-    add_filter('wp_get_attachment_image_src', 'fp_wp_get_attachment_image_src', 10, 4);
-    add_filter('wp_get_attachment_url', 'fp_wp_get_attachment_url', 5, 2);
+    if(is_user_logged_in()) {
+        add_filter('wp_prepare_attachment_for_js', 'fp_wp_prepare_attachment_for_js', 5, 3);
+        add_filter('wp_get_attachment_image', 'fp_wp_get_attachment_image', 15, 5);
+        add_filter('wp_get_attachment_image_src', 'fp_wp_get_attachment_image_src', 10, 4);
+        add_filter('wp_get_attachment_url', 'fp_wp_get_attachment_url', 5, 2);
+    }
 
     if (is_admin()) {
         add_filter('manage_media_columns', 'fp_manage_media_columns');

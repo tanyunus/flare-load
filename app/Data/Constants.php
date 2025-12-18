@@ -8,6 +8,8 @@ class Constants
     public const UPLOAD_TO_CF_INDICATOR = 'fp_upload_to_cf';
     public const UPLOADED_IMAGE_CF_ID_NAME = 'fp_cf_image_id';
     public const UPLOADED_IMAGE_CF_FILE_NAME = 'fp_cf_file_name';
+    public const UPLOADED_IMAGE_CF_THUMBNAIL_SUFFIX = '_fp_cf_thumbnail';
+    public const UPLOADED_IMAGE_CF_THUMBNAIL_NAME = 'fp_cf_thumbnail';
 
     // CF API
     public const CF_API_URL = 'https://api.cloudflare.com/client/v4/accounts/';

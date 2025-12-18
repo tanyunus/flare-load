@@ -30,6 +30,10 @@ class Utils
 
         $currentAdminPage = basename(admin_url($pagenow));
 
+        if(empty($currentAdminPage)) {
+            $currentAdminPage = basename($_SERVER['REQUEST_URI']);
+        }
+
         return $currentAdminPage === $pageSlug;
     }
 

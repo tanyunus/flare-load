@@ -8,6 +8,7 @@ use FlarePress\Api\CloudflareImagesApi;
 use FlarePress\Data\Constants;
 use FlarePress\Util\Utils;
 use ParagonIE\Sodium\Core\Util;
+use WP_Error;
 use WP_Post;
 
 class Attachment
@@ -20,6 +21,9 @@ class Attachment
 
         try {
             $imageFile = get_attached_file($attachmentId);
+
+            $thumbnail = self::createThumbnailSizeOfImage($imageFile);
+
             $fileName = basename($imageFile);
             $cfUploadResult = CloudflareImagesApi::uploadImage($imageFile, $fileName);
 
@@ -31,6 +35,7 @@ class Attachment
                 'fileName' => $fileName,
                 'cloudFlareId' => $cfUploadResult['result']['id'],
                 'publicVariantUrl' => CloudflareImagesApi::getVariantUrl('public', $cfUploadResult['result']['id']),
+                'cfThumbnail' => $thumbnail,
             ];
 
             Utils::updateAttachmentGuid($attachmentId, $publicVariantUrl);
@@ -95,6 +100,7 @@ class Attachment
         $metaData['file'] = $newMetaData['publicVariantUrl'];
         $metaData[Constants::UPLOADED_IMAGE_CF_ID_NAME] = $newMetaData['cloudFlareId'];
         $metaData[Constants::UPLOADED_IMAGE_CF_FILE_NAME] = $newMetaData['fileName'];
+        $metaData[Constants::UPLOADED_IMAGE_CF_THUMBNAIL_NAME] = $newMetaData['cfThumbnail'];
 
         foreach ($newMetaData['cfVariants'] as $variant) {
             $variantUrl = CloudflareImagesApi::getVariantUrl($variant['id'], $attachmentId);
@@ -149,7 +155,7 @@ class Attachment
             $imgUrl = $attachment->guid;
 
             $response['url'] = $imgUrl;
-            $response['sizes'] = self::updateSizes($response['sizes'], $imgUrl);
+            $response['sizes'] = self::updateSizes($response['sizes'], $imgUrl, $attachment->ID);
             $response[Constants::UPLOADED_IMAGE_CF_ID_NAME] = $cfImageId;
             $response['filename'] = Utils::getAttachmentFileName($attachment->ID);
         }
@@ -157,19 +163,17 @@ class Attachment
         return $response;
     }
 
-    private static function updateSizes(array $sizeArray, string $imgUrl): array
+    private static function updateSizes(array $sizeArray, string $imgUrl, int $attachmentId): array
     {
         if (isset($sizeArray['full'])) {
             $sizeArray['full']['url'] = $imgUrl;
         }
 
-        if (isset($sizeArray['medium'])) {
-            $sizeArray['medium']['url'] = $imgUrl;
-        }
+        $thumbnail = wp_get_attachment_metadata($attachmentId)[Constants::UPLOADED_IMAGE_CF_THUMBNAIL_NAME]['path'] ?? $imgUrl;
 
-        if (isset($sizeArray['thumbnail'])) {
-            $sizeArray['thumbnail']['url'] = $imgUrl;
-        }
+        error_log(print_r(wp_get_attachment_metadata($attachmentId)[Constants::UPLOADED_IMAGE_CF_THUMBNAIL_NAME], true));
+
+        $sizeArray['medium']['url'] = $thumbnail;
 
         return $sizeArray;
     }
@@ -186,5 +190,32 @@ class Attachment
         return empty($options[Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME]);
     }
 
+    private static function createThumbnailSizeOfImage($image): array|false
+    {
+        $editor = wp_get_image_editor($image);
 
+        if(is_wp_error($editor)) {
+            error_log('Thumbnail creation error: ' . $editor->get_error_message());
+
+            return false;
+        }
+
+        $editor->resize(300, 300, true);
+
+        if(is_wp_error($editor)) {
+            error_log('Thumbnail resize error: ' . $editor->get_error_message());
+
+            return false;
+        }
+
+        $saveResult = $editor->save($editor->generate_filename(Constants::UPLOADED_IMAGE_CF_THUMBNAIL_SUFFIX));
+
+        if(is_wp_error($editor)) {
+            error_log('Thumbnail save error: ' . $editor->get_error_message());
+
+            return false;
+        }
+
+        return $saveResult;
+    }
 }

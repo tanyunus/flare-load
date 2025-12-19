@@ -10,7 +10,7 @@ Text Domain: flare-press
 */
 
 use FlarePress\Controllers\Attachment;
-use FlarePress\Controllers\Dashboard;
+use FlarePress\Controllers\Option;
 use FlarePress\Data\Constants;
 use FlarePress\Util\Utils;
 
@@ -117,7 +117,7 @@ function fp_manage_media_columns(array $columns): array
  */
 function fp_manage_media_custom_column(string $columnName, int $attachmentId): void
 {
-    Dashboard::addLocationInfoToListViewRow($columnName, $attachmentId);
+    Option::addLocationInfoToListViewRow($columnName, $attachmentId);
 }
 
 /**
@@ -125,7 +125,7 @@ function fp_manage_media_custom_column(string $columnName, int $attachmentId): v
  */
 function fp_admin_menu(): void
 {
-    new Dashboard();
+    new Option();
 }
 
 /**

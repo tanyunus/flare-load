@@ -2,10 +2,12 @@
 
 namespace FlarePress\Controllers;
 
+use Exception;
+use FlarePress\Api\CloudflareImagesApi;
 use FlarePress\Data\Constants;
 use FlarePress\Util\Utils;
 
-class Dashboard
+class Option
 {
     public function __construct()
     {
@@ -127,7 +129,7 @@ class Dashboard
                 Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME,
                 'Variants',
                 function () {
-                   $this->renderVariantListField();
+                    $this->renderVariantListField();
                 },
                 Constants::DASHBOARD_MENU_SLUG,
                 Constants::DASHBOARD_VARIANT_SETTINGS_SECTION_ID,
@@ -136,12 +138,31 @@ class Dashboard
 
     private function renderVariantListField(): void
     {
-        $noVariantNotice = 'No variants synced yet.';
-        $variantList = get_option(Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME);
+        $variantsArray = self::getVariantNamesAsArray();
+
+        if(empty($variantsArray)) {
+            $variantsArray = array_keys(self::syncVariants());
+        }
 
         ?>
-        <div class="fp-variant-list-field"><p><?php echo !empty($variantList) ? $variantList : $noVariantNotice ?></p></div>
-        <button type="button" role="button" class="fp-variant-sync-button button button-secondary"><span class="dashicons dashicons-update-alt"></span>Sync Variants</button>
+        <div class="fp-variant-list-field">
+            <?php
+            if (!empty($variantsArray)) {
+                foreach ($variantsArray as $variant) {
+                    ?>
+                    <code><?php echo $variant ?></code>
+                    <?php
+                }
+            } else {
+                ?> <p>'No variants synced yet.'</p><?php
+            }
+            ?>
+
+        </div>
+        <button type="button" role="button" class="fp-variant-sync-button button button-secondary">
+            <span class="dashicons dashicons-update-alt"></span>
+            Sync Variants
+        </button>
         <?php
     }
 
@@ -189,24 +210,6 @@ class Dashboard
         }
     }
 
-    /**
-     * Render a checkbox field
-     *
-     * @param string $name Input name attribute
-     * @param bool $checked Whether checkbox is checked
-     */
-    function renderCheckboxField(string $name, bool $checked = false): void
-    {
-        ?>
-        <label>
-            <input type="checkbox"
-                   name="<?php echo esc_attr($name); ?>"
-                   value="1"
-                    <?php checked($checked); ?> />
-        </label>
-        <?php
-    }
-
     public function renderFileManagementCheckboxFields(): void
     {
         $options = get_option(Constants::DASHBOARD_UPLOAD_SETTINGS_NAME, []);
@@ -219,7 +222,8 @@ class Dashboard
                         <?php checked(!empty($options[Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME])); ?> />
                 <?php echo Utils::localize(Constants::UI_KEEP_FILES_AFTER_UPLOAD_FIELD_LABEL); ?>
             </label>
-            <p class="description">FlarePress deletes local attachment file after uploading it to Cloudflare.<br/>Enable this setting if you prefer to keep the local copy.</p>
+            <p class="description">FlarePress deletes local attachment file after uploading it to Cloudflare.<br/>Enable
+                this setting if you prefer to keep the local copy.</p>
             <br/>
             <label>
                 <input type="checkbox"
@@ -228,7 +232,8 @@ class Dashboard
                         <?php checked(!empty($options[Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME])); ?> />
                 <?php echo Utils::localize(Constants::UI_KEEP_FILES_ON_CF_AFTER_DELETE_FIELD_LABEL); ?>
             </label>
-            <p class="description">FlarePress deletes the copy of the attachment from Cloudflare during the deletion process.<br/>Enable this setting if you prefer to keep the file on Cloudflare.</p>
+            <p class="description">FlarePress deletes the copy of the attachment from Cloudflare during the deletion
+                process.<br/>Enable this setting if you prefer to keep the file on Cloudflare.</p>
         </fieldset>
 
         <?php
@@ -245,5 +250,53 @@ class Dashboard
         } else {
             echo Utils::localize(Constants::UI_CF_LOCATION_THIS_SERVER);
         }
+    }
+
+    public static function getVariantsAsArray(): array {
+        $variantsAsEncodedString = get_option(Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME);
+
+        if(empty($variantsAsEncodedString)) {
+            return [];
+        }
+
+        $variantsArray = json_decode($variantsAsEncodedString, true);
+
+        if(JSON_ERROR_NONE !== json_last_error()) {
+           error_log('[FlarePress] Error retrieving variants options: '.json_last_error_msg());
+
+           return [];
+        }
+
+        return $variantsArray;
+    }
+
+    public static function getVariantNamesAsArray(): array
+    {
+        $variantOptions = self::getVariantsAsArray();
+
+        if(empty($variantOptions)) {
+            return [];
+        }
+
+        return array_keys($variantOptions);
+    }
+
+    public static function syncVariants(): array {
+        try {
+            $variantsFromCloudflare = CloudflareImagesApi::getVariants();
+            $jsonEncodedVariants = json_encode($variantsFromCloudflare);
+
+            if(JSON_ERROR_NONE !== json_last_error()) {
+                throw new Exception(json_last_error_msg());
+            }
+
+            update_option(Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME, $jsonEncodedVariants);
+        } catch (Exception $e) {
+            error_log('[FlarePress] Unable to update variants option: ' . $e->getMessage());
+
+            return [];
+        }
+
+        return $variantsFromCloudflare;
     }
 }

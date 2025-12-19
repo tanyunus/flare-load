@@ -12,15 +12,14 @@ class Dashboard
         // Add page
         $this->addSettingsPage();
 
-        // Add upload settings section and fields
         $this->addUploadSettingsSection();
-
-        // Add api settings section and fields
         $this->addApiSettingsSection();
+        $this->addVariantSettingsSection();
         $this->registerAccountIDField();
         $this->registerAccountHashField();
         $this->registerAPITokenField();
         $this->registerFileManagementField();
+        $this->registerVariantListField();
     }
 
     private function addSettingsPage(): void
@@ -45,6 +44,16 @@ class Dashboard
         add_settings_section(
                 Constants::DASHBOARD_API_SETTINGS_SECTION_ID,
                 'API Settings',
+                '',
+                Constants::DASHBOARD_MENU_SLUG
+        );
+    }
+
+    private function addVariantSettingsSection(): void
+    {
+        add_settings_section(
+                Constants::DASHBOARD_VARIANT_SETTINGS_SECTION_ID,
+                'Variant Settings',
                 '',
                 Constants::DASHBOARD_MENU_SLUG
         );
@@ -105,6 +114,35 @@ class Dashboard
                 Constants::DASHBOARD_MENU_SLUG,
                 Constants::DASHBOARD_API_SETTINGS_SECTION_ID,
         );
+    }
+
+    private function registerVariantListField(): void
+    {
+        register_setting(
+                Constants::DASHBOARD_VARIANT_SETTINGS_GROUP_NAME,
+                Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME
+        );
+
+        add_settings_field(
+                Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME,
+                'Variants',
+                function () {
+                   $this->renderVariantListField();
+                },
+                Constants::DASHBOARD_MENU_SLUG,
+                Constants::DASHBOARD_VARIANT_SETTINGS_SECTION_ID,
+        );
+    }
+
+    private function renderVariantListField(): void
+    {
+        $noVariantNotice = 'No variants synced yet.';
+        $variantList = get_option(Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME);
+
+        ?>
+        <div class="fp-variant-list-field"><p><?php echo !empty($variantList) ? $variantList : $noVariantNotice ?></p></div>
+        <button type="button" role="button" class="fp-variant-sync-button button button-secondary"><span class="dashicons dashicons-update-alt"></span>Sync Variants</button>
+        <?php
     }
 
     private function registerFileManagementField(): void

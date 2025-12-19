@@ -22,15 +22,19 @@ class Constants
     public const DASHBOARD_MENU_SLUG = 'flare-press-settings';
     public const DASHBOARD_MENU_TITLE = 'FlarePress';
     public const DASHBOARD_SETTINGS_GROUP_NAME = 'fp_settings_group';
+    public const DASHBOARD_VARIANT_SETTINGS_GROUP_NAME = 'fp_variant_settings_group';
     public const DASHBOARD_UPLOAD_SETTINGS_NAME = 'fp_upload_settings';
+    public const DASHBOARD_VARIANT_SETTINGS_NAME = 'fp_variant_settings';
     public const DASHBOARD_UPLOAD_SETTINGS_SECTION_ID = 'fp_upload_settings_section';
     public const DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME = 'fp_keep_files_on_disk_after_upload';
     public const DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME = 'fp_keep_files_on_cf_after_delete';
     public const DASHBOARD_FILE_MANAGEMENT_FIELD_NAME = 'fp_keep_files_on_disk_after_delete';
     public const DASHBOARD_API_SETTINGS_SECTION_ID = 'fp_api_settings_section';
+    public const DASHBOARD_VARIANT_SETTINGS_SECTION_ID = 'fp_variant_settings_section';
     public const DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME = 'fp_cf_account_id';
     public const DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME = 'fp_cf_account_hash';
     public const DASHBOARD_CF_API_TOKEN_FIELD_NAME = 'fp_cf_api_token';
+    public const DASHBOARD_VARIANT_LIST_FIELD_NAME = 'fp_cf_variant_list';
     public const DASHBOARD_CF_LIST_VIEW_COLUMN_ID = 'fp_cf_badge_column';
 
     // UI strings

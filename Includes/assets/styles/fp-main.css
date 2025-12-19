@@ -34,3 +34,13 @@
 body.media-new-php h1 {
     display: inline-block;
 }
+
+.fp-variant-list-field {
+    margin-bottom: 8px;
+}
+
+.fp-variant-sync-button {
+    display: flex !important;
+    column-gap: 4px;
+    align-items: center;
+}

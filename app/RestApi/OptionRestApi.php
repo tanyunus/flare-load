@@ -18,9 +18,13 @@ class OptionRestApi
             ], 500);
         }
 
+        $syncResult = array_keys($syncResult);
+        sort($syncResult);
+        $arrKeys = stripslashes(wp_json_encode($syncResult));
+
         return new WP_REST_Response([
             'success' => true,
-            'data' => stripslashes(wp_json_encode(array_keys($syncResult))),
+            'data' => $arrKeys,
         ], 200);
     }
 }

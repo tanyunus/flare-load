@@ -11,7 +11,7 @@ use WP_Post;
 
 class AttachmentController
 {
-    public static function handleAddAttachment($attachmentId): void
+    public static function handleAddAttachment2($attachmentId): void
     {
         if (!self::isAttachmentToBeUploadedToCf()) {
             return;
@@ -34,8 +34,8 @@ class AttachmentController
                 'cfThumbnail' => $thumbnail,
             ];
 
-            Utils::updateAttachmentGuid($attachmentId, $publicVariantUrl);
-            Utils::updateAttachedFile($attachmentId, $publicVariantUrl);
+            self::updateAttachmentGuid($attachmentId, $publicVariantUrl);
+            self::updateAttachedFile($attachmentId, $publicVariantUrl);
 
 
             // Actions to be taken right after attachment meta added
@@ -62,9 +62,30 @@ class AttachmentController
         }
     }
 
+    public static function handleAddAttachment($attachmentId): void {
+        try {
+            // 1. Store already uploaded file path, name and size
+            $imageFile = get_attached_file($attachmentId);
+            $imageFileName = basename($imageFile);
+            $imageFileSize = wp_filesize($imageFile);
+
+            // 2. Generate thumbnail from disk version of image for preview purposes
+            $thumbnail = self::createThumbnailSizeOfImage($imageFile);
+
+            // 3. Upload image to Cloudflare and get the result
+            $cloudFlareUploadResult = CloudflareImagesApi::uploadImage($imageFile, $imageFileName);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+        }
+
+
+
+        self::updateAttachmentGuid($attachmentId, $publicVariantUrl);
+    }
+
     public static function handleDeleteAttachment(WP_Post|false|null $delete, WP_Post $post, bool $forceDelete): WP_Post|false|null
     {
-        $cfImageId = Utils::getCloudflareIdOfAttachment($post->ID);
+        $cfImageId = self::getCloudflareIdOfAttachment($post->ID);
 
         if ($cfImageId && self::shouldDeleteCloudflareFile()) {
             try {
@@ -151,7 +172,7 @@ class AttachmentController
 
     public static function updateAjaxQueryResponse(array $response, object $attachment): array
     {
-        $cfImageId = Utils::getCloudflareIdOfAttachment($attachment->ID);
+        $cfImageId = self::getCloudflareIdOfAttachment($attachment->ID);
 
         if ($cfImageId) {
             $imgUrl = $attachment->guid;
@@ -159,7 +180,7 @@ class AttachmentController
             $response['url'] = $imgUrl;
             $response['sizes'] = self::updateSizes($response['sizes'], $imgUrl, $attachment->ID);
             $response[Constants::UPLOADED_IMAGE_CF_ID_NAME] = $cfImageId;
-            $response['filename'] = Utils::getAttachmentFileName($attachment->ID);
+            $response['filename'] = self::getAttachmentFileName($attachment->ID);
         }
 
         return $response;
@@ -237,5 +258,78 @@ class AttachmentController
         }
 
         return $attachmentMeta[Constants::UPLOADED_IMAGE_CF_THUMBNAIL_NAME] ?? [];
+    }
+
+    public static function getLargestPublicVariant(): string {
+        $variants = OptionController::getVariantsAsArray();
+
+        error_log(print_r($variants, true));
+
+        return '';
+    }
+
+    public static function getAttachmentFileSizeHumanReadableFormat(int $attachmentId): string
+    {
+        $fileSize = wp_get_attachment_metadata($attachmentId)['filesize'] ?? '';
+
+        return size_format($fileSize) ?? '';
+    }
+
+    /**
+     * Updates attachment's guid field in wp_posts table with given value.
+     * This is where final URL of image is stored.
+     * @param int $attachmentId
+     * @param string $newGuid
+     * @return void
+     * @throws Exception
+     */
+    public static function updateAttachmentGuid(int $attachmentId, string $newGuid): void
+    {
+        global $wpdb;
+
+        if (!$wpdb->update($wpdb->posts, ['guid' => $newGuid], ['ID' => $attachmentId])) {
+            throw new Exception("Unable to update attachment guid");
+        }
+    }
+
+    /**
+     * Returns the file name of an image that is uploaded to Cloudflare from attachment meta
+     *
+     * @param int $attachmentId
+     * @return string|false Image's file name or false if not found
+     */
+    public static function getAttachmentFileName(int $attachmentId): string|false
+    {
+        $attachmentMeta = wp_get_attachment_metadata($attachmentId);
+
+        return $attachmentMeta[Constants::UPLOADED_IMAGE_CF_FILE_NAME] ?? false;
+    }
+
+    /**
+     * Returns the ID of and image that is uploaded to Cloudflare from attachment meta
+     *
+     * @param int $attachmentId
+     * @return string|false Image's Cloudflare ID or false if not found
+     */
+    public static function getCloudflareIdOfAttachment(int $attachmentId): string|false
+    {
+        $attachmentMeta = wp_get_attachment_metadata($attachmentId);
+
+        return $attachmentMeta[Constants::UPLOADED_IMAGE_CF_ID_NAME] ?? false;
+    }
+
+    /**
+     * Updates attachment's _wp_attached_file field in wp_postmeta table with given value.
+     * This is the place relative file path stored.
+     * @param int $attachmentId
+     * @param string $newValue
+     * @return void
+     * @throws Exception
+     */
+    public static function updateAttachedFile(int $attachmentId, string $newValue): void
+    {
+        if (!update_attached_file($attachmentId, $newValue)) {
+            throw new Exception("Unable to update attachment file value");
+        }
     }
 }

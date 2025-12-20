@@ -9,11 +9,18 @@ use FlarePress\Util\Utils;
 
 class OptionController
 {
+    private array $variants;
+    private array $variantNames;
+
     public function __construct()
     {
+        $this->variants = self::getVariantsAsArray();
+        $this->variantNames = self::getVariantNamesAsArray();
+
         // Add page
         $this->addSettingsPage();
 
+        // Add sections and fields
         $this->addUploadSettingsSection();
         $this->addApiSettingsSection();
         $this->addVariantSettingsSection();
@@ -22,6 +29,7 @@ class OptionController
         $this->registerAPITokenField();
         $this->registerFileManagementField();
         $this->registerVariantListField();
+        $this->registerDefaultVariantField();
     }
 
     private function addSettingsPage(): void
@@ -138,9 +146,9 @@ class OptionController
 
     private function renderVariantListField(): void
     {
-        $variantsArray = self::getVariantNamesAsArray();
+        $variantsArray = $this->variantNames;
 
-        if(empty($variantsArray)) {
+        if (empty($variantsArray)) {
             $variantsArray = array_keys(self::syncVariants());
         }
 
@@ -160,13 +168,68 @@ class OptionController
 
         </div>
         <div class="fp-sync-button-and-spinner">
-            <button id="fp_variant_sync_button" type="button" role="button" class="fp-variant-sync-button button button-secondary">
+            <button id="fp_variant_sync_button" type="button" role="button"
+                    class="fp-variant-sync-button button button-secondary">
                 <span class="dashicons dashicons-update-alt"></span>
                 Sync Variants
             </button>
             <span id="fp_sync_variant_spinner" class="spinner"></span>
         </div>
         <?php
+    }
+
+    private function registerDefaultVariantField(): void
+    {
+        register_setting(
+                Constants::DASHBOARD_SETTINGS_GROUP_NAME,
+                Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME,
+                array(
+                        'type' => 'string',
+                        'sanitize_callback' => function ($input) {
+                            return $this->sanitizeDefaultVariantField($input);
+                        },
+                        'default' => $this->variantNames[0]
+                )
+        );
+
+        add_settings_field(
+                Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME,
+                'Default Variant',
+                function () {
+                    $this->renderDefaultVariantField();
+                },
+                Constants::DASHBOARD_MENU_SLUG,
+                Constants::DASHBOARD_VARIANT_SETTINGS_SECTION_ID,
+        );
+    }
+
+    private function renderDefaultVariantField(): void
+    {
+        $currentValue = get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, $this->variantNames[0]);
+        $options = $this->variantNames;
+
+        ?>
+        <select name="<?php echo Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME ?>"
+                id="<?php echo Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME ?>">
+            <?php foreach ($options as $option) : ?>
+                <option value="<?php echo esc_attr($option); ?>" <?php selected($currentValue, $option); ?>>
+                    <?php echo esc_html($option); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+        <p class="description">Select an option from the dropdown.</p>
+        <?php
+    }
+
+    private function sanitizeDefaultVariantField($input): string
+    {
+        $allowedValues = $this->variantNames;
+
+        if (in_array($input, $allowedValues, true)) {
+            return $input;
+        }
+
+        return $allowedValues[0];
     }
 
     private function registerFileManagementField(): void
@@ -255,41 +318,47 @@ class OptionController
         }
     }
 
-    public static function getVariantsAsArray(): array {
+    public static function getVariantsAsArray(): array
+    {
         $variantsAsEncodedString = get_option(Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME);
 
-        if(empty($variantsAsEncodedString)) {
+        if (empty($variantsAsEncodedString)) {
             return [];
         }
 
         $variantsArray = json_decode($variantsAsEncodedString, true);
 
-        if(JSON_ERROR_NONE !== json_last_error()) {
-           error_log('[FlarePress] Error retrieving variants options: '.json_last_error_msg());
+        if (JSON_ERROR_NONE !== json_last_error()) {
+            error_log('[FlarePress] Error retrieving variants options: ' . json_last_error_msg());
 
-           return [];
+            return [];
         }
 
         return $variantsArray;
     }
 
-    public static function getVariantNamesAsArray(): array
+    private function getVariantNamesAsArray(): array
     {
-        $variantOptions = self::getVariantsAsArray();
+        $variantOptions = $this->variants;
 
-        if(empty($variantOptions)) {
+        if (empty($variantOptions)) {
             return [];
         }
 
-        return array_keys($variantOptions);
+        $variantNamesArray = array_keys($variantOptions);
+
+        asort($variantNamesArray);
+
+        return $variantNamesArray;
     }
 
-    public static function syncVariants(): array {
+    public static function syncVariants(): array
+    {
         try {
             $variantsFromCloudflare = CloudflareImagesApi::getVariants();
             $jsonEncodedVariants = json_encode($variantsFromCloudflare);
 
-            if(JSON_ERROR_NONE !== json_last_error()) {
+            if (JSON_ERROR_NONE !== json_last_error()) {
                 throw new Exception(json_last_error_msg());
             }
 

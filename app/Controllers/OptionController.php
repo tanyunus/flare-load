@@ -217,7 +217,7 @@ class OptionController
                 </option>
             <?php endforeach; ?>
         </select>
-        <p class="description">The default variant will be used for previews, so choose one that doesn't crop the image. <br/>This ensures the full image is clearly visible and recognizable.</p>
+        <p class="description">Choose the largest variant without cropping as the default. <br/>This ensures the full image is clearly visible and recognizable.</p>
         <?php
     }
 

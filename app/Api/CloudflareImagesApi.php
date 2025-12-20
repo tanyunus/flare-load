@@ -52,25 +52,6 @@ class CloudflareImagesApi
     }
 
     /**
-     * Constructs variant url by given variant name in format:
-     *   https://imagedelivery.net/<account-hash>/<image-id>/<variant>
-     *
-     * @param string $variant Variant slug/id as string
-     * @param string $imageId Image id of the image uploaded to Cloudflare
-     *
-     * @return string|false URL constructed to serve desired variant or false.
-     */
-    public static function getVariantUrl(string $variant, string $imageId): string|false {
-        $accountHash = self::getAccountHash();
-
-        if(!$accountHash){
-            return false;
-        }
-
-        return Constants::CF_CDN_URL . self::getAccountHash() . '/' . $imageId . '/' . $variant;
-    }
-
-    /**
      * @throws Exception
      */
     public static function getVariants(): array {
@@ -154,9 +135,5 @@ class CloudflareImagesApi
 
     private static function getApiToken(): string {
         return get_option(Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME);
-    }
-
-    private static function getAccountHash(): string|false {
-        return get_option(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME);
     }
 }

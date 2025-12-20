@@ -41,7 +41,7 @@ function flarePressInit(): void
         add_filter('manage_media_columns', 'fp_manage_media_columns');
         add_filter('manage_media_custom_column', 'fp_manage_media_custom_column', 10, 2);
         add_filter('pre_delete_attachment', 'fp_pre_delete_attachment', 10, 3);
-        //add_action('add_attachment', 'fp_add_attachment', 1, 3);
+        add_action('add_attachment', 'fp_add_attachment', 1, 3);
         add_action('admin_menu', 'fp_admin_menu');
         add_action('admin_print_footer_scripts', 'fp_admin_print_footer_scripts');
         add_action('admin_enqueue_scripts', 'fp_admin_enqueue_scripts');

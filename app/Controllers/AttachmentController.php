@@ -11,50 +11,47 @@ use WP_Post;
 
 class AttachmentController
 {
-    public static function handleAddAttachment2($attachmentId): void
+    public static function handleAddAttachment($attachmentId): void
     {
-        if (!self::isAttachmentToBeUploadedToCf()) {
+        if (!self::shouldUploadToCloudflare()) {
             return;
         }
 
         try {
+            // 1. Store already uploaded file path, name and size
             $imageFile = get_attached_file($attachmentId);
+            $imageFileName = basename($imageFile);
+            $imageFileSize = wp_filesize($imageFile);
+
+            // 2. Generate thumbnail from disk version of image
             $thumbnail = self::createThumbnailSizeOfImage($imageFile);
-            $fileName = basename($imageFile);
-            $cfUploadResult = CloudflareImagesApi::uploadImage($imageFile, $fileName);
 
-            $fileSize = wp_filesize($imageFile);
-            $publicVariantUrl = CloudflareImagesApi::getVariantUrl('public', $cfUploadResult['result']['id']);
+            // 3. Upload image to Cloudflare and get the result
+            $cloudFlareUploadResult = CloudflareImagesApi::uploadImage($imageFile, $imageFileName);
 
+            // 4. Update guid and attached file with Cloudflare ID
+            self::updateAttachmentGuid($attachmentId, $cloudFlareUploadResult['result']['id']);
+            self::updateAttachedFile($attachmentId, $cloudFlareUploadResult['result']['id']);
+
+            // 5. Setup new metadata values
             $newMetaData = [
-                'fileSize' => $fileSize,
-                'fileName' => $fileName,
-                'cloudFlareId' => $cfUploadResult['result']['id'],
-                'publicVariantUrl' => CloudflareImagesApi::getVariantUrl('public', $cfUploadResult['result']['id']),
-                'cfThumbnail' => $thumbnail,
+                'fileName' => $imageFileName,
+                'fileSize' => $imageFileSize,
+                'cloudFlareId' => $cloudFlareUploadResult['result']['id'],
+                'thumbnail' => $thumbnail,
             ];
 
-            self::updateAttachmentGuid($attachmentId, $publicVariantUrl);
-            self::updateAttachedFile($attachmentId, $publicVariantUrl);
-
-
-            // Actions to be taken right after attachment meta added
+            // 6. Modify attachment meta before it's created
             add_filter('wp_generate_attachment_metadata', function ($metadata, $attachmentId, $context) use ($newMetaData) {
-                $cfVariants = CloudflareImagesApi::getVariants();
-
-                $newMetaData['cfVariants'] = $cfVariants;
-
-                $updatedMetadata = self::updateAttachmentMeta(
+                return self::updateAttachmentMeta(
                     $attachmentId,
                     $metadata,
                     $newMetaData
                 );
-
-                clean_attachment_cache($attachmentId);
-                return $updatedMetadata;
             }, 1, 3);
 
-            if(self::shouldDeleteLocalFile()) {
+            // 7. Delete local file from disk if set so
+            if (self::shouldDeleteLocalFile()) {
                 Utils::deleteFileFromDisk($imageFile);
             }
         } catch (Exception $e) {
@@ -62,28 +59,7 @@ class AttachmentController
         }
     }
 
-    public static function handleAddAttachment($attachmentId): void {
-        try {
-            // 1. Store already uploaded file path, name and size
-            $imageFile = get_attached_file($attachmentId);
-            $imageFileName = basename($imageFile);
-            $imageFileSize = wp_filesize($imageFile);
-
-            // 2. Generate thumbnail from disk version of image for preview purposes
-            $thumbnail = self::createThumbnailSizeOfImage($imageFile);
-
-            // 3. Upload image to Cloudflare and get the result
-            $cloudFlareUploadResult = CloudflareImagesApi::uploadImage($imageFile, $imageFileName);
-        } catch (Exception $e) {
-            error_log($e->getMessage());
-        }
-
-
-
-        self::updateAttachmentGuid($attachmentId, $publicVariantUrl);
-    }
-
-    public static function handleDeleteAttachment(WP_Post|false|null $delete, WP_Post $post, bool $forceDelete): WP_Post|false|null
+    public static function handleDeleteAttachment(WP_Post|false|null $delete, WP_Post $post): WP_Post|false|null
     {
         $cfImageId = self::getCloudflareIdOfAttachment($post->ID);
 
@@ -100,7 +76,7 @@ class AttachmentController
         return $delete;
     }
 
-    private static function isAttachmentToBeUploadedToCf(): bool
+    private static function shouldUploadToCloudflare(): bool
     {
         return $_POST[Constants::UPLOAD_TO_CF_INDICATOR] ?? false;
     }
@@ -108,44 +84,16 @@ class AttachmentController
     /**
      * @throws Exception
      */
-    private static function updateAttachmentMeta(
-        int    $attachmentId,
-        array  $metaData,
-        array  $newMetaData,
-    ): array
+    private static function updateAttachmentMeta(int   $attachmentId, array $metaData, array $newMetaData): array
     {
-        $sizes = [];
-        $mimeType = $metaData['sizes']['medium']['mime-type'] ?? '';
         $metaData['file'] = $newMetaData['publicVariantUrl'];
         $metaData[Constants::UPLOADED_IMAGE_CF_ID_NAME] = $newMetaData['cloudFlareId'];
         $metaData[Constants::UPLOADED_IMAGE_CF_FILE_NAME] = $newMetaData['fileName'];
-        $metaData[Constants::UPLOADED_IMAGE_CF_THUMBNAIL_NAME] = $newMetaData['cfThumbnail'];
-
-        foreach ($newMetaData['cfVariants'] as $variant) {
-            $variantUrl = CloudflareImagesApi::getVariantUrl($variant['id'], $attachmentId);
-
-            if (!$variantUrl) {
-                continue;
-            }
-
-            $sizes['fp_cf_' . $variant['id']] = [
-                'file' => CloudflareImagesApi::getVariantUrl($variant['id'], $attachmentId),
-                'width' => $variant['options']['width'],
-                'height' => $variant['options']['height'],
-                'mime-type' => $mimeType,
-                'filesize' => $newMetaData['fileSize'],
-            ];
-        }
-
+        $metaData[Constants::UPLOADED_IMAGE_CF_THUMBNAIL_NAME] = $newMetaData['thumbnail'];
         $metaData['filesize'] = $newMetaData['fileSize'];
-        $metaData['width'] = $newMetaData['cfVariants']['public']['options']['width'];
-        $metaData['height'] = $newMetaData['cfVariants']['public']['options']['height'];
+        $metaData['sizes'] = [];
 
-        if (empty($sizes)) {
-            throw new Exception("Attachment size update error: No size data found.");
-        }
-
-        $metaData['sizes'] = $sizes;
+        clean_attachment_cache($attachmentId);
 
         return $metaData;
     }
@@ -154,7 +102,7 @@ class AttachmentController
     {
         $cfUrl = get_the_guid($attachmentId);
 
-        if(Utils::isAdminPage('upload.php')) {
+        if (Utils::isAdminPage('upload.php')) {
             $cfUrl = self::getCfThumbnail($attachmentId)['path'] ?? $cfUrl;
         }
 
@@ -172,14 +120,14 @@ class AttachmentController
 
     public static function updateAjaxQueryResponse(array $response, object $attachment): array
     {
-        $cfImageId = self::getCloudflareIdOfAttachment($attachment->ID);
+        $cloudflareImageId = self::getCloudflareIdOfAttachment($attachment->ID);
 
-        if ($cfImageId) {
-            $imgUrl = $attachment->guid;
+        if ($cloudflareImageId) {
+            $defaultVariantUrl = self::getDefaultVariantUrl($cloudflareImageId);
 
-            $response['url'] = $imgUrl;
-            $response['sizes'] = self::updateSizes($response['sizes'], $imgUrl, $attachment->ID);
-            $response[Constants::UPLOADED_IMAGE_CF_ID_NAME] = $cfImageId;
+            $response['url'] = $defaultVariantUrl;
+            $response['sizes'] = self::updateSizes($response['sizes'], $defaultVariantUrl, $attachment->ID);
+            $response[Constants::UPLOADED_IMAGE_CF_ID_NAME] = $cloudflareImageId;
             $response['filename'] = self::getAttachmentFileName($attachment->ID);
         }
 
@@ -198,13 +146,15 @@ class AttachmentController
         return $sizeArray;
     }
 
-    private static function shouldDeleteLocalFile(): bool {
+    private static function shouldDeleteLocalFile(): bool
+    {
         $options = get_option(Constants::DASHBOARD_UPLOAD_SETTINGS_NAME, []);
 
         return empty($options[Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME]);
     }
 
-    private static function shouldDeleteCloudflareFile(): bool {
+    private static function shouldDeleteCloudflareFile(): bool
+    {
         $options = get_option(Constants::DASHBOARD_UPLOAD_SETTINGS_NAME, []);
 
         return empty($options[Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME]);
@@ -214,7 +164,7 @@ class AttachmentController
     {
         $editor = wp_get_image_editor($image);
 
-        if(is_wp_error($editor)) {
+        if (is_wp_error($editor)) {
             error_log('Thumbnail creation error: ' . $editor->get_error_message());
 
             return false;
@@ -222,7 +172,7 @@ class AttachmentController
 
         $editor->resize(300, 300, true);
 
-        if(is_wp_error($editor)) {
+        if (is_wp_error($editor)) {
             error_log('Thumbnail resize error: ' . $editor->get_error_message());
 
             return false;
@@ -230,7 +180,7 @@ class AttachmentController
 
         $saveResult = $editor->save($editor->generate_filename(Constants::UPLOADED_IMAGE_CF_THUMBNAIL_SUFFIX));
 
-        if(is_wp_error($editor)) {
+        if (is_wp_error($editor)) {
             error_log('Thumbnail save error: ' . $editor->get_error_message());
 
             return false;
@@ -243,24 +193,26 @@ class AttachmentController
     {
         $thumbnail = self::getCfThumbnail($attachmentId)['path'] ?? '';
 
-        if(empty($thumbnail)) {
+        if (empty($thumbnail)) {
             return;
         }
 
         Utils::deleteFileFromDisk($thumbnail);
     }
 
-    private static function getCfThumbnail(int $attachmentId): array {
-        $attachmentMeta =  wp_get_attachment_metadata($attachmentId);
+    private static function getCfThumbnail(int $attachmentId): array
+    {
+        $attachmentMeta = wp_get_attachment_metadata($attachmentId);
 
-        if(!$attachmentMeta) {
+        if (!$attachmentMeta) {
             return [];
         }
 
         return $attachmentMeta[Constants::UPLOADED_IMAGE_CF_THUMBNAIL_NAME] ?? [];
     }
 
-    public static function getLargestPublicVariant(): string {
+    public static function getLargestPublicVariant(): string
+    {
         $variants = OptionController::getVariantsAsArray();
 
         error_log(print_r($variants, true));
@@ -331,5 +283,30 @@ class AttachmentController
         if (!update_attached_file($attachmentId, $newValue)) {
             throw new Exception("Unable to update attachment file value");
         }
+    }
+
+    public static function getDefaultVariantUrl($cloudflareImageId): string {
+        $defaultVariant = get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME);
+
+        return self::getVariantUrl($defaultVariant, $cloudflareImageId);
+    }
+
+    /**
+     * Constructs variant url by given variant name in format:
+     *   https://imagedelivery.net/<account-hash>/<image-id>/<variant>
+     *
+     * @param string $variant Variant slug/id as string
+     * @param string $imageId Image id of the image uploaded to Cloudflare
+     *
+     * @return string|false URL constructed to serve desired variant or false.
+     */
+    public static function getVariantUrl(string $variant, string $imageId): string|false {
+        $accountHash = get_option(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME);
+
+        if(!$accountHash){
+            return false;
+        }
+
+        return Constants::CF_CDN_URL . $accountHash . '/' . $imageId . '/' . $variant;
     }
 }

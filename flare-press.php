@@ -9,10 +9,11 @@ License:     GPL-2.0+
 Text Domain: flare-press
 */
 
-use FlarePress\Controllers\Attachment;
-use FlarePress\Controllers\Option;
+use FlarePress\Controllers\AttachmentController;
+use FlarePress\Controllers\OptionController;
 use FlarePress\Data\Constants;
 use FlarePress\Util\Utils;
+use FlarePress\RestApi\OptionRestApi;
 
 if (!defined('WPINC')) {
     die;
@@ -29,6 +30,7 @@ add_action('plugins_loaded', 'flarePressInit');
 function flarePressInit(): void
 {
     if(is_user_logged_in()) {
+        add_action('rest_api_init', 'fp_rest_api_init');
         add_filter('wp_prepare_attachment_for_js', 'fp_wp_prepare_attachment_for_js', 5, 3);
         add_filter('wp_get_attachment_image', 'fp_wp_get_attachment_image', 15, 5);
         add_filter('wp_get_attachment_image_src', 'fp_wp_get_attachment_image_src', 10, 4);
@@ -47,12 +49,26 @@ function flarePressInit(): void
 }
 
 /**
+ * Add new rest api endpoints
+ */
+function fp_rest_api_init(): void
+{
+    register_rest_route('flare-press/v1', '/sync-variants', array(
+        'methods' => 'POST',
+        'callback' => [OptionRestApi::class, 'syncVariants'],
+        'permission_callback' => function () {
+            return current_user_can('manage_options');
+        }
+    ));
+}
+
+/**
  * Modifying ajax response right after upload and before sending it
  * */
 function fp_wp_prepare_attachment_for_js(array $response, WP_Post $attachment): array
 {
     if (Utils::getCloudflareIdOfAttachment($attachment->ID)) {
-        $response = Attachment::updateAjaxQueryResponse($response, $attachment);
+        $response = AttachmentController::updateAjaxQueryResponse($response, $attachment);
     }
 
     return $response;
@@ -64,7 +80,7 @@ function fp_wp_prepare_attachment_for_js(array $response, WP_Post $attachment): 
 function fp_wp_get_attachment_image(string $html, int $attachmentId): string
 {
     if (Utils::getCloudflareIdOfAttachment($attachmentId)) {
-        $html = Attachment::updateQueriedAttachmentUrl($attachmentId, $html);
+        $html = AttachmentController::updateQueriedAttachmentUrl($attachmentId, $html);
     }
 
     return $html;
@@ -99,7 +115,7 @@ function fp_wp_get_attachment_url(string $attachmentUrl, int $attachmentId): str
  */
 function fp_add_attachment(int $attachmentId): void
 {
-    Attachment::handleAddAttachment($attachmentId);
+    AttachmentController::handleAddAttachment($attachmentId);
 }
 
 /**
@@ -117,7 +133,7 @@ function fp_manage_media_columns(array $columns): array
  */
 function fp_manage_media_custom_column(string $columnName, int $attachmentId): void
 {
-    Option::addLocationInfoToListViewRow($columnName, $attachmentId);
+    OptionController::addLocationInfoToListViewRow($columnName, $attachmentId);
 }
 
 /**
@@ -125,7 +141,7 @@ function fp_manage_media_custom_column(string $columnName, int $attachmentId): v
  */
 function fp_admin_menu(): void
 {
-    new Option();
+    new OptionController();
 }
 
 /**
@@ -134,6 +150,7 @@ function fp_admin_menu(): void
 function fp_admin_print_footer_scripts(): void
 {
     wp_enqueue_script('fp-main-script', FLARE_PRESS_PATH . 'includes/assets/scripts/fp-main.js');
+    wp_enqueue_script('fp-options-script', FLARE_PRESS_PATH . 'includes/assets/scripts/fp-options.js');
 }
 
 /**
@@ -149,5 +166,5 @@ function fp_admin_enqueue_scripts(): void
  */
 function fp_pre_delete_attachment(WP_Post|false|null $delete, WP_Post $post, bool $forceDelete): WP_Post|false|null
 {
-    return Attachment::handleDeleteAttachment($delete, $post, $forceDelete);
+    return AttachmentController::handleDeleteAttachment($delete, $post, $forceDelete);
 }

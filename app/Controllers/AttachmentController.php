@@ -9,7 +9,7 @@ use FlarePress\Data\Constants;
 use FlarePress\Util\Utils;
 use WP_Post;
 
-class Attachment
+class AttachmentController
 {
     public static function handleAddAttachment($attachmentId): void
     {

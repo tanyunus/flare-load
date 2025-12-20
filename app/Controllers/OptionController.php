@@ -7,7 +7,7 @@ use FlarePress\Api\CloudflareImagesApi;
 use FlarePress\Data\Constants;
 use FlarePress\Util\Utils;
 
-class Option
+class OptionController
 {
     public function __construct()
     {
@@ -145,7 +145,7 @@ class Option
         }
 
         ?>
-        <div class="fp-variant-list-field">
+        <div id="fp_variant_list_field" class="fp-variant-list-field">
             <?php
             if (!empty($variantsArray)) {
                 foreach ($variantsArray as $variant) {
@@ -159,7 +159,7 @@ class Option
             ?>
 
         </div>
-        <button type="button" role="button" class="fp-variant-sync-button button button-secondary">
+        <button id="fp_variant_sync_button" type="button" role="button" class="fp-variant-sync-button button button-secondary">
             <span class="dashicons dashicons-update-alt"></span>
             Sync Variants
         </button>

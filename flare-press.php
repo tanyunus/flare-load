@@ -79,8 +79,10 @@ function fp_wp_prepare_attachment_for_js(array $response, WP_Post $attachment): 
  */
 function fp_wp_get_attachment_image(string $html, int $attachmentId): string
 {
-    if (AttachmentController::getCloudflareIdOfAttachment($attachmentId)) {
-        $html = AttachmentController::updateQueriedAttachmentUrl($attachmentId, $html);
+    $cfId = AttachmentController::getCloudflareIdOfAttachment($attachmentId);
+
+    if ($cfId) {
+        $html = AttachmentController::updateQueriedAttachmentHtml($attachmentId, $cfId, $html);
     }
 
     return $html;

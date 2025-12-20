@@ -98,9 +98,9 @@ class AttachmentController
         return $metaData;
     }
 
-    public static function updateQueriedAttachmentUrl(int $attachmentId, string $html): string
+    public static function updateQueriedAttachmentHtml(int $attachmentId, string $cfId, string $html): string
     {
-        $cfUrl = get_the_guid($attachmentId);
+        $cfUrl = self::getDefaultVariantUrl($cfId);
 
         if (Utils::isAdminPage('upload.php')) {
             $cfUrl = self::getCfThumbnail($attachmentId)['path'] ?? $cfUrl;
@@ -114,6 +114,8 @@ class AttachmentController
         $img = $dom->getElementsByTagName('img')->item(0);
         $img->setAttribute('src', $cfUrl);
         $img->setAttribute('srcset', '');
+        $img->setAttribute('width', '60');
+        $img->setAttribute('height', '60');
 
         return $dom->saveHTML($img);
     }

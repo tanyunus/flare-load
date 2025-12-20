@@ -6,7 +6,6 @@ use FlarePress\Data\Constants;
 
 class Utils
 {
-
     /**
      * Translates given string in this plugin's own translation domain
      *

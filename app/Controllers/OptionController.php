@@ -159,10 +159,13 @@ class OptionController
             ?>
 
         </div>
-        <button id="fp_variant_sync_button" type="button" role="button" class="fp-variant-sync-button button button-secondary">
-            <span class="dashicons dashicons-update-alt"></span>
-            Sync Variants
-        </button>
+        <div class="fp-sync-button-and-spinner">
+            <button id="fp_variant_sync_button" type="button" role="button" class="fp-variant-sync-button button button-secondary">
+                <span class="dashicons dashicons-update-alt"></span>
+                Sync Variants
+            </button>
+            <span id="fp_sync_variant_spinner" class="spinner"></span>
+        </div>
         <?php
     }
 

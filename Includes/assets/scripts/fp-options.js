@@ -1,14 +1,11 @@
 document.addEventListener('DOMContentLoaded', function () {
     const syncButton = document.querySelector('#fp_variant_sync_button');
     const variantListField = document.querySelector('#fp_variant_list_field');
+    const spinner = document.querySelector('#fp_sync_variant_spinner');
 
     if (syncButton && variantListField) {
         syncButton.addEventListener('click', async () => {
-            const syncedVariants = await syncVariants();
-
-            if(Array.isArray(syncedVariants)) {
-                variantListField.innerHTML = renderNewVariants(syncedVariants);
-            }
+            await handleSyncVariants(syncButton, variantListField, spinner);
         });
     }
 
@@ -53,4 +50,18 @@ function renderNewVariants(variantArray) {
     });
 
     return finalHtml;
+}
+
+async function handleSyncVariants(syncButton, variantListField, spinner) {
+    syncButton.toggleAttribute('disabled', true);
+    spinner && spinner.classList.toggle('is-active', true);
+
+    const syncedVariants = await syncVariants();
+
+    if(Array.isArray(syncedVariants)) {
+        variantListField.innerHTML = renderNewVariants(syncedVariants);
+
+        syncButton.toggleAttribute('disabled', false);
+        spinner && spinner.classList.toggle('is-active', false);
+    }
 }

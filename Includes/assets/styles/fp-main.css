@@ -44,3 +44,12 @@ body.media-new-php h1 {
     column-gap: 4px;
     align-items: center;
 }
+
+.fp-sync-button-and-spinner {
+    display: flex;
+    align-items: center;
+}
+
+.fp-sync-button-and-spinner > .spinner {
+    margin-top: 0;
+}

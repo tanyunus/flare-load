@@ -244,9 +244,9 @@ class OptionController
 
     public static function addLocationInfoToListViewRow(string $columnName, $attachmentId): void
     {
-        if ($columnName === Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID && Utils::getCloudflareIdOfAttachment($attachmentId)) {
+        if ($columnName === Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID && AttachmentController::getCloudflareIdOfAttachment($attachmentId)) {
             echo '<span 
-                data-fp-file-name="' . Utils::getAttachmentFileName($attachmentId) . '"
+                data-fp-file-name="' . AttachmentController::getAttachmentFileName($attachmentId) . '"
                 data-fp-url="' . get_the_guid($attachmentId) . '"
                 >
                 <img title="' . Utils::localize(Constants::UI_CF_BADGE_TITLE) . '" alt="Cloudflare logo" height="18" src="/wordpress/wp-content/plugins/flare-press/includes/assets/images/cf_logo.png"></span>';

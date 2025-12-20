@@ -2,7 +2,6 @@
 
 namespace FlarePress\Util;
 
-use Exception;
 use FlarePress\Data\Constants;
 
 class Utils
@@ -35,32 +34,6 @@ class Utils
         }
 
         return $currentAdminPage === $pageSlug;
-    }
-
-    /**
-     * Returns the ID of and image that is uploaded to Cloudflare from attachment meta
-     *
-     * @param int $attachmentId
-     * @return string|false Image's Cloudflare ID or false if not found
-     */
-    public static function getCloudflareIdOfAttachment(int $attachmentId): string|false
-    {
-        $attachmentMeta = wp_get_attachment_metadata($attachmentId);
-
-        return $attachmentMeta[Constants::UPLOADED_IMAGE_CF_ID_NAME] ?? false;
-    }
-
-    /**
-     * Returns the file name of an image that is uploaded to Cloudflare from attachment meta
-     *
-     * @param int $attachmentId
-     * @return string|false Image's file name or false if not found
-     */
-    public static function getAttachmentFileName(int $attachmentId): string|false
-    {
-        $attachmentMeta = wp_get_attachment_metadata($attachmentId);
-
-        return $attachmentMeta[Constants::UPLOADED_IMAGE_CF_FILE_NAME] ?? false;
     }
 
     /**
@@ -97,36 +70,6 @@ class Utils
     }
 
     /**
-     * Updates attachment's guid field in wp_posts table with given value.
-     * This is where final URL of image is stored.
-     * @param int $attachmentId
-     * @param string $newGuid
-     * @return void
-     * @throws Exception
-     */
-    public static function updateAttachmentGuid(int $attachmentId, string $newGuid): void {
-        global $wpdb;
-
-        if(!$wpdb->update($wpdb->posts, ['guid' => $newGuid], ['ID' => $attachmentId])) {
-            throw new Exception("Unable to update attachment guid");
-        }
-    }
-
-    /**
-     * Updates attachment's _wp_attached_file field in wp_postmeta table with given value.
-     * This is the place relative file path stored.
-     * @param int $attachmentId
-     * @param string $newValue
-     * @return void
-     * @throws Exception
-     */
-    public static function updateAttachedFile(int $attachmentId, string $newValue): void {
-        if(!update_attached_file($attachmentId, $newValue)) {
-            throw new Exception("Unable to update attachment file value");
-        }
-    }
-
-    /**
      * Deletes file from disk.
      *
      * @param string $filePath
@@ -158,9 +101,4 @@ class Utils
         }
     }
 
-    public static function getAttachmentFileSizeHumanReadableFormat(int $attachmentId): string {
-        $fileSize = wp_get_attachment_metadata($attachmentId)['filesize'] ?? '';
-
-        return size_format( $fileSize ) ?? '';
-    }
 }

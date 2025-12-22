@@ -35,6 +35,13 @@ function flarePressInit(): void
         add_filter('wp_get_attachment_image', 'fp_wp_get_attachment_image', 15, 5);
         add_filter('wp_get_attachment_image_src', 'fp_wp_get_attachment_image_src', 10, 4);
         add_filter('wp_get_attachment_url', 'fp_wp_get_attachment_url', 5, 2);
+        add_filter('block_type_metadata', function($metadata) {
+            if($metadata['name'] === 'core/image') {
+                error_log(print_r($metadata, true));
+            }
+
+           return $metadata;
+        });
     }
 
     if (is_admin()) {
@@ -94,7 +101,7 @@ function fp_wp_get_attachment_image(string $html, int $attachmentId): string
 function fp_wp_get_attachment_image_src(array|false $image, int $attachmentId): array|false
 {
     if (AttachmentController::getCloudflareIdOfAttachment($attachmentId)) {
-        $image[0] = get_the_guid($attachmentId);
+        $image[0] = AttachmentController::getCfThumbnail($attachmentId);
     }
 
     return $image;

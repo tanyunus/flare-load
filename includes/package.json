@@ -1,0 +1,26 @@
+{
+  "name": "includes",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npm run dev:ts & npm run dev:scss",
+    "dev:ts": "tsc --watch",
+    "dev:scss": "sass --watch assets/styles:dist/css",
+    "build": "npm run build:ts && npm run build:scss",
+    "build:ts": "tsc",
+    "build:scss": "sass assets/styles:dist/css",
+    "build:prod": "npm run build:prod:ts && npm run build:prod:scss",
+    "build:prod:ts": "tsc --removeComments --sourceMap false",
+    "build:prod:scss": "sass --style=compressed --no-source-map assets/styles:dist/css"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "sass": "^1.97.1",
+    "typescript": "^5.9.3"
+  }
+}

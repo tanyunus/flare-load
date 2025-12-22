@@ -86,7 +86,7 @@ class AttachmentController
      */
     private static function updateAttachmentMeta(int   $attachmentId, array $metaData, array $newMetaData): array
     {
-        $metaData['file'] = $newMetaData['publicVariantUrl'];
+        $metaData['file'] = '';
         $metaData[Constants::UPLOADED_IMAGE_CF_ID_NAME] = $newMetaData['cloudFlareId'];
         $metaData[Constants::UPLOADED_IMAGE_CF_FILE_NAME] = $newMetaData['fileName'];
         $metaData[Constants::UPLOADED_IMAGE_CF_THUMBNAIL_NAME] = $newMetaData['thumbnail'];
@@ -202,7 +202,7 @@ class AttachmentController
         Utils::deleteFileFromDisk($thumbnail);
     }
 
-    private static function getCfThumbnail(int $attachmentId): array
+    public static function getCfThumbnail(int $attachmentId): array
     {
         $attachmentMeta = wp_get_attachment_metadata($attachmentId);
 

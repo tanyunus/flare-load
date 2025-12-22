@@ -19,9 +19,21 @@
   "type": "commonjs",
   "devDependencies": {
     "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@types/wordpress__block-editor": "^14.21.2",
+    "@wordpress/block-editor": "^15.9.0",
+    "@wordpress/blocks": "^15.9.0",
+    "@wordpress/components": "^30.9.0",
+    "@wordpress/compose": "^7.36.0",
+    "@wordpress/element": "^6.36.0",
+    "@wordpress/scripts": "^31.1.0",
     "esbuild": "^0.27.2",
     "sass": "^1.97.1",
     "terser": "^5.44.1",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@wordpress/hooks": "^4.36.0"
   }
 }

@@ -1,5 +1,3 @@
-// Type definitions for WordPress media library
-
 export interface WordPressMedia {
     view?: {
         Attachment?: any;
@@ -104,13 +102,22 @@ export interface StatsResult {
     initialized: boolean;
 }
 
-// Type definitions
 export interface SyncVariantsResponse {
     data: string; // JSON string that needs to be parsed
 }
 
 export interface WpNonceResponse {
     text(): Promise<string>;
+}
+
+export interface ExtraProps {
+    className?: string;
+    [key: string]: any;
+}
+
+export interface BlockType {
+    name: string;
+    [key: string]: any;
 }
 
 declare global {

@@ -35,13 +35,7 @@ function flarePressInit(): void
         add_filter('wp_get_attachment_image', 'fp_wp_get_attachment_image', 15, 5);
         add_filter('wp_get_attachment_image_src', 'fp_wp_get_attachment_image_src', 10, 4);
         add_filter('wp_get_attachment_url', 'fp_wp_get_attachment_url', 5, 2);
-        add_filter('block_type_metadata', function($metadata) {
-            if($metadata['name'] === 'core/image') {
-                error_log(print_r($metadata, true));
-            }
-
-           return $metadata;
-        });
+        add_filter('render_block', 'fp_render_block', 10, 2);
     }
 
     if (is_admin()) {
@@ -53,6 +47,26 @@ function flarePressInit(): void
         add_action('admin_print_footer_scripts', 'fp_admin_print_footer_scripts');
         add_action('admin_enqueue_scripts', 'fp_admin_enqueue_scripts');
     }
+}
+
+function fp_render_block($blockContent, $block) {
+    if ($block['blockName'] !== 'core/image') {
+        return $blockContent;
+    }
+
+    if (isset($block['attrs']['customOption'])) {
+        $custom_option = $block['attrs']['customOption'];
+        $custom_class = 'custom-option-' . esc_attr($custom_option);
+
+        $block_content = preg_replace(
+            '/class="([^"]*)"/',
+            'class="$1 ' . $custom_class . '"',
+            $blockContent,
+            1
+        );
+    }
+
+    return $blockContent;
 }
 
 /**
@@ -159,7 +173,8 @@ function fp_admin_menu(): void
 function fp_admin_print_footer_scripts(): void
 {
     wp_enqueue_script('fp-main-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-main.js');
-    wp_enqueue_script('fp-options-script', FLARE_PRESS_PATH . 'includes/dist/main/scripts/fp-options.js');
+    wp_enqueue_script('fp-options-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-options.js');
+    wp_enqueue_script('fp-post-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-post.js');
 }
 
 /**

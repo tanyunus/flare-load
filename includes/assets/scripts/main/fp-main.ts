@@ -129,9 +129,9 @@ function handleMediaLibraryListView(): void {
     });
 }
 
-function handleUploadSwitcherElementForMediaModal(mediaLibraryMonitor: FpMediaLibraryMonitor): void {
+function handleUploadSwitcherElementForMediaModal(): void {
     // Watch for media modal to open
-    const observer = new MutationObserver((mutations) => {
+    const observer = new MutationObserver(() => {
         const mediaModal = document.querySelector<HTMLElement>('.media-modal');
         if (mediaModal && mediaModal.style.display !== 'none') {
             // Check if upload view is active
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Then handle the UI
         handleUploadSwitcherElement();
 
-        handleUploadSwitcherElementForMediaModal(mediaLibraryMonitor);
+        handleUploadSwitcherElementForMediaModal();
 
         window.addEventListener('fpMediaLibrary:cfImageElementFound', () => {
             addCfBadge(mediaLibraryMonitor.getCfImageAttachmentsWithElements());

@@ -1,5 +1,35 @@
-// Media library monitor
-class FpMediaLibraryMonitor {
+import type {
+    WordPressMedia,           // Used in hookMediaGrid() and hookAttachmentViews()
+    WordPressGlobal,          // Used in window.wp type checking throughout
+    PluploadFile,             // Used in getUploadParams() and callbacks
+    PluploadUploader,         // Used in hookExistingUploader() and uploader instances
+    WordPressUploaderInstance,// Used in hookUploader() for 'this' context
+    AttachmentData,           // Used in attachments Map and methods
+    CfImageData,              // Used in cfImageAttachments Map
+    UploadParams,             // Used in uploadParams property
+    DynamicParamsCallback,    // Used in uploadParamsCallbacks array
+    UploadResponse,           // Used in FileUploaded event handler
+    AjaxResponse,             // Used in processAjaxResponse()
+    EventDetail,              // Used in emitEvent()
+    RefreshResult,            // Return type of refreshCfImageElements()
+    StatsResult               // Return type of getStats()
+} from '../types/types';
+
+export default class FpMediaLibraryMonitor {
+    private attachments: Map<string | number, AttachmentData>;
+    private pendingThumbnails: Map<string | number, any>;
+    private cfImageAttachments: Map<string | number, CfImageData>;
+    private uploadParams: UploadParams;
+    private uploadParamsCallbacks: DynamicParamsCallback[];
+    private initialized: boolean;
+    private existingUploaderHooked: boolean;
+    private uploaderPrototypeHooked: boolean;
+    private readonly isMediaLibraryPage: boolean;
+    private readonly isMediaNewPage: boolean;
+    private debug: boolean;
+    private gridObserver?: MutationObserver;
+    public ready: Promise<boolean>;
+
     constructor() {
         this.attachments = new Map();
         this.pendingThumbnails = new Map();
@@ -8,13 +38,14 @@ class FpMediaLibraryMonitor {
         this.uploadParamsCallbacks = [];
         this.initialized = false;
         this.existingUploaderHooked = false;
-        this.uploaderPrototypeHooked = false; // ADD THIS
+        this.uploaderPrototypeHooked = false;
         this.isMediaLibraryPage = window.location.pathname.includes('upload.php');
         this.isMediaNewPage = window.location.pathname.includes('media-new.php');
+        this.debug = false;
         this.ready = this.init();
     }
 
-    async init() {
+    private async init(): Promise<boolean> {
         try {
             console.log('[FP] Initializing on:', window.location.pathname);
 
@@ -25,7 +56,7 @@ class FpMediaLibraryMonitor {
             if (this.isMediaLibraryPage) {
                 await this.initForMediaLibraryPage();
             } else if (this.isMediaNewPage) {
-                await this.initForMediaNewPage(); // Don't wait for components
+                await this.initForMediaNewPage();
             } else {
                 await this.initForMediaModal();
             }
@@ -41,10 +72,13 @@ class FpMediaLibraryMonitor {
         }
     }
 
-    // New method to modify upload form data
-    modifyUploadFormData(customParams = {}, dynamicParamsCallback = null) {
+    // Method to modify upload form data
+    public modifyUploadFormData(
+        customParams: UploadParams = {},
+        dynamicParamsCallback?: DynamicParamsCallback | null
+    ): void {
         // Store static params
-        this.uploadParams = {...this.uploadParams, ...customParams};
+        this.uploadParams = { ...this.uploadParams, ...customParams };
 
         // Store dynamic params callback if provided
         if (dynamicParamsCallback && typeof dynamicParamsCallback === 'function') {
@@ -55,8 +89,8 @@ class FpMediaLibraryMonitor {
     }
 
     // Method to get all upload params for a file
-    getUploadParams(file) {
-        let params = {...this.uploadParams};
+    private getUploadParams(file: PluploadFile): Record<string, any> {
+        let params: Record<string, any> = { ...this.uploadParams };
 
         // Apply all dynamic callbacks
         this.uploadParamsCallbacks.forEach((callback, index) => {
@@ -64,7 +98,7 @@ class FpMediaLibraryMonitor {
                 const dynamicParams = callback(file);
                 console.log(`[FP] Dynamic callback ${index} returned:`, dynamicParams);
                 if (dynamicParams) {
-                    params = {...params, ...dynamicParams};
+                    params = { ...params, ...dynamicParams };
                 }
             } catch (e) {
                 console.error('[FP] Error in upload params callback:', e);
@@ -85,13 +119,13 @@ class FpMediaLibraryMonitor {
     }
 
     // Clear all custom upload parameters
-    clearUploadParams() {
+    public clearUploadParams(): void {
         this.uploadParams = {};
         this.uploadParamsCallbacks = [];
         console.log('[FP] Upload params cleared');
     }
 
-    hookUploader() {
+    private hookUploader(): void {
         if (!window.wp?.Uploader) {
             console.log('[FP] wp.Uploader not available yet');
             return;
@@ -106,10 +140,10 @@ class FpMediaLibraryMonitor {
         const monitor = this;
 
         // Store original init
-        const originalInit = window.wp.Uploader.prototype.init;
+        const originalInit = window.wp?.Uploader.prototype.init;
 
-        window.wp.Uploader.prototype.init = function () {
-            const ret = originalInit.apply(this, arguments);
+        window.wp.Uploader.prototype.init = function (this: WordPressUploaderInstance) {
+            const ret = originalInit.apply(this, arguments as any);
 
             console.log('[FP] Uploader initialized');
 
@@ -119,12 +153,12 @@ class FpMediaLibraryMonitor {
             if (!this._fpHooked) {
                 this._fpHooked = true;
 
-                this.uploader.bind('Init', (up) => {
+                this.uploader.bind('Init', (up: PluploadUploader) => {
                     console.log('[FP] Plupload initialized');
                 });
 
                 // DON'T unbind - just add our handler
-                this.uploader.bind('BeforeUpload', (up, file) => {
+                this.uploader.bind('BeforeUpload', (up: PluploadUploader, file: PluploadFile) => {
                     const customParams = monitor.getUploadParams(file);
 
                     up.settings.multipart_params = {
@@ -140,15 +174,15 @@ class FpMediaLibraryMonitor {
                     });
                 });
 
-                this.uploader.bind('FilesAdded', (up, files) => {
+                this.uploader.bind('FilesAdded', (up: PluploadUploader, files: PluploadFile[]) => {
                     console.log('[FP] Files added:', files.length);
-                    monitor.emitEvent('filesAdded', {files});
+                    monitor.emitEvent('filesAdded', { files });
                 });
 
-                this.uploader.bind('FileUploaded', (up, file, response) => {
+                this.uploader.bind('FileUploaded', (up: PluploadUploader, file: PluploadFile, response: any) => {
                     console.log('[FP] File uploaded:', file.name);
                     try {
-                        const data = JSON.parse(response.response);
+                        const data: UploadResponse = JSON.parse(response.response);
                         if (data.success && data.data) {
                             if (data.data.fp_cf_image_id) {
                                 monitor.checkAndStoreCfImage(data.data);
@@ -160,7 +194,7 @@ class FpMediaLibraryMonitor {
                     }
                 });
 
-                this.uploader.bind('UploadComplete', (up, files) => {
+                this.uploader.bind('UploadComplete', (up: PluploadUploader, files: PluploadFile[]) => {
                     console.log('[FP] Upload complete:', files.length);
                     monitor.emitEvent('uploadComplete', {
                         count: files.length,
@@ -179,7 +213,7 @@ class FpMediaLibraryMonitor {
         }
     }
 
-    hookExistingUploader(uploader) {
+    private hookExistingUploader(uploader: PluploadUploader): void {
         const monitor = this;
 
         // Check if already hooked
@@ -192,7 +226,7 @@ class FpMediaLibraryMonitor {
         uploader._fpHooked = true;
 
         // DON'T unbind - just add our handlers
-        uploader.bind('BeforeUpload', (up, file) => {
+        uploader.bind('BeforeUpload', (up: PluploadUploader, file: PluploadFile) => {
             const customParams = monitor.getUploadParams(file);
 
             up.settings.multipart_params = {
@@ -208,15 +242,15 @@ class FpMediaLibraryMonitor {
             });
         });
 
-        uploader.bind('FilesAdded', (up, files) => {
+        uploader.bind('FilesAdded', (up: PluploadUploader, files: PluploadFile[]) => {
             console.log('[FP] Files added to existing uploader:', files.length);
-            monitor.emitEvent('filesAdded', {files});
+            monitor.emitEvent('filesAdded', { files });
         });
 
-        uploader.bind('FileUploaded', (up, file, response) => {
+        uploader.bind('FileUploaded', (up: PluploadUploader, file: PluploadFile, response: any) => {
             console.log('[FP] File uploaded via existing uploader:', file.name);
             try {
-                const data = JSON.parse(response.response);
+                const data: UploadResponse = JSON.parse(response.response);
                 if (data.success && data.data) {
                     if (data.data.fp_cf_image_id) {
                         monitor.checkAndStoreCfImage(data.data);
@@ -228,7 +262,7 @@ class FpMediaLibraryMonitor {
             }
         });
 
-        uploader.bind('UploadComplete', (up, files) => {
+        uploader.bind('UploadComplete', (up: PluploadUploader, files: PluploadFile[]) => {
             console.log('[FP] Upload complete:', files.length);
             monitor.emitEvent('uploadComplete', {
                 count: files.length,
@@ -237,12 +271,12 @@ class FpMediaLibraryMonitor {
         });
     }
 
-    setupUploaderHooksWhenReady() {
+    private setupUploaderHooksWhenReady(): void {
         const monitor = this;
         let attemptCount = 0;
         const maxAttempts = 100; // Try for 10 seconds
 
-        const tryHook = () => {
+        const tryHook = (): boolean => {
             attemptCount++;
 
             // Check if wp.Uploader exists
@@ -276,7 +310,7 @@ class FpMediaLibraryMonitor {
         this.observeFileInput();
     }
 
-    observeFileInput() {
+    private observeFileInput(): void {
         const monitor = this;
 
         // Watch for the plupload container to be created
@@ -308,15 +342,13 @@ class FpMediaLibraryMonitor {
         }, 15000);
     }
 
-    // ... rest of the methods remain the same ...
-
-    hookAjaxResponses() {
+    private hookAjaxResponses(): void {
         // Hook into jQuery AJAX if available
         if (window.jQuery) {
-            jQuery(document).ajaxComplete((event, xhr, settings) => {
+            window.jQuery(document).ajaxComplete((event: any, xhr: any, settings: any) => {
                 if (settings.url && settings.url.includes('admin-ajax.php')) {
                     try {
-                        const response = JSON.parse(xhr.responseText);
+                        const response: AjaxResponse = JSON.parse(xhr.responseText);
                         this.processAjaxResponse(response);
                     } catch (e) {
                         // Not JSON or parsing failed
@@ -327,7 +359,9 @@ class FpMediaLibraryMonitor {
 
         // Also hook into native fetch
         const originalFetch = window.fetch;
-        window.fetch = async (...args) => {
+        const monitor = this;
+
+        window.fetch = async function (...args: Parameters<typeof fetch>): Promise<Response> {
             const response = await originalFetch(...args);
 
             // Check if it's admin-ajax
@@ -335,8 +369,8 @@ class FpMediaLibraryMonitor {
                 // Clone response to read it without consuming
                 const clone = response.clone();
                 try {
-                    const data = await clone.json();
-                    this.processAjaxResponse(data);
+                    const data: AjaxResponse = await clone.json();
+                    monitor.processAjaxResponse(data);
                 } catch (e) {
                     // Not JSON
                 }
@@ -348,20 +382,23 @@ class FpMediaLibraryMonitor {
         // Hook into XMLHttpRequest
         const originalOpen = XMLHttpRequest.prototype.open;
         const originalSend = XMLHttpRequest.prototype.send;
-        const monitor = this;
 
-        XMLHttpRequest.prototype.open = function (method, url) {
-            this._url = url;
-            return originalOpen.apply(this, arguments);
+        XMLHttpRequest.prototype.open = function (
+            this: XMLHttpRequest & { _url?: string },
+            method: string,
+            url: string | URL
+        ) {
+            this._url = url.toString();
+            return originalOpen.apply(this, arguments as any);
         };
 
-        XMLHttpRequest.prototype.send = function () {
+        XMLHttpRequest.prototype.send = function (this: XMLHttpRequest & { _url?: string }) {
             const xhr = this;
 
             if (xhr._url && xhr._url.includes('admin-ajax.php')) {
                 xhr.addEventListener('load', function () {
                     try {
-                        const response = JSON.parse(xhr.responseText);
+                        const response: AjaxResponse = JSON.parse(xhr.responseText);
                         monitor.processAjaxResponse(response);
                     } catch (e) {
                         // Not JSON
@@ -369,18 +406,18 @@ class FpMediaLibraryMonitor {
                 });
             }
 
-            return originalSend.apply(this, arguments);
+            return originalSend.apply(this, arguments as any);
         };
     }
 
-    processAjaxResponse(response) {
+    private processAjaxResponse(response: AjaxResponse): void {
         if (!response) return;
 
         // Check for query-attachments response
         if (response.success && response.data) {
             // Handle array of attachments
             if (Array.isArray(response.data)) {
-                response.data.forEach(attachment => {
+                response.data.forEach((attachment: AttachmentData) => {
                     this.checkAndStoreCfImage(attachment);
                 });
             }
@@ -392,11 +429,11 @@ class FpMediaLibraryMonitor {
 
         // Also check if response itself is an attachment
         if (response.id) {
-            this.checkAndStoreCfImage(response);
+            this.checkAndStoreCfImage(response as AttachmentData);
         }
     }
 
-    checkAndStoreCfImage(attachment) {
+    private checkAndStoreCfImage(attachment: AttachmentData): void {
         if (attachment.fp_cf_image_id) {
             console.log('[FP] Found attachment with fp_cf_image_id:', attachment.id, attachment.fp_cf_image_id);
 
@@ -410,7 +447,7 @@ class FpMediaLibraryMonitor {
 
             // Update main attachments map if exists
             if (this.attachments.has(attachment.id)) {
-                const existing = this.attachments.get(attachment.id);
+                const existing = this.attachments.get(attachment.id)!;
                 existing.fp_cf_image_id = attachment.fp_cf_image_id;
                 this.attachments.set(attachment.id, existing);
             } else {
@@ -434,7 +471,7 @@ class FpMediaLibraryMonitor {
         }
     }
 
-    findCfImageElement(attachmentId) {
+    private findCfImageElement(attachmentId: string | number): HTMLElement | null {
         // Try different selectors
         const selectors = [
             `[data-id="${attachmentId}"]`,
@@ -443,9 +480,9 @@ class FpMediaLibraryMonitor {
             `.attachment-${attachmentId}`
         ];
 
-        let element = null;
+        let element: HTMLElement | null = null;
         for (const selector of selectors) {
-            element = document.querySelector(selector);
+            element = document.querySelector<HTMLElement>(selector);
             if (element) break;
         }
 
@@ -466,7 +503,7 @@ class FpMediaLibraryMonitor {
             });
 
             // Add a data attribute to mark it
-            element.setAttribute('data-fp-cf-image-id', this.cfImageAttachments.get(attachmentId)?.cfImageId);
+            element.setAttribute('data-fp-cf-image-id', this.cfImageAttachments.get(attachmentId)?.cfImageId || '');
 
             return element;
         }
@@ -474,21 +511,31 @@ class FpMediaLibraryMonitor {
         return null;
     }
 
-    getCfImageAttachments() {
+    public getCfImageAttachments(): CfImageData[] {
         return Array.from(this.cfImageAttachments.values());
     }
 
-    getCfImageAttachment(attachmentId) {
+    public getCfImageAttachment(attachmentId: string | number): CfImageData | undefined {
         return this.cfImageAttachments.get(attachmentId);
     }
 
-    getCfImageAttachmentsWithElements() {
-        const results = [];
+    public getCfImageAttachmentsWithElements(): Array<{
+        attachmentId: string | number;
+        cfImageId: string;
+        element: HTMLElement;
+        data: any;
+    }> {
+        const results: Array<{
+            attachmentId: string | number;
+            cfImageId: string;
+            element: HTMLElement;
+            data: any;
+        }> = [];
 
         this.cfImageAttachments.forEach((data, attachmentId) => {
             // Try to find element if not already found
             if (!data.element) {
-                data.element = this.findCfImageElement(attachmentId);
+                data.element = this.findCfImageElement(attachmentId) || undefined;
             }
 
             if (data.element) {
@@ -504,11 +551,11 @@ class FpMediaLibraryMonitor {
         return results;
     }
 
-    refreshCfImageElements() {
+    public refreshCfImageElements(): RefreshResult {
         console.log('[FP] Refreshing CF image elements...');
 
-        const found = [];
-        const notFound = [];
+        const found: (string | number)[] = [];
+        const notFound: (string | number)[] = [];
 
         this.cfImageAttachments.forEach((data, attachmentId) => {
             const element = this.findCfImageElement(attachmentId);
@@ -530,7 +577,7 @@ class FpMediaLibraryMonitor {
         };
     }
 
-    waitForCfImageElement(attachmentId, timeout = 5000) {
+    public waitForCfImageElement(attachmentId: string | number, timeout = 5000): Promise<HTMLElement> {
         return new Promise((resolve, reject) => {
             // Check if already exists
             const existing = this.findCfImageElement(attachmentId);
@@ -541,7 +588,7 @@ class FpMediaLibraryMonitor {
 
             const startTime = Date.now();
 
-            const check = () => {
+            const check = (): void => {
                 const element = this.findCfImageElement(attachmentId);
                 if (element) {
                     resolve(element);
@@ -556,7 +603,7 @@ class FpMediaLibraryMonitor {
         });
     }
 
-    async initForMediaLibraryPage() {
+    private async initForMediaLibraryPage(): Promise<void> {
         // Wait for wp.media to be available
         await this.waitForMediaComponents();
 
@@ -575,13 +622,13 @@ class FpMediaLibraryMonitor {
         }, 500);
     }
 
-    async initForMediaModal() {
+    private async initForMediaModal(): Promise<void> {
         await this.waitForMediaComponents();
         this.hookAttachmentViews();
         this.hookUploader();
     }
 
-    async initForMediaNewPage() {
+    private async initForMediaNewPage(): Promise<void> {
         console.log('[FP] Initializing for media-new.php');
 
         // Don't wait for components, hook them when they appear
@@ -590,11 +637,11 @@ class FpMediaLibraryMonitor {
         console.log('[FP] media-new.php initialization complete (uploader will be hooked when available)');
     }
 
-    waitForMediaComponents(timeout = 10000) {
+    private waitForMediaComponents(timeout = 10000): Promise<void> {
         return new Promise((resolve, reject) => {
             const startTime = Date.now();
 
-            const check = () => {
+            const check = (): void => {
                 // Note: media-new.php doesn't use this anymore
                 if (this.isMediaLibraryPage) {
                     if (window.wp?.media && window.wp?.Uploader) {
@@ -605,7 +652,9 @@ class FpMediaLibraryMonitor {
                         setTimeout(check, 100);
                     }
                 } else {
-                    if (window.wp?.media?.view?.Attachment && window.wp?.Uploader) {
+                    if (window.wp?.media && typeof window.wp?.media === 'object' &&
+                        (window.wp?.media as WordPressMedia).view?.Attachment &&
+                        window.wp?.Uploader) {
                         resolve();
                     } else if (Date.now() - startTime > timeout) {
                         reject(new Error('Timeout waiting for media components'));
@@ -619,32 +668,35 @@ class FpMediaLibraryMonitor {
         });
     }
 
-    hookMediaGrid() {
-        if (window.wp?.media?.view?.AttachmentsBrowser) {
-            const originalBrowser = window.wp.media.view.AttachmentsBrowser;
-            const monitor = this;
+    private hookMediaGrid(): void {
+        if (window.wp?.media && typeof window.wp?.media === 'object') {
+            const wpMedia = window.wp?.media as WordPressMedia;
+            if (wpMedia.view?.AttachmentsBrowser) {
+                const originalBrowser = wpMedia.view.AttachmentsBrowser;
+                const monitor = this;
 
-            window.wp.media.view.AttachmentsBrowser = originalBrowser.extend({
-                initialize: function () {
-                    originalBrowser.prototype.initialize.apply(this, arguments);
-                    console.log('[FP] AttachmentsBrowser initialized');
+                wpMedia.view.AttachmentsBrowser = originalBrowser.extend({
+                    initialize: function (this: any) {
+                        originalBrowser.prototype.initialize.apply(this, arguments);
+                        console.log('[FP] AttachmentsBrowser initialized');
 
-                    if (this.collection) {
-                        monitor.hookCollection(this.collection);
+                        if (this.collection) {
+                            monitor.hookCollection(this.collection);
+                        }
                     }
-                }
-            });
-        }
+                });
+            }
 
-        if (window.wp?.media?.view?.Attachment) {
-            this.hookAttachmentViews();
+            if (wpMedia.view?.Attachment) {
+                this.hookAttachmentViews();
+            }
         }
     }
 
-    hookCollection(collection) {
+    private hookCollection(collection: any): void {
         console.log('[FP] Hooking into collection');
 
-        collection.on('add', (model) => {
+        collection.on('add', (model: any) => {
             console.log('[FP] Model added to collection:', model.get('id'));
 
             // Check for fp_cf_image_id
@@ -683,15 +735,20 @@ class FpMediaLibraryMonitor {
         }
     }
 
-    hookAttachmentViews() {
-        const originalAttachment = window.wp.media.view.Attachment;
+    private hookAttachmentViews(): void {
+        if (!window.wp?.media || typeof window.wp?.media !== 'object') return;
+
+        const wpMedia = window.wp?.media as WordPressMedia;
+        if (!wpMedia.view?.Attachment) return;
+
+        const originalAttachment = wpMedia.view.Attachment;
         const monitor = this;
 
-        window.wp.media.view.Attachment = originalAttachment.extend({
-            initialize: function () {
+        wpMedia.view.Attachment = originalAttachment.extend({
+            initialize: function (this: any) {
                 originalAttachment.prototype.initialize.apply(this, arguments);
 
-                const attachmentData = {
+                const attachmentData: AttachmentData = {
                     id: this.model.get('id'),
                     url: this.model.get('url'),
                     title: this.model.get('title'),
@@ -718,7 +775,7 @@ class FpMediaLibraryMonitor {
                 });
             },
 
-            render: function () {
+            render: function (this: any) {
                 const result = originalAttachment.prototype.render.apply(this, arguments);
 
                 setTimeout(() => {
@@ -730,8 +787,8 @@ class FpMediaLibraryMonitor {
         });
     }
 
-    processExistingAttachments() {
-        const attachments = document.querySelectorAll('.attachment');
+    private processExistingAttachments(): void {
+        const attachments = document.querySelectorAll<HTMLElement>('.attachment');
         console.log(`[FP] Found ${attachments.length} existing attachments`);
 
         attachments.forEach(element => {
@@ -739,27 +796,27 @@ class FpMediaLibraryMonitor {
             if (id) {
                 // Check if this is a CF image attachment
                 if (this.cfImageAttachments.has(id)) {
-                    const cfData = this.cfImageAttachments.get(id);
+                    const cfData = this.cfImageAttachments.get(id)!;
                     cfData.element = element;
                     this.cfImageAttachments.set(id, cfData);
                     element.setAttribute('data-fp-cf-image-id', cfData.cfImageId);
                 }
 
-                const img = element.querySelector('img');
+                const img = element.querySelector<HTMLImageElement>('img');
                 if (img) {
                     if (img.complete) {
                         this.handleImageLoaded(id, img);
                     } else {
                         img.addEventListener('load', () => {
                             this.handleImageLoaded(id, img);
-                        }, {once: true});
+                        }, { once: true });
                     }
                 }
             }
         });
     }
 
-    trackRenderedAttachment(view) {
+    private trackRenderedAttachment(view: any): void {
         const id = view.model.get('id');
 
         // Check if this is a CF image
@@ -777,7 +834,7 @@ class FpMediaLibraryMonitor {
             }, 100);
         }
 
-        const img = view.$el.find('img')[0] || view.el.querySelector('img');
+        const img: HTMLImageElement | null = view.$el?.find('img')[0] || view.el.querySelector('img');
 
         if (img) {
             if (img.complete) {
@@ -785,21 +842,21 @@ class FpMediaLibraryMonitor {
             } else {
                 img.addEventListener('load', () => {
                     this.handleImageLoaded(id, img);
-                }, {once: true});
+                }, { once: true });
             }
         }
     }
 
-    observeMediaGrid() {
+    private observeMediaGrid(): void {
         const containers = [
             '.attachments-browser .attachments',
             '.media-frame-content .attachments',
             '#wp-media-grid .attachments'
         ];
 
-        let targetNode = null;
+        let targetNode: HTMLElement | null = null;
         for (const selector of containers) {
-            targetNode = document.querySelector(selector);
+            targetNode = document.querySelector<HTMLElement>(selector);
             if (targetNode) break;
         }
 
@@ -814,37 +871,40 @@ class FpMediaLibraryMonitor {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
-                    if (node.nodeType === 1 && node.classList?.contains('attachment')) {
-                        const id = node.getAttribute('data-id');
+                    if (node.nodeType === 1 && (node as HTMLElement).classList?.contains('attachment')) {
+                        const element = node as HTMLElement;
+                        const id = element.getAttribute('data-id');
                         console.log('[FP] New attachment in DOM:', id);
 
-                        // Check if it's a CF image attachment
-                        if (this.cfImageAttachments.has(id)) {
-                            const cfData = this.cfImageAttachments.get(id);
-                            cfData.element = node;
-                            this.cfImageAttachments.set(id, cfData);
-                            node.setAttribute('data-fp-cf-image-id', cfData.cfImageId);
+                        if (id) {
+                            // Check if it's a CF image attachment
+                            if (this.cfImageAttachments.has(id)) {
+                                const cfData = this.cfImageAttachments.get(id)!;
+                                cfData.element = element;
+                                this.cfImageAttachments.set(id, cfData);
+                                element.setAttribute('data-fp-cf-image-id', cfData.cfImageId);
 
-                            this.emitEvent('cfImageElementAdded', {
+                                this.emitEvent('cfImageElementAdded', {
+                                    attachmentId: id,
+                                    cfImageId: cfData.cfImageId,
+                                    element: element
+                                });
+                            }
+
+                            this.emitEvent('attachmentAddedToDOM', {
                                 attachmentId: id,
-                                cfImageId: cfData.cfImageId,
-                                element: node
+                                element: element
                             });
-                        }
 
-                        this.emitEvent('attachmentAddedToDOM', {
-                            attachmentId: id,
-                            element: node
-                        });
-
-                        const img = node.querySelector('img');
-                        if (img) {
-                            if (img.complete) {
-                                this.handleImageLoaded(id, img);
-                            } else {
-                                img.addEventListener('load', () => {
+                            const img = element.querySelector<HTMLImageElement>('img');
+                            if (img) {
+                                if (img.complete) {
                                     this.handleImageLoaded(id, img);
-                                }, {once: true});
+                                } else {
+                                    img.addEventListener('load', () => {
+                                        this.handleImageLoaded(id, img);
+                                    }, { once: true });
+                                }
                             }
                         }
                     }
@@ -860,7 +920,7 @@ class FpMediaLibraryMonitor {
         this.gridObserver = observer;
     }
 
-    handleViewReady(view) {
+    private handleViewReady(view: any): void {
         const id = view.model.get('id');
         const attachment = this.attachments.get(id);
 
@@ -871,12 +931,12 @@ class FpMediaLibraryMonitor {
         this.trackThumbnail(view);
     }
 
-    trackThumbnail(view) {
-        const img = view.el.querySelector('img');
+    private trackThumbnail(view: any): void {
+        const img: HTMLImageElement | null = view.el.querySelector('img');
         const id = view.model.get('id');
 
         if (!img) {
-            this.emitEvent('thumbnailMissing', {attachmentId: id});
+            this.emitEvent('thumbnailMissing', { attachmentId: id });
             return;
         }
 
@@ -885,12 +945,12 @@ class FpMediaLibraryMonitor {
         } else {
             img.addEventListener('load', () => {
                 this.handleImageLoaded(id, img);
-            }, {once: true});
+            }, { once: true });
         }
     }
 
-    handleImageLoaded(id, img) {
-        const attachment = this.attachments.get(id) || {};
+    private handleImageLoaded(id: string | number, img: HTMLImageElement): void {
+        const attachment = this.attachments.get(id) || {} as AttachmentData;
         attachment.id = id;
         attachment.thumbnailLoaded = Date.now();
         attachment.thumbnailUrl = img.src;
@@ -908,11 +968,11 @@ class FpMediaLibraryMonitor {
         });
     }
 
-    handleLibraryReset(collection) {
+    private handleLibraryReset(collection: any): void {
         const models = collection.models || [];
         console.log(`[FP] Library reset with ${models.length} items`);
 
-        const attachments = models.map(model => ({
+        const attachments = models.map((model: any) => ({
             id: model.get('id'),
             title: model.get('title'),
             url: model.get('url'),
@@ -921,7 +981,7 @@ class FpMediaLibraryMonitor {
         }));
 
         // Check for CF images
-        attachments.forEach(att => {
+        attachments.forEach((att: AttachmentData) => {
             if (att.fp_cf_image_id) {
                 this.checkAndStoreCfImage(att);
             }
@@ -932,13 +992,13 @@ class FpMediaLibraryMonitor {
             attachments
         });
 
-        models.forEach(model => {
+        models.forEach((model: any) => {
             this.processModel(model);
         });
     }
 
-    handleLibraryAdd(model) {
-        const data = {
+    private handleLibraryAdd(model: any): void {
+        const data: AttachmentData = {
             id: model.get('id'),
             title: model.get('title'),
             url: model.get('url'),
@@ -953,8 +1013,8 @@ class FpMediaLibraryMonitor {
         this.processModel(model);
     }
 
-    handleFileUploaded(data) {
-        const attachment = {
+    private handleFileUploaded(data: AttachmentData & { id: string | number }): void {
+        const attachment: AttachmentData = {
             id: data.id,
             url: data.url,
             filename: data.filename,
@@ -967,7 +1027,7 @@ class FpMediaLibraryMonitor {
         this.emitEvent('fileUploaded', attachment);
     }
 
-    processModel(model) {
+    private processModel(model: any): void {
         const id = model.get('id');
         if (!this.attachments.has(id)) {
             this.attachments.set(id, {
@@ -981,7 +1041,7 @@ class FpMediaLibraryMonitor {
         }
     }
 
-    emitEvent(eventName, detail) {
+    private emitEvent(eventName: string, detail: Partial<EventDetail>): void {
         const event = new CustomEvent(`fpMediaLibrary:${eventName}`, {
             detail: {
                 ...detail,
@@ -995,281 +1055,33 @@ class FpMediaLibraryMonitor {
         }
     }
 
-    getAttachment(id) {
+    public getAttachment(id: string | number): AttachmentData | undefined {
         return this.attachments.get(id);
     }
 
-    getAllAttachments() {
+    public getAllAttachments(): AttachmentData[] {
         return Array.from(this.attachments.values());
     }
 
-    enableDebug() {
+    public enableDebug(): void {
         this.debug = true;
     }
 
-    disableDebug() {
+    public disableDebug(): void {
         this.debug = false;
     }
 
-    getStats() {
+    public getStats(): StatsResult {
         return {
             totalAttachments: this.attachments.size,
             cfImageAttachments: this.cfImageAttachments.size,
             uploadParams: this.uploadParams,
             uploadCallbacks: this.uploadParamsCallbacks.length,
             isMediaLibraryPage: this.isMediaLibraryPage,
-            isMediaNewPage: this.isMediaNewPage,  // ADD THIS LINE
+            isMediaNewPage: this.isMediaNewPage,
             initialized: this.initialized
         };
     }
 }
 
-// Add cf badge function
-function addCfBadge(cfImageElements) {
-    cfImageElements.forEach(cfImageElement => {
-        cfImageElement.element.classList.add('fp-cf-badge');
-    });
-}
-
-// Upload form data modifier
-function modifyUploadFormData(mediaLibraryMonitor) {
-    // Clear any existing params first
-    mediaLibraryMonitor.clearUploadParams();
-
-    // Add a dynamic callback that always checks the current checkbox state
-    mediaLibraryMonitor.modifyUploadFormData({}, (file) => {
-        const checkbox = document.querySelector('#fp_upload_switcher');
-        const value = checkbox ? +checkbox.checked : 0;
-        console.log('[FP] Reading checkbox state:', value, 'Checkbox element:', checkbox);
-
-        return {
-            fp_upload_to_cf: value
-        };
-    });
-}
-
-// Upload switcher element creator function
-function createUploadSwitcherElement(additionalClassName = '') {
-    const checkboxId = 'fp_upload_switcher';
-
-    const labelElement = document.createElement('label');
-    labelElement.className = 'fp-upload-switcher' + ' ' + additionalClassName;
-    labelElement.htmlFor = 'fp_upload_switcher';
-
-    const checkBoxElement = document.createElement('input');
-    checkBoxElement.name = checkboxId;
-    checkBoxElement.id = checkboxId;
-    checkBoxElement.type = 'checkbox';
-
-    labelElement.appendChild(checkBoxElement);
-    labelElement.innerHTML += 'Upload to Cloudflare';
-
-    return labelElement;
-}
-
-// Append upload switcher element right side of
-// add media button in media library page (upload.php)
-function appendSwitcherToSideOfAddMediaButton(uploadSwitcherElement) {
-    const addMediaFileButton = document.querySelector(`#wp-media-grid > a.page-title-action`);
-
-    if (!addMediaFileButton) {
-        return false;
-    }
-
-    addMediaFileButton.after(uploadSwitcherElement);
-
-    addCfUploadIndicatorToWindow();
-
-    return true;
-}
-
-function appendSwitcherToSideOfTitle(uploadSwitcherElement) {
-    const mediaNewPageTitle = document.querySelector('body.media-new-php h1');
-
-    if (!mediaNewPageTitle) {
-        return false;
-    }
-
-    mediaNewPageTitle.after(uploadSwitcherElement);
-
-    addCfUploadIndicatorToWindow();
-
-    return true;
-}
-
-function handleUploadSwitcherElement() {
-    const uploadSwitcherElement = createUploadSwitcherElement();
-
-    if (appendSwitcherToSideOfAddMediaButton(uploadSwitcherElement)) {
-        return true;
-    }
-
-    return appendSwitcherToSideOfTitle(uploadSwitcherElement);
-}
-
-function handleMediaLibaryListView() {
-    const mediaTable = document.querySelector('.wp-list-table.media');
-
-    if (!mediaTable) {
-        return;
-    }
-
-    const rowArray = Array.from(mediaTable.rows);
-
-    rowArray.forEach(row => {
-        const newRowDetails = {
-            fileName: "",
-            url: ""
-        }
-
-        const cellArray = Array.from(row.cells);
-        cellArray.forEach(cell => {
-            if (cell.classList.contains('fp_cf_badge_column') && cell.innerHTML) {
-                const cfLogoWrapper = cell.querySelector('[data-fp-file-name][data-fp-url]');
-
-                if (cfLogoWrapper) {
-                    newRowDetails.fileName = cfLogoWrapper.getAttribute('data-fp-file-name');
-                    newRowDetails.url = cfLogoWrapper.getAttribute('data-fp-url');
-                }
-
-                const titleCell = row.querySelector('.title.column-title[data-colname="File"]');
-                const fileNameElement = titleCell.querySelector('.filename');
-                const copyAttachmentButton = titleCell.querySelector('.copy-attachment-url');
-
-                let screenReaderText = titleCell.querySelector('.screen-reader-text');
-                screenReaderText = screenReaderText.cloneNode(true);
-
-                fileNameElement.innerHTML = "";
-                fileNameElement.appendChild(screenReaderText);
-                fileNameElement.innerHTML += newRowDetails.fileName;
-
-                copyAttachmentButton.dataset.clipboardText = newRowDetails.url;
-            }
-        })
-    })
-}
-
-function handleUploadSwitcherElementForMediaModal(mediaLibraryMonitor) {
-    // Watch for media modal to open
-    const observer = new MutationObserver((mutations) => {
-        const mediaModal = document.querySelector('.media-modal');
-        if (mediaModal && mediaModal.style.display !== 'none') {
-            // Check if upload view is active
-            const uploadView = mediaModal.querySelector('.media-frame-content .uploader-inline');
-            if (uploadView && uploadView.style.display !== 'none') {
-                appendSwitcherToUploadWindow(mediaModal);
-            }
-        }
-    });
-
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['style', 'class']
-    });
-}
-
-function appendSwitcherToUploadWindow(mediaModal) {
-    if (!mediaModal) {
-        return false;
-    }
-
-    // Check if already exists
-    let existingSwitcher = mediaModal.querySelector('#fp_upload_switcher');
-    if (existingSwitcher) {
-        return true;
-    }
-
-    // Find the upload UI
-    const uploadUI = mediaModal.querySelector('.media-frame-content .uploader-inline-content');
-    if (!uploadUI) {
-        return false;
-    }
-
-    const selectFilesButton = uploadUI.querySelector('button.browser');
-    if (!selectFilesButton) {
-        return false;
-    }
-
-    const uploadSwitcherElement = createUploadSwitcherElement('fp-media-modal-switcher');
-
-    // Insert after the button's parent paragraph
-    const buttonContainer = selectFilesButton.closest('p') || selectFilesButton.parentElement;
-    buttonContainer.after(uploadSwitcherElement);
-
-    addCfUploadIndicatorToWindow();
-
-    return true;
-}
-
-function watchMediaFrameTabs() {
-    // Listen for media frame state changes
-    if (window.wp && window.wp.media) {
-        const originalFrame = window.wp.media;
-
-        window.wp.media = function(options) {
-            const frame = originalFrame(options);
-
-            frame.on('content:render', function() {
-                setTimeout(() => {
-                    const mediaModal = document.querySelector('.media-modal');
-                    if (mediaModal) {
-                        const uploadView = mediaModal.querySelector('.media-frame-content .uploader-inline');
-                        if (uploadView && uploadView.style.display !== 'none') {
-                            appendSwitcherToUploadWindow(mediaModal);
-                        }
-                    }
-                }, 100);
-            });
-
-            return frame;
-        };
-
-        // Copy static properties
-        Object.setPrototypeOf(window.wp.media, originalFrame);
-        Object.keys(originalFrame).forEach(key => {
-            if (!(key in window.wp.media)) {
-                window.wp.media[key] = originalFrame[key];
-            }
-        });
-    }
-}
-
-function addCfUploadIndicatorToWindow() {
-    window.fp_upload_to_cf = 0;
-
-    const newUploadSwitcherElement = document.querySelector('#fp_upload_switcher');
-
-    newUploadSwitcherElement.addEventListener('change', () => {
-        window.fp_upload_to_cf = newUploadSwitcherElement.checked ? 1 : 0;
-    });
-}
-
-// Listen dom load
-document.addEventListener('DOMContentLoaded', () => {
-    handleMediaLibaryListView();
-
-    const mediaLibraryMonitor = new FpMediaLibraryMonitor();
-
-    watchMediaFrameTabs();
-
-    mediaLibraryMonitor.ready.then(async () => {
-        // Set up upload form data modifier once (it will work for all checkboxes)
-        modifyUploadFormData(mediaLibraryMonitor);
-
-        // Then handle the UI
-        handleUploadSwitcherElement();
-
-        handleUploadSwitcherElementForMediaModal(mediaLibraryMonitor);
-
-        window.addEventListener('fpMediaLibrary:cfImageElementFound', () => {
-            addCfBadge(mediaLibraryMonitor.getCfImageAttachmentsWithElements());
-        });
-
-        window.addEventListener('fpMediaLibrary:cfImageElementAdded', () => {
-            addCfBadge(mediaLibraryMonitor.getCfImageAttachmentsWithElements());
-        });
-    });
-});
-
+// Helper functions

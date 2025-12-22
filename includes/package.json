@@ -1,18 +1,17 @@
 {
-  "name": "includes",
+  "name": "flare-press",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "npm run dev:ts & npm run dev:scss",
-    "dev:ts": "tsc --watch",
+    "dev:ts": "node build-dev.js",
     "dev:scss": "sass --watch assets/styles:dist/css",
-    "build": "npm run build:ts && npm run build:scss",
-    "build:ts": "tsc",
-    "build:scss": "sass assets/styles:dist/css",
-    "build:prod": "npm run build:prod:ts && npm run build:prod:scss",
-    "build:prod:ts": "tsc --removeComments --sourceMap false",
-    "build:prod:scss": "sass --style=compressed --no-source-map assets/styles:dist/css"
+    "build:images": "xcopy assets\\images dist\\images /E /I /Y",
+    "build": "npm run build:ts && npm run build:scss && npm run build:images",
+    "build:ts": "node build.js",
+    "build:scss": "sass --style=compressed --no-source-map assets/styles:dist/css",
+    "build:prod": "npm run build"
   },
   "keywords": [],
   "author": "",
@@ -20,7 +19,9 @@
   "type": "commonjs",
   "devDependencies": {
     "@types/node": "^25.0.3",
+    "esbuild": "^0.27.2",
     "sass": "^1.97.1",
+    "terser": "^5.44.1",
     "typescript": "^5.9.3"
   }
 }

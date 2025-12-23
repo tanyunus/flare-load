@@ -1,4 +1,5 @@
 import {SyncVariantsResponse} from "../types/types";
+import RestApi from "../modules/RestApi";
 
 function assertElement<T extends Element>(
     element: Element | null,
@@ -23,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 async function syncVariants(): Promise<string[] | false> {
-    const wpNonce = await getWpNonce();
+    const wpNonce = await RestApi.getWpNonce();
 
     if (!wpNonce) {
         return false;
@@ -51,20 +52,7 @@ async function syncVariants(): Promise<string[] | false> {
     }
 }
 
-async function getWpNonce(): Promise<string | undefined> {
-    try {
-        const response = await fetch('/wp-admin/admin-ajax.php?action=rest-nonce');
 
-        if (response.ok) {
-            return await response.text();
-        }
-
-        return undefined;
-    } catch (error) {
-        console.error('Error getting WP nonce:', error);
-        return undefined;
-    }
-}
 
 function renderNewVariants(variantArray: string[]): string {
     let finalHtml = '';

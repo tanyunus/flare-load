@@ -9,6 +9,11 @@ export interface WordPressMedia {
 export interface WordPressGlobal {
     media?: WordPressMedia | ((options?: any) => any);
     Uploader?: any;
+    apiFetch?: {
+        nonceMiddleware?: {
+            nonce?: string;
+        }
+    }
 }
 
 export interface PluploadFile {
@@ -103,7 +108,15 @@ export interface StatsResult {
 }
 
 export interface SyncVariantsResponse {
-    data: string; // JSON string that needs to be parsed
+    data: string;
+}
+
+export interface GetVariantNamesResponse {
+    data: string;
+}
+
+export interface GetAccountHashResponse {
+    data: string;
 }
 
 export interface WpNonceResponse {

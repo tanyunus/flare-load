@@ -27,4 +27,39 @@ class OptionRestApi
             'data' => $arrKeys,
         ], 200);
     }
+
+    public static function getVariantNames(WP_REST_Request $request): WP_REST_Response {
+        $variantNames = OptionController::getVariantNames();
+
+        if(empty($variantNames)) {
+            return new WP_REST_Response([
+                'error' => true,
+                'message' => 'Error while getting variant names.',
+            ], 500);
+        }
+
+        sort($variantNames);
+        $jsonEncodedVariantNames = stripslashes(wp_json_encode($variantNames));
+
+        return new WP_REST_Response([
+            'success' => true,
+            'data' => $variantNames,
+        ], 200);
+    }
+
+    public static function getAccountHash(WP_REST_Request $request): WP_REST_Response {
+        $accountHash = OptionController::getAccountHash();
+
+        if(empty($accountHash)) {
+            return new WP_REST_Response([
+                'error' => true,
+                'message' => 'Error while getting account hash.',
+            ], 500);
+        }
+
+        return new WP_REST_Response([
+            'success' => true,
+            'data' => $accountHash,
+        ], 200);
+    }
 }

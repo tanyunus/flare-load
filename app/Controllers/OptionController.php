@@ -9,12 +9,10 @@ use FlarePress\Util\Utils;
 
 class OptionController
 {
-    private array $variants;
     private array $variantNames;
 
     public function __construct()
     {
-        $this->variants = self::getVariantsAsArray();
         $this->variantNames = self::getVariantNamesAsArray();
 
         // Add page
@@ -146,7 +144,7 @@ class OptionController
 
     private function renderVariantListField(): void
     {
-        $variantsArray = $this->variantNames;
+        $variantsArray = $this->getVariantNamesAsArray();
 
         if (empty($variantsArray)) {
             $variantsArray = array_keys(self::syncVariants());
@@ -188,7 +186,7 @@ class OptionController
                         'sanitize_callback' => function ($input) {
                             return $this->sanitizeDefaultVariantField($input);
                         },
-                        'default' => $this->variantNames[0]
+                        'default' => $this->getVariantNamesAsArray()[0]
                 )
         );
 
@@ -205,8 +203,8 @@ class OptionController
 
     private function renderDefaultVariantField(): void
     {
-        $currentValue = get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, $this->variantNames[0]);
-        $options = $this->variantNames;
+        $currentValue = get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, $this->getVariantNamesAsArray()[0]);
+        $options = $this->getVariantNamesAsArray();
 
         ?>
         <select name="<?php echo Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME ?>"
@@ -223,7 +221,7 @@ class OptionController
 
     private function sanitizeDefaultVariantField($input): string
     {
-        $allowedValues = $this->variantNames;
+        $allowedValues = $this->getVariantNamesAsArray();
 
         if (in_array($input, $allowedValues, true)) {
             return $input;
@@ -318,7 +316,7 @@ class OptionController
         }
     }
 
-    public static function getVariantsAsArray(): array
+    public static function getVariants(): array
     {
         $variantsAsEncodedString = get_option(Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME);
 
@@ -339,13 +337,15 @@ class OptionController
 
     private function getVariantNamesAsArray(): array
     {
-        $variantOptions = $this->variants;
-
-        if (empty($variantOptions)) {
-            return [];
+        if(empty($this->variantNames)) {
+            $this->variantNames = self::getVariantNames();
         }
 
-        $variantNamesArray = array_keys($variantOptions);
+        return $this->variantNames;
+    }
+
+    public static function getVariantNames(): array {
+        $variantNamesArray = array_keys(self::getVariants());
 
         asort($variantNamesArray);
 
@@ -370,5 +370,9 @@ class OptionController
         }
 
         return $variantsFromCloudflare;
+    }
+
+    public static function getAccountHash(): string {
+        return get_option(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME) ?? '';
     }
 }

@@ -215,7 +215,7 @@ class AttachmentController
 
     public static function getLargestPublicVariant(): string
     {
-        $variants = OptionController::getVariantsAsArray();
+        $variants = OptionController::getVariants();
 
         error_log(print_r($variants, true));
 

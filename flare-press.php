@@ -49,22 +49,47 @@ function flarePressInit(): void
     }
 }
 
+/**
+ * Modify block attributes before they're rendered to contain plugin features.
+ */
 function fp_render_block($blockContent, $block) {
     if ($block['blockName'] !== 'core/image') {
         return $blockContent;
     }
 
-    if (isset($block['attrs']['customOption'])) {
-        $custom_option = $block['attrs']['customOption'];
-        $custom_class = 'custom-option-' . esc_attr($custom_option);
-
-        $block_content = preg_replace(
-            '/class="([^"]*)"/',
-            'class="$1 ' . $custom_class . '"',
-            $blockContent,
-            1
-        );
+    if (empty($block['attrs']['cloudflareVariant'])) {
+        return $blockContent;
     }
+
+    $imageId = $block['attrs']['id'] ?? null;
+
+    if (!$imageId) {
+        return $blockContent;
+    }
+
+    $cfImageId = AttachmentController::getCloudflareIdOfAttachment($imageId);
+
+    if (!$cfImageId) {
+        return $blockContent;
+    }
+
+    $variant = $block['attrs']['cloudflareVariant'];
+    $variantUrl = AttachmentController::getVariantUrl($variant, $cfImageId);
+
+    $blockContent = preg_replace(
+        '/src="[^"]*"/',
+        'src="' . esc_url($variantUrl) . '"',
+        $blockContent,
+        1
+    );
+
+    $variantClass = 'cf-variant-' . esc_attr($variant);
+    $blockContent = preg_replace(
+        '/class="([^"]*)"/',
+        'class="$1 ' . $variantClass . '"',
+        $blockContent,
+        1
+    );
 
     return $blockContent;
 }
@@ -80,6 +105,35 @@ function fp_rest_api_init(): void
         'permission_callback' => function () {
             return current_user_can('manage_options');
         }
+    ));
+
+    register_rest_route('flare-press/v1', '/get-variant-names', array(
+        'methods' => 'GET',
+        'callback' => [OptionRestApi::class, 'getVariantNames'],
+        'permission_callback' => function () {
+            return current_user_can('edit_posts');
+        }
+    ));
+
+    register_rest_route('flare-press/v1', '/get-account-hash', array(
+        'methods' => 'GET',
+        'callback' => [OptionRestApi::class, 'getAccountHash'],
+        'permission_callback' => function () {
+            return current_user_can('edit_posts');
+        }
+    ));
+
+    register_rest_field('attachment', 'fp_cf_image_id', array(
+        'get_callback' => function ($object) {
+            $imageId = $object['id'];
+            return AttachmentController::getCloudflareIdOfAttachment($imageId);
+        },
+        'update_callback' => null,
+        'schema' => array(
+            'description' => 'Cloudflare Image ID',
+            'type' => 'string',
+            'context' => array('view', 'edit')
+        )
     ));
 }
 

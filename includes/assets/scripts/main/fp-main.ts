@@ -1,4 +1,4 @@
-import FpMediaLibraryMonitor from "../modules/FpLibraryMonitor";
+import FpMediaLibraryMonitor from "../modules/LibraryMonitor";
 import {PluploadFile} from "../types/types";
 
 function addCfBadge(cfImageElements: Array<{ element: HTMLElement }>): void {

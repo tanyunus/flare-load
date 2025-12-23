@@ -1,13 +1,19 @@
 import {addFilter} from '@wordpress/hooks';
 import {createHigherOrderComponent} from '@wordpress/compose';
 import {InspectorControls} from '@wordpress/block-editor';
-import {PanelBody, SelectControl} from '@wordpress/components';
+import {PanelBody, SelectControl, Spinner} from '@wordpress/components';
 import {BlockEditProps} from '@wordpress/blocks';
-import {ComponentType} from 'react';
+import {ComponentType, useEffect, useState} from '@wordpress/element';
+import {useSelect} from '@wordpress/data';
+import RestApi from "../modules/RestApi";
+import {GetAccountHashResponse, GetVariantNamesResponse} from "../types/types";
+import {store as coreStore} from '@wordpress/core-data';
 import React from "react";
+import * as fs from "node:fs";
 
 interface ImageBlockAttributes {
-    customOption?: 'option1' | 'option2' | 'option3';
+    cloudflareVariant?: string;
+    fp_cf_image_id: string;
 
     [key: string]: any;
 }
@@ -31,9 +37,9 @@ function addCustomAttribute(settings: BlockSettings, name: string): BlockSetting
         ...settings,
         attributes: {
             ...settings.attributes,
-            customOption: {
+            cloudflareVariant: {
                 type: 'string',
-                default: 'option1'
+                default: ''
             }
         }
     };
@@ -53,22 +59,79 @@ const withCustomControl = createHigherOrderComponent(
             }
 
             const {attributes, setAttributes} = props;
+            const [variants, setVariants] = useState<string[]>([]);
+            const [loading, setLoading] = useState(true);
+            const [originalUrl, setOriginalUrl] = useState<string>('');
+
+            const media = useSelect(
+                (select) => {
+                    if (!attributes.id) {
+                        return null;
+                    }
+                    const {getMedia} = select(coreStore) as any;
+                    return getMedia(attributes.id);
+                },
+                [attributes.id]
+            );
+
+            const cfImageId = media?.fp_cf_image_id;
+
+            useEffect(() => {
+                if (attributes.url && !originalUrl) {
+                    setOriginalUrl(attributes.url);
+                }
+            }, [attributes.url]);
+
+            useEffect(() => {
+                if (cfImageId) {
+                    getVariantNames().then(result => {
+                        if (result) {
+                            setVariants(result);
+                        }
+                        setLoading(false);
+                    });
+                } else {
+                    setLoading(false);
+                }
+            }, [cfImageId]);
+
+            useEffect(() => {
+                if (cfImageId && attributes.cloudflareVariant && originalUrl) {
+                    getAccountHash().then(result => {
+                        const variantUrl = `https://imagedelivery.net/${result}/${cfImageId}/${attributes.cloudflareVariant}`;
+
+                        setAttributes({url: variantUrl});
+                    })
+                }
+            }, [attributes.cloudflareVariant, cfImageId]);
+
+            if (!cfImageId) {
+                return <BlockEdit {...props} />;
+            }
+
+            const options = variants.map(variant => ({
+                label: variant,
+                value: variant
+            }));
 
             return (
                 <>
                     <BlockEdit {...props} />
                     <InspectorControls>
                         <PanelBody title="Cloudflare Variants" initialOpen={true}>
-                            <SelectControl
-                                label="Choose a variant"
-                                value={attributes.customOption || 'option1'}
-                                options={[
-                                    {label: 'Option 1', value: 'option1'},
-                                    {label: 'Option 2', value: 'option2'},
-                                    {label: 'Option 3', value: 'option3'}
-                                ]}
-                                onChange={(value: ImageBlockAttributes["customOption"]) => setAttributes({customOption: value})}
-                            />
+                            {loading ? (
+                                <Spinner/>
+                            ) : (
+                                <SelectControl
+                                    label="Choose a variant"
+                                    value={attributes.cloudflareVariant || ''}
+                                    options={[
+                                        {label: 'Select a variant...', value: ''},
+                                        ...options
+                                    ]}
+                                    onChange={(value: string) => setAttributes({cloudflareVariant: value})}
+                                />
+                            )}
                         </PanelBody>
                     </InspectorControls>
                 </>
@@ -83,3 +146,62 @@ addFilter(
     'flare-press/with-custom-control',
     withCustomControl
 );
+``
+
+async function getVariantNames(): Promise<string[] | false> {
+    const wpNonce = window?.wp?.apiFetch?.nonceMiddleware?.nonce ?? await RestApi.getWpNonce();
+
+    if (!wpNonce) {
+        return false;
+    }
+
+    const url = '/wp-json/flare-press/v1/get-variant-names';
+
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-WP-Nonce': wpNonce
+            }
+        });
+
+        if (response.ok) {
+            const result: GetVariantNamesResponse = await response.json();
+            return result.data as string[];
+        }
+
+        return false;
+    } catch (error) {
+        console.error('Error getting variant names:', error);
+        return false;
+    }
+}
+
+async function getAccountHash(): Promise<string | false> {
+    const wpNonce = window?.wp?.apiFetch?.nonceMiddleware?.nonce ?? await RestApi.getWpNonce();
+
+    if (!wpNonce) {
+        return false;
+    }
+
+    const url = '/wp-json/flare-press/v1/get-account-hash';
+
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-WP-Nonce': wpNonce
+            }
+        });
+
+        if (response.ok) {
+            const result: GetAccountHashResponse = await response.json();
+            return result.data as string;
+        }
+
+        return false;
+    } catch (error) {
+        console.error('Error getting account hash:', error);
+        return false;
+    }
+}

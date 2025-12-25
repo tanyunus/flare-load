@@ -180,6 +180,18 @@ function fp_wp_get_attachment_image(string $html, int $attachmentId): string
  */
 function fp_wp_get_attachment_image_src(array|false $image, int $attachmentId): array|false
 {
+    // If image edit page and the image is from Cloudflare
+    if(Utils::isAdminPage('post.php')) {
+        global $post;
+        $cfId = AttachmentController::getCloudflareIdOfAttachment($post->ID);
+
+        if(AttachmentController::getCloudflareIdOfAttachment($post->ID)) {
+            $image[0] = AttachmentController::getDefaultVariantUrl($cfId);
+
+            return $image;
+        }
+    }
+
     if (AttachmentController::getCloudflareIdOfAttachment($attachmentId)) {
         $image[0] = AttachmentController::getCfThumbnail($attachmentId);
     }

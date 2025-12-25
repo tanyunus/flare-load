@@ -47,7 +47,52 @@ function flarePressInit(): void
         add_action('admin_print_footer_scripts', 'fp_admin_print_footer_scripts');
         add_action('admin_enqueue_scripts', 'fp_admin_enqueue_scripts');
         add_filter('pre_update_option_'.Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'fp_pre_update_option_save_api_token', 10, 2);
+        add_filter('get_attached_file', 'fp_get_attached_file', 10, 2);
+        add_filter('get_sample_permalink_html', 'fp_get_sample_permalink_html', 10, 5);
     }
+}
+
+function fp_get_sample_permalink_html(string $return, int $postId, string|null $newTitle, string|null $newSlug, WP_Post $post): string {
+    if(Utils::isAdminPage('post.php')) {
+        error_log($return);
+        $cfId = AttachmentController::getCloudflareIdOfAttachment($postId);
+
+        if($cfId) {
+            $cfUrl = AttachmentController::getDefaultVariantUrl($cfId);
+
+            $dom = new DOMDocument();
+            libxml_use_internal_errors(true);
+            $dom->loadHTML($return, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+            libxml_clear_errors();
+
+            $a = $dom->getElementsByTagName('a')->item(0);
+            $a->setAttribute('href', $cfUrl);
+            $a->nodeValue = $cfUrl;
+
+            $dom->appendChild($a);
+
+            return $dom->saveHTML();
+        }
+    }
+
+    return $return;
+}
+
+/**
+ * Modify basename before it's being returned.
+ */
+function fp_get_attached_file(string $file, int $attachmentId): string {
+    //  1. Check if it's post editing page
+    if(Utils::isAdminPage('post.php')) {
+        $cfId = AttachmentController::getCloudflareIdOfAttachment($attachmentId);
+        // 2. Check if image is uploaded to Cloudflare
+        if($cfId) {
+            // 3. Replace basename with file's actual name stored in db
+            $file = str_replace(wp_basename($file), get_the_title($attachmentId), $file);
+        }
+    }
+
+    return $file;
 }
 
 /**
@@ -204,8 +249,10 @@ function fp_wp_get_attachment_image_src(array|false $image, int $attachmentId): 
  */
 function fp_wp_get_attachment_url(string $attachmentUrl, int $attachmentId): string
 {
+    $cfId = AttachmentController::getCloudflareIdOfAttachment($attachmentId);
+
     if (AttachmentController::getCloudflareIdOfAttachment($attachmentId)) {
-        $attachmentUrl = get_the_guid($attachmentId);
+        $attachmentUrl = AttachmentController::getDefaultVariantUrl($cfId);
     }
 
     return $attachmentUrl;

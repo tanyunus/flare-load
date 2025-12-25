@@ -9,7 +9,6 @@ import RestApi from "../modules/RestApi";
 import {GetAccountHashResponse, GetVariantNamesResponse} from "../types/types";
 import {store as coreStore} from '@wordpress/core-data';
 import React from "react";
-import * as fs from "node:fs";
 
 interface ImageBlockAttributes {
     cloudflareVariant?: string;

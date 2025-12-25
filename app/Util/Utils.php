@@ -23,12 +23,13 @@ class Utils
      * @param string $pageSlug Page slug with extension of the page
      * @return bool
      */
-    public static function isAdminPage(string $pageSlug): bool {
+    public static function isAdminPage(string $pageSlug): bool
+    {
         global $pagenow;
 
         $currentAdminPage = basename(admin_url($pagenow));
 
-        if(empty($currentAdminPage)) {
+        if (empty($currentAdminPage)) {
             $currentAdminPage = basename($_SERVER['REQUEST_URI']);
         }
 
@@ -74,10 +75,11 @@ class Utils
      * @param string $filePath
      * @return bool
      */
-    public static function deleteFileFromDisk(string $filePath): bool {
+    public static function deleteFileFromDisk(string $filePath): bool
+    {
         $fileRealPath = realpath($filePath);
 
-        if(!is_writable($fileRealPath)) {
+        if (!is_writable($fileRealPath)) {
             return false;
         }
 
@@ -91,13 +93,13 @@ class Utils
      * @param array $data
      * @return void
      */
-    public static function renderTemplate(string $template, array $data = []): void {
-        extract( $data );
+    public static function renderTemplate(string $template, array $data = []): void
+    {
+        extract($data);
         $file = FLARE_PRESS_PATH . 'app/Views/' . $template . '.php';
 
-        if ( file_exists( $file ) ) {
+        if (file_exists($file)) {
             include $file;
         }
     }
-
 }

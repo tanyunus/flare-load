@@ -58,6 +58,7 @@ class OptionRestApi
         }
 
         return new WP_REST_Response([
+
             'success' => true,
             'data' => $accountHash,
         ], 200);

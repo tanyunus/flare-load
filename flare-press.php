@@ -46,7 +46,19 @@ function flarePressInit(): void
         add_action('admin_menu', 'fp_admin_menu');
         add_action('admin_print_footer_scripts', 'fp_admin_print_footer_scripts');
         add_action('admin_enqueue_scripts', 'fp_admin_enqueue_scripts');
+        add_filter('pre_update_option_'.Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'fp_pre_update_option_save_api_token', 10, 2);
     }
+}
+
+/**
+ * Modify api token submission value if empty and save old data.
+ */
+function fp_pre_update_option_save_api_token(mixed $newValue, mixed $oldValue): mixed {
+    if(empty(trim($newValue))) {
+        return $oldValue;
+    }
+
+    return $newValue;
 }
 
 /**

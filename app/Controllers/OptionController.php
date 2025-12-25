@@ -116,8 +116,7 @@ class OptionController
                 Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME,
                 'Cloudflare Account API Token',
                 function () {
-                    $description = 'You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/api-tokens</i>';
-                    $this->renderTextField(Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, $description);
+                    $this->renderApiTokenField();
                 },
                 Constants::DASHBOARD_MENU_SLUG,
                 Constants::DASHBOARD_API_SETTINGS_SECTION_ID,
@@ -215,7 +214,8 @@ class OptionController
                 </option>
             <?php endforeach; ?>
         </select>
-        <p class="description">Choose the largest variant without cropping as the default. <br/>This ensures the full image is clearly visible and recognizable.</p>
+        <p class="description">Choose the largest variant without cropping as the default. <br/>This ensures the full
+            image is clearly visible and recognizable.</p>
         <?php
     }
 
@@ -255,12 +255,43 @@ class OptionController
         );
     }
 
-    private function renderTextField(string $optionName, string $description = '', bool $hideValue = false): void
+    private function renderApiTokenField(): void
     {
+        $optionVal = trim(esc_attr(get_option(Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME)));
+        ?>
+        <label class="fp-api-token-field-label">
+            <input
+                    type="password"
+                    value="<?php echo !empty($optionVal) ? '••••••••••••••••••••••' : ''?>"
+                    data-field-name="<?php echo Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME ?>"
+                    <?php echo empty($optionVal) ? 'name="' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME . '"' : '' ?>
+                    <?php echo empty($optionVal) ? 'id="' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME . '"' : '' ?>
+                    <?php echo !empty($optionVal) ? 'disabled' : '' ?>
+                    <?php echo empty($optionVal) ? 'required' : '' ?>
+                    class="regular-text"/>
+
+            <?php
+                if(!empty($optionVal)) {
+                    ?>
+                    <button id="fp_change_api_token_button" class="button button-secondary fp-change-api-token-button" type="button" role="button">
+                        <span class="dashicons dashicons-edit"></span>
+                    </button>
+                    <?php
+                }
+            ?>
+        </label>
+        <p class="description">You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/api-tokens</i></p>
+        <?php
+    }
+
+    private function renderTextField(string $optionName, string $description = ''): void
+    {
+        $optionVal = trim(esc_attr(get_option($optionName)));
+
         ?>
         <label>
             <input
-                    value="<?php echo !$hideValue ? esc_attr(get_option($optionName)) : ''; ?>"
+                    value="<?php echo $optionVal ?>"
                     name="<?php echo $optionName ?>"
                     id="<?php echo $optionName ?>"
                     type="text"
@@ -337,14 +368,15 @@ class OptionController
 
     private function getVariantNamesAsArray(): array
     {
-        if(empty($this->variantNames)) {
+        if (empty($this->variantNames)) {
             $this->variantNames = self::getVariantNames();
         }
 
         return $this->variantNames;
     }
 
-    public static function getVariantNames(): array {
+    public static function getVariantNames(): array
+    {
         $variantNamesArray = array_keys(self::getVariants());
 
         asort($variantNamesArray);
@@ -372,7 +404,8 @@ class OptionController
         return $variantsFromCloudflare;
     }
 
-    public static function getAccountHash(): string {
+    public static function getAccountHash(): string
+    {
         return get_option(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME) ?? '';
     }
 }

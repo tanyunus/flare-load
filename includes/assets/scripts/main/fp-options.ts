@@ -15,10 +15,22 @@ document.addEventListener('DOMContentLoaded', function () {
     const variantListField = document.querySelector<HTMLElement>('#fp_variant_list_field');
     const spinner = document.querySelector<HTMLElement>('#fp_sync_variant_spinner');
     const defaultVariantSelect = document.querySelector<HTMLSelectElement>('#fp_cf_default_variant');
+    const editApiTokenField = document.querySelector<HTMLButtonElement>('#fp_change_api_token_button');
+    const apiTokenField = document.querySelector<HTMLInputElement>('[data-field-name="fp_cf_api_token"]');
 
     if (syncButton && variantListField) {
         syncButton.addEventListener('click', async () => {
             await handleSyncVariants(syncButton, variantListField, spinner, defaultVariantSelect);
+        });
+    }
+
+    if(editApiTokenField && apiTokenField) {
+        editApiTokenField.addEventListener('click', function () {
+            editApiTokenField.remove();
+            apiTokenField.disabled = false;
+            apiTokenField.name = apiTokenField.dataset?.fieldName as string;
+            apiTokenField.value = '';
+            apiTokenField.required = true;
         });
     }
 });
@@ -51,8 +63,6 @@ async function syncVariants(): Promise<string[] | false> {
         return false;
     }
 }
-
-
 
 function renderNewVariants(variantArray: string[]): string {
     let finalHtml = '';

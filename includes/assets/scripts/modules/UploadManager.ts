@@ -88,6 +88,19 @@ export default class UploadManager {
 
             console.log('[FP] Injected fp_upload_to_cf:', manager.isUploadToCfEnabled() ? 1 : 0);
         });
+
+        uploader.bind('FileUploaded', (up: any, file: any, response: any) => {
+            try {
+                const data = JSON.parse(response.response);
+                if (data.success && data.data) {
+                    window.dispatchEvent(new CustomEvent('fpFileUploaded', {
+                        detail: data.data
+                    }));
+                }
+            } catch (e) {
+                // Parsing failed
+            }
+        });
     }
 
     public createSwitcherElement(customClass: string = ''): HTMLLabelElement {

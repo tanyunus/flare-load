@@ -11,6 +11,7 @@ import {store as coreStore} from '@wordpress/core-data';
 import React from "react";
 import UploadManager from "../modules/UploadManager";
 import {appendSwitcherToMediaModal} from "../functions/media-modal";
+import {detectAndMarkCfImages} from "../functions/cf-image-detector";
 
 interface ImageBlockAttributes {
     cloudflareVariant?: string;
@@ -212,4 +213,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     uploadManager.hookUploader();
     appendSwitcherToMediaModal(uploadManager);
+    detectAndMarkCfImages();
 })

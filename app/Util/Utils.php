@@ -110,4 +110,10 @@ class Utils
     public static function isPostEditPage(): bool {
         return self::isAdminPage('post.php') && !empty($_GET['post']) && $_GET['action'] === 'edit';
     }
+
+    public static function isMediaEditPage(): bool {
+        global $post;
+
+        return self::isPostEditPage() && $post->post_type === 'attachment';
+    }
 }

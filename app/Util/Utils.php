@@ -102,4 +102,12 @@ class Utils
             include $file;
         }
     }
+
+    public static function isFpOptionsPage(): bool {
+        return is_admin() && $_GET['page'] === Constants::DASHBOARD_MENU_SLUG;
+    }
+
+    public static function isPostEditPage(): bool {
+        return self::isAdminPage('post.php') && !empty($_GET['post']) && $_GET['action'] === 'edit';
+    }
 }

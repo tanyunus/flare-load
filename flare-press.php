@@ -297,9 +297,21 @@ function fp_admin_menu(): void
  */
 function fp_admin_print_footer_scripts(): void
 {
-    wp_enqueue_script('fp-main-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-main.js');
-    wp_enqueue_script('fp-options-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-options.js');
-    wp_enqueue_script('fp-post-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-post.js');
+    if(Utils::isAdminPage('upload.php') && (empty($_GET) || $_GET['mode'] === 'grid')) {
+        wp_enqueue_script('fp-media-library-grid-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-media-library-grid.js');
+    }
+
+    if(Utils::isAdminPage('media-new.php')) {
+        wp_enqueue_script('fp-media-new-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-media-new.js');
+    }
+
+    if(Utils::isFpOptionsPage()) {
+        wp_enqueue_script('fp-options-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-options.js');
+    }
+
+    if(Utils::isPostEditPage()) {
+        wp_enqueue_script('fp-post-edit-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-post.js');
+    }
 }
 
 /**

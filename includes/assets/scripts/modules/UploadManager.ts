@@ -1,7 +1,9 @@
 export default class UploadManager {
     private switcherCheckbox: HTMLInputElement | null = null;
 
-    // Hooks into default uploader in /wp-admin/upload.php page
+    // Hooks into
+    //  - default uploader in /wp-admin/upload.php page
+    //  - media modal uploader in post-edit and new-post pages
     public hookUploader(): void {
         if (!window.wp?.Uploader) {
             console.log('[FP] wp.Uploader not available');
@@ -88,9 +90,9 @@ export default class UploadManager {
         });
     }
 
-    public createSwitcherElement(): HTMLLabelElement {
+    public createSwitcherElement(customClass: string = ''): HTMLLabelElement {
         const label = document.createElement('label');
-        label.className = 'fp-upload-switcher';
+        label.className = 'fp-upload-switcher ' + customClass;
         label.style.marginLeft = '10px';
         label.htmlFor = 'fp_upload_to_cf';
 

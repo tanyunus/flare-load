@@ -309,8 +309,8 @@ function fp_admin_print_footer_scripts(): void
         wp_enqueue_script('fp-options-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-options.js');
     }
 
-    if(Utils::isPostEditPage()) {
-        wp_enqueue_script('fp-post-edit-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-post.js');
+    if(Utils::isPostEditPage() || Utils::isAdminPage('post-new.php')) {
+        wp_enqueue_script('fp-post-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-post.js');
     }
 }
 

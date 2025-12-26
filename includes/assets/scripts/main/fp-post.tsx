@@ -9,6 +9,8 @@ import RestApi from "../modules/RestApi";
 import {GetAccountHashResponse, GetVariantNamesResponse} from "../types/types";
 import {store as coreStore} from '@wordpress/core-data';
 import React from "react";
+import UploadManager from "../modules/UploadManager";
+import {appendSwitcherToMediaModal} from "../functions/media-modal";
 
 interface ImageBlockAttributes {
     cloudflareVariant?: string;
@@ -166,7 +168,7 @@ async function getVariantNames(): Promise<string[] | false> {
 
         if (response.ok) {
             const result: GetVariantNamesResponse = await response.json();
-            return result.data as string[];
+            return result.data as unknown as string[];
         }
 
         return false;
@@ -204,3 +206,10 @@ async function getAccountHash(): Promise<string | false> {
         return false;
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const uploadManager = new UploadManager();
+
+    uploadManager.hookUploader();
+    appendSwitcherToMediaModal(uploadManager);
+})

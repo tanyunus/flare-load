@@ -54,7 +54,6 @@ function flarePressInit(): void
 
 function fp_get_sample_permalink_html(string $return, int $postId, string|null $newTitle, string|null $newSlug, WP_Post $post): string {
     if(Utils::isAdminPage('post.php')) {
-        error_log($return);
         $cfId = AttachmentController::getCloudflareIdOfAttachment($postId);
 
         if($cfId) {
@@ -305,7 +304,7 @@ function fp_admin_print_footer_scripts(): void
         wp_enqueue_script('fp-options-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-options.js');
     }
 
-    if(Utils::isPostEditPage() || Utils::isAdminPage('post-new.php')) {
+    if((Utils::isPostEditPage() || Utils::isAdminPage('post-new.php')) && !Utils::isMediaEditPage()) {
         wp_enqueue_script('fp-post-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-post.js');
     }
 }

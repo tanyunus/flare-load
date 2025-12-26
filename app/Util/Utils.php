@@ -104,6 +104,10 @@ class Utils
     }
 
     public static function isFpOptionsPage(): bool {
+        if(!isset($_GET['page'])) {
+            return false;
+        }
+
         return is_admin() && $_GET['page'] === Constants::DASHBOARD_MENU_SLUG;
     }
 

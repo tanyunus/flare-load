@@ -62,6 +62,32 @@ export default class UploadManager {
         });
     }
 
+    public hookRestApiUpload(): void {
+        const originalFetch = window.fetch;
+
+        window.fetch = async function(...args: Parameters<typeof fetch>): Promise<Response> {
+            const url = args[0]?.toString() || '';
+
+            if (url.includes('/wp/v2/media')) {
+                const options = args[1] || {};
+
+                if (options.body instanceof FormData) {
+                    const formData = options.body;
+                    const uploadToCf = (window as any).fp_upload_to_cf_next ? '1' : '0';
+
+                    formData.append('fp_upload_to_cf', uploadToCf);
+
+                    // Reset flag
+                    (window as any).fp_upload_to_cf_next = false;
+
+                    console.log('[FP] Injected fp_upload_to_cf to REST API upload:', uploadToCf);
+                }
+            }
+
+            return originalFetch.apply(this, args);
+        };
+    }
+
     public waitForUploader(callback: () => void): void {
         const checkUploader = (): void => {
             if (window.uploader) {
@@ -118,6 +144,15 @@ export default class UploadManager {
         label.appendChild(document.createTextNode(' Upload to Cloudflare'));
 
         return label;
+    }
+
+    public createCfUploadButton(additionalClassName: string = ''): HTMLButtonElement {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'fp-cf-upload-button components-button block-editor-media-placeholder__button block-editor-media-placeholder__upload-button is-next-40px-default-size is-secondary ' + additionalClassName;
+        button.textContent = 'Upload to Cloudflare';
+
+        return button;
     }
 
     public setSwitcherCheckbox(checkbox: HTMLInputElement): void {

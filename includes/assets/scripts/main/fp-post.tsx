@@ -12,6 +12,7 @@ import React from "react";
 import UploadManager from "../modules/UploadManager";
 import {appendSwitcherToMediaModal} from "../functions/media-modal";
 import {detectAndMarkCfImages} from "../functions/cf-image-detector";
+import {addSwitcherToImageBlock} from "../functions/image-block";
 
 interface ImageBlockAttributes {
     cloudflareVariant?: string;
@@ -212,6 +213,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadManager = new UploadManager();
 
     uploadManager.hookUploader();
+    uploadManager.hookRestApiUpload();
+
     appendSwitcherToMediaModal(uploadManager);
     detectAndMarkCfImages();
+    addSwitcherToImageBlock(uploadManager);
 })

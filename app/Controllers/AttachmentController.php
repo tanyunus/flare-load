@@ -17,6 +17,8 @@ class AttachmentController
             return;
         }
 
+        error_log("Will upload to CF");
+
         try {
             // 1. Store already uploaded file path, name and size
             $imageFile = get_attached_file($attachmentId);

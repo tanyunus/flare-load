@@ -1,6 +1,6 @@
 const cfImageIds = new Set<string | number>();
 
-function detectAndMarkCfImages(): void {
+export function detectAndMarkCfImages(): void {
     // Listen for file upload completion
     window.addEventListener('fpFileUploaded', ((event: CustomEvent) => {
         const data = event.detail;
@@ -82,5 +82,3 @@ function waitForAttachmentElement(attachmentId: string | number): void {
 
     checkElement();
 }
-
-export { detectAndMarkCfImages };

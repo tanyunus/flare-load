@@ -36,9 +36,6 @@ function flarePressInit(): void
         add_filter('wp_get_attachment_image_src', 'fp_wp_get_attachment_image_src', 10, 4);
         add_filter('wp_get_attachment_url', 'fp_wp_get_attachment_url', 5, 2);
         add_filter('render_block', 'fp_render_block', 10, 2);
-    }
-
-    if (is_admin()) {
         add_filter('manage_media_columns', 'fp_manage_media_columns');
         add_filter('manage_media_custom_column', 'fp_manage_media_custom_column', 10, 2);
         add_filter('pre_delete_attachment', 'fp_pre_delete_attachment', 10, 3);

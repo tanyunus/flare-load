@@ -149,9 +149,11 @@ export default class UploadManager {
     public createCfUploadButton(additionalClassName: string = ''): HTMLButtonElement {
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'fp-cf-upload-button components-button block-editor-media-placeholder__button block-editor-media-placeholder__upload-button is-next-40px-default-size is-secondary ' + additionalClassName;
-        button.textContent = 'Upload to Cloudflare';
-
+        button.className = 'fp-cf-upload-button ' + additionalClassName;
+        button.innerHTML = 'Upload to Cloudflare &nbsp;&nbsp;<img style="margin-left: auto; height: 14px;" src="/wp-content/plugins/flare-press/includes/dist/images/cf_logo_cropped.png" alt="Cloudflare logo">';
+        button.style.boxShadow = 'inset 0 0 0 1px #f78100, 0 0 0 currentColor';
+        button.style.color = '#f78100';
+        button.style.background = '#fffdfa !important';
         return button;
     }
 

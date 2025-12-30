@@ -25,7 +25,7 @@ export function addSwitcherToImageBlock(uploadManager: UploadManager): void {
                 const blockLabel = placeholder.querySelector('.components-placeholder__label');
 
                 if (uploadButton && blockLabel) {
-                    const cfButton = uploadManager.createCfUploadButton('fp-switcher-for-block-placeholder');
+                    const cfButton = uploadManager.createCfUploadButton('components-button block-editor-media-placeholder__button block-editor-media-placeholder__upload-button is-next-40px-default-size is-secondary fp-switcher-for-block-placeholder');
                     cfButton.style.marginLeft = '10px';
 
                     cfButton.addEventListener('click', () => {
@@ -92,7 +92,7 @@ function observeMainDocumentForDropdown(uploadManager: UploadManager): void {
             if (uploadButton) {
                 console.log('[FP] Found Upload button in dropdown');
 
-                const cfButton = uploadManager.createCfUploadButton('fp-cf-upload-toolbar-button');
+                const cfButton = uploadManager.createCfUploadButton('is-next-40px-default-size components-button fp-cf-upload-toolbar-button');
                 cfButton.classList.add('components-menu-item__button');
                 cfButton.style.width = '100%';
                 cfButton.style.justifyContent = 'flex-start';

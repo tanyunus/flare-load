@@ -153,7 +153,6 @@ export default class UploadManager {
         button.innerHTML = 'Upload to Cloudflare &nbsp;&nbsp;<img style="margin-left: auto; height: 14px;" src="/wp-content/plugins/flare-press/includes/dist/images/cf_logo_cropped.png" alt="Cloudflare logo">';
         button.style.boxShadow = 'inset 0 0 0 1px #f78100, 0 0 0 currentColor';
         button.style.color = '#f78100';
-        button.style.background = '#fffdfa !important';
         return button;
     }
 

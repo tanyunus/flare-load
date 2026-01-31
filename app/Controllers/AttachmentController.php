@@ -6,6 +6,7 @@ use DOMDocument;
 use Exception;
 use FlarePress\Api\CloudflareImagesApi;
 use FlarePress\Data\Constants;
+use FlarePress\Util\Logger;
 use FlarePress\Util\Utils;
 use WP_Post;
 
@@ -16,8 +17,6 @@ class AttachmentController
         if (!self::shouldUploadToCloudflare()) {
             return;
         }
-
-        error_log("Will upload to CF");
 
         try {
             // 1. Store already uploaded file path, name and size
@@ -57,7 +56,7 @@ class AttachmentController
                 Utils::deleteFileFromDisk($imageFile);
             }
         } catch (Exception $e) {
-            error_log($e->getMessage());
+            Logger::log(0, $e->getMessage());
         }
     }
 
@@ -69,7 +68,7 @@ class AttachmentController
             try {
                 CloudflareImagesApi::deleteImage($cfImageId);
             } catch (Exception $e) {
-                error_log('[FlarePress] Attachment deletion error: ' . $e->getMessage());
+                error_log('Attachment deletion error: ' . $e->getMessage());
             }
         }
 

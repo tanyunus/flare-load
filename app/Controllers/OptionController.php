@@ -5,6 +5,7 @@ namespace FlarePress\Controllers;
 use Exception;
 use FlarePress\Api\CloudflareImagesApi;
 use FlarePress\Data\Constants;
+use FlarePress\Util\Logger;
 use FlarePress\Util\Utils;
 
 class OptionController
@@ -28,16 +29,43 @@ class OptionController
         $this->registerFileManagementField();
         $this->registerVariantListField();
         $this->registerDefaultVariantField();
+
+        // Add Log Page
+        $this->addLogPage();
+        $this->addLogViewerSection();
+        $this->registerLogViewer();
     }
 
     private function addSettingsPage(): void
     {
-        add_options_page(
+        /*add_options_page(
                 Constants::UI_PAGE_TITLE,
                 Constants::DASHBOARD_MENU_TITLE,
                 'manage_options',
                 Constants::DASHBOARD_MENU_SLUG,
                 [$this, 'fpAdminDashboardView'],
+                5
+        );*/
+
+        add_menu_page(
+                Constants::UI_PAGE_TITLE,
+                Constants::DASHBOARD_MENU_TITLE,
+                'manage_options',
+                Constants::DASHBOARD_MENU_SLUG,
+                [$this, 'fpAdminDashboardView'],
+                '',
+                5
+        );
+    }
+
+    private function addLogPage(): void {
+        add_submenu_page(
+                Constants::DASHBOARD_MENU_SLUG,
+                Constants::UI_LOG_PAGE_TITLE,
+                Constants::LOG_MENU_TITLE,
+                'manage_options',
+                Constants::DASHBOARD_LOG_PAGE_SLUG,
+                [$this, 'fpAdminLogView'],
                 5
         );
     }
@@ -45,6 +73,10 @@ class OptionController
     public function fpAdminDashboardView(): void
     {
         Utils::renderTemplate(Constants::DASHBOARD_VIEW);
+    }
+
+    public function fpAdminLogView(): void {
+        Utils::renderTemplate(Constants::LOG_VIEW);
     }
 
     private function addApiSettingsSection(): void
@@ -74,6 +106,46 @@ class OptionController
                 'Upload Settings',
                 '',
                 Constants::DASHBOARD_MENU_SLUG
+        );
+    }
+
+    private function addLogViewerSection(): void {
+        add_settings_section(
+                'fp_log_viewer_section',
+                'Log Viewer',
+                null,
+                Constants::DASHBOARD_LOG_PAGE_SLUG
+        );
+    }
+
+    private function renderLogViewer(): void
+    {
+        ?>
+        <label>
+            <textarea
+                    class="fp-log-viewer-textarea"
+                    id="<?php echo Constants::LOG_VIEWER_FIELD_NAME ?>"
+                    name="<?php echo Constants::LOG_VIEWER_FIELD_NAME ?>"
+                    rows="20"
+                    disabled
+            ><?php echo trim(Logger::getLogFile()) ?></textarea>
+        </label>
+        <p class="description"></p>
+        <?php
+    }
+
+    private function registerLogViewer(): void
+    {
+        register_setting('fp_log_field_group', Constants::LOG_VIEWER_FIELD_NAME);
+
+        add_settings_field(
+                Constants::LOG_VIEWER_FIELD_NAME,
+                'Logs',
+                function () {
+                    $this->renderLogViewer();
+                },
+                Constants::DASHBOARD_LOG_PAGE_SLUG,
+                'fp_log_viewer_section',
         );
     }
 
@@ -358,7 +430,7 @@ class OptionController
         $variantsArray = json_decode($variantsAsEncodedString, true);
 
         if (JSON_ERROR_NONE !== json_last_error()) {
-            error_log('[FlarePress] Error retrieving variants options: ' . json_last_error_msg());
+            error_log('Error retrieving variants options: ' . json_last_error_msg());
 
             return [];
         }
@@ -396,7 +468,7 @@ class OptionController
 
             update_option(Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME, $jsonEncodedVariants);
         } catch (Exception $e) {
-            error_log('[FlarePress] Unable to update variants option: ' . $e->getMessage());
+            error_log('Unable to update variants option: ' . $e->getMessage());
 
             return [];
         }

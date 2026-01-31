@@ -19,8 +19,12 @@ class Constants
 
     // Views
     public const DASHBOARD_VIEW = 'dashboard';
+    public const LOG_VIEW = 'logs';
     public const DASHBOARD_MENU_SLUG = 'flare-press-settings';
+    public const DASHBOARD_LOG_PAGE_SLUG = 'flare-press-logs';
     public const DASHBOARD_MENU_TITLE = 'FlarePress';
+    public const LOG_MENU_TITLE = 'Logs';
+    public const LOG_VIEWER_FIELD_NAME = 'fp_log_viewer';
     public const DASHBOARD_SETTINGS_GROUP_NAME = 'fp_settings_group';
     public const DASHBOARD_VARIANT_SETTINGS_GROUP_NAME = 'fp_variant_settings_group';
     public const DASHBOARD_UPLOAD_SETTINGS_NAME = 'fp_upload_settings';
@@ -40,6 +44,7 @@ class Constants
 
     // UI strings
     public const UI_PAGE_TITLE = 'FlarePress Settings';
+    public const UI_LOG_PAGE_TITLE = 'FlarePress Logs';
     public const UI_CF_BADGE_TITLE = 'Uploaded to Cloudflare';
     public const UI_CF_LOCATION_THIS_SERVER = 'This server';
     public const UI_CF_LOCATION_COLUMN_NAME = 'Location';

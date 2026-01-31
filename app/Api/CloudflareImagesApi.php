@@ -18,11 +18,11 @@ class CloudflareImagesApi
         $response = json_decode($response, true);
 
         if(json_last_error() !== JSON_ERROR_NONE){
-            throw new Exception('[FlarePress] Cloudflare image upload error: Json error: ' . json_last_error_msg());
+            throw new Exception('[Images API] Json error: ' . json_last_error_msg());
         }
 
         if(!$response['success']){
-            throw new Exception('[FlarePress] Cloudflare image upload error: ' . $response['errors'][0]['message']);
+            throw new Exception('[Images API] Cloudflare image upload error: ' . $response['errors'][0]['message']);
         }
 
         return $response;
@@ -37,11 +37,11 @@ class CloudflareImagesApi
         $response = json_decode($response, true);
 
         if(json_last_error() !== JSON_ERROR_NONE){
-            throw new Exception('[FlarePress] Cloudflare image delete error: Json error: ' . json_last_error_msg());
+            throw new Exception('[Images API] Cloudflare image delete error: Json error: ' . json_last_error_msg());
         }
 
         if(!$response['success']){
-            throw new Exception('[FlarePress] Cloudflare image delete error: ' . $response['errors'][0]['message']);
+            throw new Exception('[Images API] Cloudflare image delete error: ' . $response['errors'][0]['message']);
         }
 
         return $response;
@@ -59,11 +59,11 @@ class CloudflareImagesApi
         $response = json_decode($response, true);
 
         if(json_last_error() !== JSON_ERROR_NONE){
-            throw new Exception('[FlarePress] Variant retrieval error: Json error: ' . json_last_error_msg());
+            throw new Exception('[Images API] Variant retrieval error: Json error: ' . json_last_error_msg());
         }
 
         if(!$response['success']){
-            throw new Exception('[FlarePress] Variant retrieval error: ' . $response['errors'][0]['message']);
+            throw new Exception('[Images API] Variant retrieval error: ' . $response['errors'][0]['message']);
         }
 
         return $response['result']['variants'];

@@ -53,7 +53,7 @@ class OptionController
                 'manage_options',
                 Constants::DASHBOARD_MENU_SLUG,
                 [$this, 'fpAdminDashboardView'],
-                '',
+                WP_PLUGIN_DIR . '/flare-press/includes/dist/images/fp_dashboard_icon.svg',
                 5
         );
     }

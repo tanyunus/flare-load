@@ -92,3 +92,19 @@ body.media-new-php {
 .fp-log-viewer-textarea {
   width: 100%;
 }
+
+.fp-header {
+  margin-bottom: 50px;
+  margin-top: 50px;
+  display: flex;
+  align-items: center;
+  column-gap: 30px;
+}
+
+#adminmenu .toplevel_page_flare-press-settings {
+  .wp-menu-image img {
+    width: 20px;
+    height: 20px;
+    padding-top: 6px;
+  }
+}

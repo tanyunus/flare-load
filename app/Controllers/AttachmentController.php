@@ -160,6 +160,21 @@ class AttachmentController
         return $metaData;
     }
 
+
+    /**
+     * Update the queried attachment HTML snippet to replace attachment url
+     * with corresponding Cloudflare Image URL generated using default variant.
+     *
+     * If it's admin page the query run, then the URL is set for thumbnail previews
+     * in media library page located here: /wp-admin/upload.php
+     *
+     * 99% suited only for 'wp_get_attachment_image' hook.
+     *
+     * @param int $attachmentId
+     * @param string $cfId
+     * @param string $html
+     * @return string
+     */
     public static function updateQueriedAttachmentHtml(int $attachmentId, string $cfId, string $html): string
     {
         $cfUrl = self::getDefaultVariantUrl($cfId);
@@ -174,13 +189,42 @@ class AttachmentController
         libxml_clear_errors();
 
         $img = $dom->getElementsByTagName('img')->item(0);
-        $img->setAttribute('src', $cfUrl);
-        $img->setAttribute('srcset', '');
-        $img->setAttribute('width', '60');
-        $img->setAttribute('height', '60');
+
+        if(!$img->setAttribute('src', $cfUrl)) {
+            Logger::log(0, '[ATTACHMENT] Cannot update -src- attribute of queried attachment html.');
+
+            return $html;
+        }
+
+        if(!$img->setAttribute('srcset', '')) {
+            Logger::log(0, '[ATTACHMENT] Cannot update -srcset- attribute of queried attachment html.');
+
+            return $html;
+        }
+
+        if(!$img->setAttribute('width', '60')) {
+            Logger::log(0, '[ATTACHMENT] Cannot update -width- attribute of queried attachment html.');
+
+            return $html;
+        }
+
+        if(!$img->setAttribute('height', '60')) {
+            Logger::log(0, '[ATTACHMENT] Cannot update -height- attribute of queried attachment html.');
+
+            return $html;
+        }
+
+        $savedHTML = $dom->saveHTML($img);
+
+        if(!$savedHTML) {
+            Logger::log(0, '[ATTACHMENT] Cannot save updated queried attachment html.');
+
+            return $html;
+        }
 
         return $dom->saveHTML($img);
     }
+
 
     public static function updateAjaxQueryResponse(array $response, object $attachment): array
     {

@@ -2,8 +2,6 @@
 
 namespace FlarePress\Util;
 
-use DateTime;
-
 class Logger
 {
     const LOG_FILE = 'flare-press.log';

@@ -256,6 +256,20 @@ class AttachmentController
         return $response;
     }
 
+
+    /**
+     * Updates size data.
+     *
+     * Replaces 'full' size url with given $imgUrl (which should be default variant of CF image)
+     *
+     * Replaces 'medium' size url with thumbnail url, the one generated before upload
+     * and resides on disk and used for previews on dashboard.
+     *
+     * @param array $sizeArray Default size array from meta-data.
+     * @param string $imgUrl The url which will be used for 'full' size.
+     * @param int $attachmentId The id of the attachment in regard.
+     * @return array The updated size array.
+     */
     private static function updateSizes(array $sizeArray, string $imgUrl, int $attachmentId): array
     {
         if (isset($sizeArray['full'])) {

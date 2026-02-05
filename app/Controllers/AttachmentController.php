@@ -282,6 +282,12 @@ class AttachmentController
         return $sizeArray;
     }
 
+    /**
+     * Check whether the file uploaded to /uploads folder should be deleted
+     * by the option in plugin settings page.
+     *
+     * @return bool
+     */
     private static function shouldDeleteLocalFile(): bool
     {
         $options = get_option(Constants::DASHBOARD_UPLOAD_SETTINGS_NAME, []);
@@ -289,6 +295,12 @@ class AttachmentController
         return empty($options[Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME]);
     }
 
+    /**
+     * Check whether the file in Cloudflare Images should be deleted
+     * by the option in plugin settings page.
+     *
+     * @return bool
+     */
     private static function shouldDeleteCloudflareFile(): bool
     {
         $options = get_option(Constants::DASHBOARD_UPLOAD_SETTINGS_NAME, []);
@@ -296,12 +308,24 @@ class AttachmentController
         return empty($options[Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME]);
     }
 
-    private static function createThumbnailSizeOfImage($image): array|false
+    /**
+     * Create thumbnail version of an image and save it to
+     * the same directory it was uploaded, with the suffix '_fp_cf_thumbnail'.
+     *
+     * The idea of creating alternative thumbnail is to prevent consuming
+     * view count from Cloudflare Images (CDN) and reduce load times
+     * in dashboard while previewing images in thumbnails.
+     *
+     * @param string $image The full image path.
+     *
+     * @return array|false Array of the saved thumbnail image details or false on failure.
+     */
+    private static function createThumbnailSizeOfImage(string $image): array|false
     {
         $editor = wp_get_image_editor($image);
 
         if (is_wp_error($editor)) {
-            error_log('Thumbnail creation error: ' . $editor->get_error_message());
+            Logger::log(0, '[ATTACHMENT] Thumbnail creation error: ' . $editor->get_error_message());
 
             return false;
         }
@@ -309,7 +333,7 @@ class AttachmentController
         $editor->resize(300, 300, true);
 
         if (is_wp_error($editor)) {
-            error_log('Thumbnail resize error: ' . $editor->get_error_message());
+            Logger::log(0, '[ATTACHMENT] Thumbnail resize error: ' . $editor->get_error_message());
 
             return false;
         }
@@ -317,7 +341,7 @@ class AttachmentController
         $saveResult = $editor->save($editor->generate_filename(Constants::UPLOADED_IMAGE_CF_THUMBNAIL_SUFFIX));
 
         if (is_wp_error($editor)) {
-            error_log('Thumbnail save error: ' . $editor->get_error_message());
+            Logger::log(0, '[ATTACHMENT] Thumbnail save error: ' . $editor->get_error_message());
 
             return false;
         }

@@ -349,6 +349,14 @@ class AttachmentController
         return $saveResult;
     }
 
+    /**
+     * Delete the thumbnail image file that is created
+     * for previewing Cloudflare images.
+     *
+     * @param int $attachmentId
+     *
+     * @return void
+     */
     private static function deleteCfThumbnail(int $attachmentId): void
     {
         $thumbnail = self::getCfThumbnail($attachmentId)['path'] ?? '';
@@ -360,6 +368,14 @@ class AttachmentController
         Utils::deleteFileFromDisk($thumbnail);
     }
 
+    /**
+     * Get the thumbnail image of the image that is uploaded
+     * to Cloudflare.
+     *
+     * @param int $attachmentId
+     *
+     * @return array
+     */
     public static function getCfThumbnail(int $attachmentId): array
     {
         $attachmentMeta = wp_get_attachment_metadata($attachmentId);
@@ -371,25 +387,10 @@ class AttachmentController
         return $attachmentMeta[Constants::UPLOADED_IMAGE_CF_THUMBNAIL_NAME] ?? [];
     }
 
-    public static function getLargestPublicVariant(): string
-    {
-        $variants = OptionController::getVariants();
-
-        error_log(print_r($variants, true));
-
-        return '';
-    }
-
-    public static function getAttachmentFileSizeHumanReadableFormat(int $attachmentId): string
-    {
-        $fileSize = wp_get_attachment_metadata($attachmentId)['filesize'] ?? '';
-
-        return size_format($fileSize) ?? '';
-    }
-
     /**
      * Updates attachment's guid field in wp_posts table with given value.
      * This is where final URL of image is stored.
+     *
      * @param int $attachmentId
      * @param string $newGuid
      * @return void
@@ -400,7 +401,7 @@ class AttachmentController
         global $wpdb;
 
         if (!$wpdb->update($wpdb->posts, ['guid' => $newGuid], ['ID' => $attachmentId])) {
-            throw new Exception("Unable to update attachment guid");
+            throw new Exception("[ATTACHMENT] Unable to update attachment guid");
         }
     }
 
@@ -433,6 +434,7 @@ class AttachmentController
     /**
      * Updates attachment's _wp_attached_file field in wp_postmeta table with given value.
      * This is the place relative file path stored.
+     *
      * @param int $attachmentId
      * @param string $newValue
      * @return void
@@ -441,11 +443,19 @@ class AttachmentController
     public static function updateAttachedFile(int $attachmentId, string $newValue): void
     {
         if (!update_attached_file($attachmentId, $newValue)) {
-            throw new Exception("Unable to update attachment file value");
+            throw new Exception("[ATTACHMENT] Unable to update attachment file value");
         }
     }
 
-    public static function getDefaultVariantUrl($cloudflareImageId): string {
+    /**
+     * Retrieve default variant url constructed using default variant
+     * set in plugin settings page.
+     *
+     * @param int $cloudflareImageId
+     *
+     * @return string
+     */
+    public static function getDefaultVariantUrl(int $cloudflareImageId): string {
         $defaultVariant = get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME);
 
         return self::getVariantUrl($defaultVariant, $cloudflareImageId);

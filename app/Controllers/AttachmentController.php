@@ -225,7 +225,21 @@ class AttachmentController
         return $dom->saveHTML($img);
     }
 
-
+    /**
+     * Updates query response (json structured data string) with new data
+     * before it's being sent back to client.
+     *
+     * url, sizes and filename are replaced.
+     *
+     * New prop: 'fp_cf_image_id' added and value is set to Cloudflare image id.
+     *
+     * Works with 'wp_prepare_attachment_for_js' filter.
+     *
+     * @param array $response Response data from filtering wp_prepare_attachment_for_js
+     * @param object $attachment Attachment itself from filtering wp_prepare_attachment_for_js
+     *
+     * @return array Modified dataset.
+     */
     public static function updateAjaxQueryResponse(array $response, object $attachment): array
     {
         $cloudflareImageId = self::getCloudflareIdOfAttachment($attachment->ID);

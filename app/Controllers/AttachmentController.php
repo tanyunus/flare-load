@@ -455,7 +455,7 @@ class AttachmentController
      *
      * @return string
      */
-    public static function getDefaultVariantUrl(int $cloudflareImageId): string {
+    public static function getDefaultVariantUrl(string $cloudflareImageId): string {
         $defaultVariant = get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME);
 
         return self::getVariantUrl($defaultVariant, $cloudflareImageId);

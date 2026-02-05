@@ -122,9 +122,31 @@ class AttachmentController
     }
 
     /**
-     * @throws Exception
+     * A wrapper for meta-data value replacements & additions.
+     *
+     * Params & Values:
+     *
+     * 'file' => ''
+     *
+     * 'fp_cf_image_id' => cloudflare ID of image
+     *
+     * 'fp_cf_file_name' => file name from $newMetaData
+     *
+     * 'fp_cf_thumbnail' => thumbnail data from $newMetaData
+     *
+     * 'filesize' => known file size from uploaded image
+     *
+     * 'sizes' => empty array because it has no use in this case
+     *
+     * Also cleans up attachment cache for immediate reflection on db.
+     *
+     * @param int $attachmentId
+     * @param array $metaData
+     * @param array $newMetaData
+     *
+     * @return array
      */
-    private static function updateAttachmentMeta(int   $attachmentId, array $metaData, array $newMetaData): array
+    private static function updateAttachmentMeta(int $attachmentId, array $metaData, array $newMetaData): array
     {
         $metaData['file'] = '';
         $metaData[Constants::UPLOADED_IMAGE_CF_ID_NAME] = $newMetaData['cloudFlareId'];

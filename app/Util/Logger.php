@@ -6,6 +6,19 @@ class Logger
 {
     const LOG_FILE = 'flare-press.log';
 
+    /**
+     * Levels:
+     *
+     * 0 => "Error"
+     *
+     * 1 => "Warning"
+     *
+     * 2 => "Notice"
+     *
+     * 3 => "Info"
+     *
+     * 4 => "Debug"
+     */
     public static function log(int $level, string $message, array $context = []): void {
         $dateTime = '[' . wp_date('Y-m-d H:i:s P') . '] ';
         $message = self::getLevel($level) .': '. $message;

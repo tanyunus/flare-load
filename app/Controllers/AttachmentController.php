@@ -451,7 +451,7 @@ class AttachmentController
      * Retrieve default variant url constructed using default variant
      * set in plugin settings page.
      *
-     * @param int $cloudflareImageId
+     * @param string $cloudflareImageId
      *
      * @return string
      */

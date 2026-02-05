@@ -82,6 +82,13 @@ class AttachmentController
         }
     }
 
+    /**
+     * Handles the processes that will take place while deleting a Cloudflare Image from WordPress media library.
+     *
+     * @param WP_Post|false|null $delete
+     * @param WP_Post $post
+     * @return WP_Post|false|null
+     */
     public static function handleDeleteAttachment(WP_Post|false|null $delete, WP_Post $post): WP_Post|false|null
     {
         $cfImageId = self::getCloudflareIdOfAttachment($post->ID);
@@ -90,7 +97,7 @@ class AttachmentController
             try {
                 CloudflareImagesApi::deleteImage($cfImageId);
             } catch (Exception $e) {
-                error_log('Attachment deletion error: ' . $e->getMessage());
+                error_log('[ATTACHMENT][DELETE_FROM_DISK] ' . $e->getMessage());
             }
         }
 
@@ -99,6 +106,16 @@ class AttachmentController
         return $delete;
     }
 
+
+    /**
+     * Check if image should be uploaded to Cloudflare.
+     *
+     * Checks 'fp_upload_to_cf' param from $_POST object to determine the result.
+     * The param and it's value is added to request body in frontend
+     * before media upload request sent; Intercepted by JS code.
+     *
+     * @return bool
+     */
     private static function shouldUploadToCloudflare(): bool
     {
         return $_POST[Constants::UPLOAD_TO_CF_INDICATOR] ?? false;

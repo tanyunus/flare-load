@@ -12,6 +12,28 @@ use WP_Post;
 
 class AttachmentController
 {
+    /**
+     * Handles processes that will take place while inserting an attachment to db.
+     *
+     * Basically these are happening:
+     *
+     * 1 - Path, name and size of the uploaded image file are stored in variables.
+     *
+     * 2 - A thumbnail version of the uploaded image is generated from the disk version.
+     *
+     * 3 - Image is uploaded to Cloudflare Images.
+     *
+     * 4 - 'guid' and 'attached_file' values are replaced with Cloudflare Image ID in db.
+     *
+     * 5 - New and existing meta-data is created.
+     *
+     * 6 - Attachment meta-data is modified with new values before it's written on db via filtering: wp_generate_attachment_metadata.
+     *
+     * 7 - Local file of uploaded image deletion (is it's set to be deleted in options page).
+     *
+     * @param $attachmentId
+     * @return void
+     */
     public static function handleAddAttachment($attachmentId): void
     {
         if (!self::shouldUploadToCloudflare()) {

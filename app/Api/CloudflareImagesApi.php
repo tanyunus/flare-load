@@ -9,73 +9,115 @@ use FlarePress\Data\Constants;
 class CloudflareImagesApi
 {
     /**
+     * Directly upload given image file to Cloudflare Images
+     * with given image file name.
+     *
+     * @param string $imageFile
+     * @param string $imageFileName
+     *
+     * @return array
      * @throws Exception
      */
     public static function uploadImage(string $imageFile, string $imageFileName): array {
-        $payload = ['file' => new CURLFile($imageFile, mime_content_type($imageFile), $imageFileName)];
+        $mimeType = mime_content_type($imageFile);
 
-        $response = self::sendData($payload, self::buildRequestUrl(), 'POST');
+        if(!$mimeType) {
+            throw new Exception('[IMAGES_API][UPLOAD] Cannot get mime type from given image file.');
+        }
+
+        $payload = ['file' => new CURLFile($imageFile, $mimeType, $imageFileName)];
+
+        $requestUrl = self::buildRequestUrl();
+
+        if(empty($requestUrl)) {
+            throw new Exception('[IMAGES_API][UPLOAD] Cannot construct api request url.');
+        }
+
+        $response = self::sendData($payload, $requestUrl, 'POST');
+
+        if(empty($response)) {
+            throw new Exception('[IMAGES_API][UPLOAD] Empty response body from request.');
+        }
+
         $response = json_decode($response, true);
 
         if(json_last_error() !== JSON_ERROR_NONE){
-            throw new Exception('[Images API] Json error: ' . json_last_error_msg());
+            throw new Exception('[IMAGES_API][UPLOAD] Json error: ' . json_last_error_msg());
         }
 
         if(!$response['success']){
-            throw new Exception('[Images API] Cloudflare image upload error: ' . $response['errors'][0]['message']);
+            throw new Exception('[IMAGES_API][UPLOAD] ' . $response['errors'][0]['message']);
         }
 
         return $response;
     }
 
     /**
+     * Delete image of given Cloudflare ID from Cloudflare Images
+     *
+     * @param string $cloudFlareImageId
+     *
+     * @return array
      * @throws Exception
      */
     public static function deleteImage(string $cloudFlareImageId): array {
-        $response = self::sendData([], self::buildRequestUrl($cloudFlareImageId), 'DELETE');
+        $requestUrl = self::buildRequestUrl($cloudFlareImageId);
+
+        if(empty($requestUrl)) {
+            throw new Exception('[IMAGES_API][DELETE] Cannot construct api request url.');
+        }
+
+        $response = self::sendData([], $requestUrl, 'DELETE');
 
         $response = json_decode($response, true);
 
-        if(json_last_error() !== JSON_ERROR_NONE){
-            throw new Exception('[Images API] Cloudflare image delete error: Json error: ' . json_last_error_msg());
+        if(json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('[IMAGES_API][DELETE] Json error: ' . json_last_error_msg());
         }
 
         if(!$response['success']){
-            throw new Exception('[Images API] Cloudflare image delete error: ' . $response['errors'][0]['message']);
+            throw new Exception('[IMAGES_API][DELETE] ' . $response['errors'][0]['message']);
         }
 
         return $response;
     }
 
-    public static function uploadMultipleImages(array $imageUrls): array|false {
-        return [];
-    }
-
     /**
+     * Get all variants defined in Cloudflare Images account.
+     *
+     * @return array
      * @throws Exception
      */
     public static function getVariants(): array {
+        $requestUrl = self::buildRequestUrl(Constants::CF_API_MODULE_VARIANTS);
+
+        if(empty($requestUrl)) {
+            throw new Exception('[IMAGES_API][VARIANT_RETRIEVAL] Cannot construct api request url.');
+        }
+
         $response = self::sendData([], self::buildRequestUrl(Constants::CF_API_MODULE_VARIANTS), 'GET');
         $response = json_decode($response, true);
 
         if(json_last_error() !== JSON_ERROR_NONE){
-            throw new Exception('[Images API] Variant retrieval error: Json error: ' . json_last_error_msg());
+            throw new Exception('[IMAGES_API][VARIANT_RETRIEVAL] Json error: ' . json_last_error_msg());
         }
 
         if(!$response['success']){
-            throw new Exception('[Images API] Variant retrieval error: ' . $response['errors'][0]['message']);
+            throw new Exception('[IMAGES_API][VARIANT_RETRIEVAL] ' . $response['errors'][0]['message']);
         }
 
         return $response['result']['variants'];
     }
 
     /**
-     * Makes a request to the given URL and returns the response.
+     * Make a cURL request to a URL and get the response as plain string.
+     * Current support for methods: GET, POST, DELETE
      *
      * @param array $payload
      * @param string $url
      * @param string $method
      * @param array $headers
+     *
      * @return string
      * @throws Exception
      */
@@ -108,7 +150,7 @@ class CloudflareImagesApi
             if (curl_errno($ch)) {
                 curl_close($ch);
 
-                throw new Exception("cURL Error: " . curl_error($ch));
+                throw new Exception("[IMAGES_API][cURL]: " . curl_error($ch));
             } else {
                 curl_close($ch);
 
@@ -121,8 +163,19 @@ class CloudflareImagesApi
         }
     }
 
+
+    /**
+     * Constructs request url to be used in API requests.
+     *
+     * @return string
+     * @param string $additional
+     */
     private static function buildRequestUrl(string $additional = ''): string {
         $accountId = get_option(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME);
+
+        if(empty($accountId)) {
+            return '';
+        }
 
         $url = Constants::CF_API_URL . $accountId . '/images/' . Constants::CF_API_VERSION;
 
@@ -133,7 +186,12 @@ class CloudflareImagesApi
         return $url;
     }
 
+    /**
+     * Get API token from DB. Empty if option or value not found.
+     *
+     * @return string
+     */
     private static function getApiToken(): string {
-        return get_option(Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME);
+        return get_option(Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME) ?? '';
     }
 }

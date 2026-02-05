@@ -38,15 +38,6 @@ class OptionController
 
     private function addSettingsPage(): void
     {
-        /*add_options_page(
-                Constants::UI_PAGE_TITLE,
-                Constants::DASHBOARD_MENU_TITLE,
-                'manage_options',
-                Constants::DASHBOARD_MENU_SLUG,
-                [$this, 'fpAdminDashboardView'],
-                5
-        );*/
-
         add_menu_page(
                 Constants::UI_PAGE_TITLE,
                 Constants::DASHBOARD_MENU_TITLE,

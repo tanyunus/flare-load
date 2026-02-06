@@ -1,0 +1,8 @@
+# Deny access to everything by default
+Order Deny,Allow
+Deny from all
+
+# Allow access only to /includes/dist/ directory
+<FilesMatch "^(includes/dist/)">
+    Allow from all
+</FilesMatch>

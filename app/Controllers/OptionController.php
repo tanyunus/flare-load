@@ -56,7 +56,8 @@ class OptionController
         );
     }
 
-    private function addLogPage(): void {
+    private function addLogPage(): void
+    {
         add_submenu_page(
                 Constants::DASHBOARD_MENU_SLUG,
                 Constants::UI_LOG_PAGE_TITLE,
@@ -73,7 +74,8 @@ class OptionController
         Utils::renderTemplate(Constants::DASHBOARD_VIEW);
     }
 
-    public function fpAdminLogView(): void {
+    public function fpAdminLogView(): void
+    {
         Utils::renderTemplate(Constants::LOG_VIEW);
     }
 
@@ -107,7 +109,8 @@ class OptionController
         );
     }
 
-    private function addLogViewerSection(): void {
+    private function addLogViewerSection(): void
+    {
         add_settings_section(
                 'fp_log_viewer_section',
                 'Log Viewer',
@@ -149,7 +152,14 @@ class OptionController
 
     private function registerAccountIDField(): void
     {
-        register_setting(Constants::DASHBOARD_SETTINGS_GROUP_NAME, Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME, [$this, 'sanitizeText']);
+        register_setting(
+                Constants::DASHBOARD_SETTINGS_GROUP_NAME,
+                Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME,
+                [
+                        'sanitize_callback' => 'sanitize_text_field',
+                        'default' => ''
+                ]
+        );
 
         add_settings_field(
                 Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME,
@@ -164,7 +174,14 @@ class OptionController
 
     private function registerAccountHashField(): void
     {
-        register_setting(Constants::DASHBOARD_SETTINGS_GROUP_NAME, Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME, [$this, 'sanitizeText']);
+        register_setting(
+                Constants::DASHBOARD_SETTINGS_GROUP_NAME,
+                Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME,
+                [
+                        'sanitize_callback' => 'sanitize_text_field',
+                        'default' => ''
+                ]
+        );
 
         add_settings_field(
                 Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME,
@@ -180,7 +197,14 @@ class OptionController
 
     private function registerApiTokenField(): void
     {
-        register_setting(Constants::DASHBOARD_SETTINGS_GROUP_NAME, Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, [$this, 'sanitizeText']);
+        register_setting(
+                Constants::DASHBOARD_SETTINGS_GROUP_NAME,
+                Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME,
+                [
+                        'sanitize_callback' => 'sanitize_text_field',
+                        'default' => ''
+                ]
+        );
 
         add_settings_field(
                 Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME,
@@ -195,9 +219,23 @@ class OptionController
 
     private function registerVariantListField(): void
     {
+        $variantNames = $this->getVariantNamesAsArray();
+
         register_setting(
                 Constants::DASHBOARD_VARIANT_SETTINGS_GROUP_NAME,
-                Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME
+                Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME,
+                [
+                        'sanitize_callback' => function ($value) use ($variantNames) {
+                            $sanitized = sanitize_text_field($value);
+
+                            if (in_array($sanitized, $variantNames, true)) {
+                                return $sanitized;
+                            }
+
+                            return $variantNames[0];
+                        },
+                        'default' => $variantNames[0],
+                ]
         );
 
         add_settings_field(
@@ -332,7 +370,7 @@ class OptionController
         <label class="fp-api-token-field-label">
             <input
                     type="password"
-                    value="<?php echo !empty($optionVal) ? '••••••••••••••••••••••' : ''?>"
+                    value="<?php echo !empty($optionVal) ? '••••••••••••••••••••••' : '' ?>"
                     data-field-name="<?php echo Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME ?>"
                     <?php echo empty($optionVal) ? 'name="' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME . '"' : '' ?>
                     <?php echo empty($optionVal) ? 'id="' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME . '"' : '' ?>
@@ -341,16 +379,18 @@ class OptionController
                     class="regular-text"/>
 
             <?php
-                if(!empty($optionVal)) {
-                    ?>
-                    <button id="fp_change_api_token_button" class="button button-secondary fp-change-api-token-button" type="button" role="button">
-                        <span class="dashicons dashicons-edit"></span>
-                    </button>
-                    <?php
-                }
+            if (!empty($optionVal)) {
+                ?>
+                <button id="fp_change_api_token_button" class="button button-secondary fp-change-api-token-button"
+                        type="button" role="button">
+                    <span class="dashicons dashicons-edit"></span>
+                </button>
+                <?php
+            }
             ?>
         </label>
-        <p class="description">You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/api-tokens</i></p>
+        <p class="description">You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/api-tokens</i>
+        </p>
         <?php
     }
 
@@ -448,7 +488,7 @@ class OptionController
         $variantsArray = json_decode($variantsAsEncodedString, true);
 
         if (JSON_ERROR_NONE !== json_last_error()) {
-            Logger::log(0,'[OPTIONS] Error retrieving variants options: ' . json_last_error_msg());
+            Logger::log(0, '[OPTIONS] Error retrieving variants options: ' . json_last_error_msg());
 
             return [];
         }

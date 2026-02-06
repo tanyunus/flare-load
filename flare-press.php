@@ -29,12 +29,8 @@ add_action('plugins_loaded', 'flarePressInit');
 
 function flarePressInit(): void
 {
-    if(is_user_logged_in()) {
+    if (is_user_logged_in()) {
         add_action('rest_api_init', 'fp_rest_api_init');
-        add_filter('wp_prepare_attachment_for_js', 'fp_wp_prepare_attachment_for_js', 5, 3);
-        add_filter('wp_get_attachment_image', 'fp_wp_get_attachment_image', 15, 5);
-        add_filter('wp_get_attachment_image_src', 'fp_wp_get_attachment_image_src', 10, 4);
-        add_filter('wp_get_attachment_url', 'fp_wp_get_attachment_url', 5, 2);
         add_filter('render_block', 'fp_render_block', 10, 2);
         add_filter('manage_media_columns', 'fp_manage_media_columns');
         add_filter('manage_media_custom_column', 'fp_manage_media_custom_column', 10, 2);
@@ -43,17 +39,24 @@ function flarePressInit(): void
         add_action('admin_menu', 'fp_admin_menu');
         add_action('admin_print_footer_scripts', 'fp_admin_print_footer_scripts');
         add_action('admin_enqueue_scripts', 'fp_admin_enqueue_scripts');
-        add_filter('pre_update_option_'.Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'fp_pre_update_option_save_api_token', 10, 2);
-        add_filter('get_attached_file', 'fp_get_attached_file', 10, 2);
-        add_filter('get_sample_permalink_html', 'fp_get_sample_permalink_html', 10, 5);
+        add_filter('pre_update_option_' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'fp_pre_update_option_save_api_token', 10, 2);
     }
+
+    # Public filters
+    add_filter('wp_prepare_attachment_for_js', 'fp_wp_prepare_attachment_for_js', 5, 3);
+    add_filter('wp_get_attachment_image', 'fp_wp_get_attachment_image', 15, 5);
+    add_filter('wp_get_attachment_image_src', 'fp_wp_get_attachment_image_src', 10, 4);
+    add_filter('wp_get_attachment_url', 'fp_wp_get_attachment_url', 5, 2);
+    add_filter('get_attached_file', 'fp_get_attached_file', 10, 2);
+    add_filter('get_sample_permalink_html', 'fp_get_sample_permalink_html', 10, 5);
 }
 
-function fp_get_sample_permalink_html(string $return, int $postId, string|null $newTitle, string|null $newSlug, WP_Post $post): string {
-    if(Utils::isAdminPage('post.php')) {
+function fp_get_sample_permalink_html(string $return, int $postId, string|null $newTitle, string|null $newSlug, WP_Post $post): string
+{
+    if (Utils::isAdminPage('post.php')) {
         $cfId = AttachmentController::getCloudflareIdOfAttachment($postId);
 
-        if($cfId) {
+        if ($cfId) {
             $cfUrl = AttachmentController::getDefaultVariantUrl($cfId);
 
             $dom = new DOMDocument();
@@ -77,12 +80,13 @@ function fp_get_sample_permalink_html(string $return, int $postId, string|null $
 /**
  * Modify basename before it's being returned.
  */
-function fp_get_attached_file(string $file, int $attachmentId): string {
+function fp_get_attached_file(string $file, int $attachmentId): string
+{
     //  1. Check if it's post editing page
-    if(Utils::isAdminPage('post.php')) {
+    if (Utils::isAdminPage('post.php')) {
         $cfId = AttachmentController::getCloudflareIdOfAttachment($attachmentId);
         // 2. Check if image is uploaded to Cloudflare
-        if($cfId) {
+        if ($cfId) {
             // 3. Replace basename with file's actual name stored in db
             $file = str_replace(wp_basename($file), get_the_title($attachmentId), $file);
         }
@@ -94,8 +98,9 @@ function fp_get_attached_file(string $file, int $attachmentId): string {
 /**
  * Modify api token submission value if empty and save old data.
  */
-function fp_pre_update_option_save_api_token(mixed $newValue, mixed $oldValue): mixed {
-    if(empty(trim($newValue))) {
+function fp_pre_update_option_save_api_token(mixed $newValue, mixed $oldValue): mixed
+{
+    if (empty(trim($newValue))) {
         return $oldValue;
     }
 
@@ -105,7 +110,8 @@ function fp_pre_update_option_save_api_token(mixed $newValue, mixed $oldValue): 
 /**
  * Modify block attributes before they're rendered to contain plugin features.
  */
-function fp_render_block($blockContent, $block) {
+function fp_render_block($blockContent, $block)
+{
     if ($block['blockName'] !== 'core/image') {
         return $blockContent;
     }
@@ -152,14 +158,23 @@ function fp_render_block($blockContent, $block) {
  */
 function fp_rest_api_init(): void
 {
-    register_rest_route('flare-press/v1', '/sync-variants', array(
-        'methods' => 'POST',
-        'callback' => [OptionRestApi::class, 'syncVariants'],
-        'permission_callback' => function () {
-            return current_user_can('manage_options');
-        }
-    ));
+    # Provides variant synchronization through rest api if the current user
+    # is capable of managing options.
+    #
+    # In plugin settings page we have a 'Sync Variants' button.
+    # This button is tied to this endpoint and triggers variant sync process.
+    if(current_user_can('manage_options')) {
+        register_rest_route('flare-press/v1', '/sync-variants', array(
+            'methods' => 'POST',
+            'callback' => [OptionRestApi::class, 'syncVariants'],
+            'permission_callback' => function () {
+                return current_user_can('manage_options');
+            }
+        ));
+    }
 
+    # Provides variant names as array.
+    # Used in post editor blocks contain image insertion mechanics.
     register_rest_route('flare-press/v1', '/get-variant-names', array(
         'methods' => 'GET',
         'callback' => [OptionRestApi::class, 'getVariantNames'],
@@ -168,6 +183,8 @@ function fp_rest_api_init(): void
         }
     ));
 
+    # Provides Cloudflare account hash.
+    # Used in post editor for generating Cloudflare image urls on the fly.
     register_rest_route('flare-press/v1', '/get-account-hash', array(
         'methods' => 'GET',
         'callback' => [OptionRestApi::class, 'getAccountHash'],
@@ -223,11 +240,11 @@ function fp_wp_get_attachment_image_src(array|false $image, int $attachmentId): 
 {
     $cfId = AttachmentController::getCloudflareIdOfAttachment($attachmentId);
 
-    if(!$cfId) {
+    if (!$cfId) {
         return $image;
     }
 
-    if(Utils::isMediaEditPage()) {
+    if (Utils::isMediaEditPage()) {
         $image[0] = AttachmentController::getDefaultVariantUrl($cfId);
     } else {
         $image[0] = AttachmentController::getCfThumbnail($attachmentId)['path'];
@@ -289,19 +306,19 @@ function fp_admin_menu(): void
  */
 function fp_admin_print_footer_scripts(): void
 {
-    if(Utils::isAdminPage('upload.php') && (empty($_GET) || $_GET['mode'] === 'grid')) {
+    if (Utils::isAdminPage('upload.php') && (empty($_GET) || $_GET['mode'] === 'grid')) {
         wp_enqueue_script('fp-media-library-grid-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-media-library-grid.js');
     }
 
-    if(Utils::isAdminPage('media-new.php')) {
+    if (Utils::isAdminPage('media-new.php')) {
         wp_enqueue_script('fp-media-new-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-media-new.js');
     }
 
-    if(Utils::isFpOptionsPage()) {
+    if (Utils::isFpOptionsPage()) {
         wp_enqueue_script('fp-options-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-options.js');
     }
 
-    if((Utils::isPostEditPage() || Utils::isAdminPage('post-new.php')) && !Utils::isMediaEditPage()) {
+    if ((Utils::isPostEditPage() || Utils::isAdminPage('post-new.php')) && !Utils::isMediaEditPage()) {
         wp_enqueue_script('fp-post-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-post.js');
     }
 }

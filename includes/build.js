@@ -1,3 +1,5 @@
+// Prod build script
+
 const esbuild = require('esbuild');
 const fs = require('fs');
 const path = require('path');
@@ -26,36 +28,6 @@ const wpExternalsPlugin = {
     }
 };
 
-const scssPlugin = {
-    name: 'scss',
-    setup(build) {
-        build.onLoad({ filter: /\.scss$/ }, async (args) => {
-            try {
-                const result = sass.compile(args.path, {
-                    sourceMap: false,
-                    style: 'compressed'
-                });
-
-                return {
-                    contents: result.css,
-                    loader: 'css',
-                };
-            } catch (error) {
-                return {
-                    errors: [{
-                        text: error.message,
-                        location: error.span ? {
-                            file: args.path,
-                            line: error.span.start.line,
-                            column: error.span.start.column,
-                        } : null,
-                    }],
-                };
-            }
-        });
-    }
-};
-
 function getEntryPoints(dir) {
     const files = fs.readdirSync(dir);
     const entryPoints = [];
@@ -74,46 +46,70 @@ function getEntryPoints(dir) {
     return entryPoints;
 }
 
-function getScssEntryPoints(dir) {
+function getScssFiles(dir) {
     if (!fs.existsSync(dir)) {
         console.log(`Directory ${dir} does not exist, skipping SCSS compilation`);
         return [];
     }
 
     const files = fs.readdirSync(dir);
-    const entryPoints = [];
+    const scssFiles = [];
 
     files.forEach(file => {
         const fullPath = path.join(dir, file);
         const stat = fs.statSync(fullPath);
 
         if (stat.isDirectory()) {
-            entryPoints.push(...getScssEntryPoints(fullPath));
+            scssFiles.push(...getScssFiles(fullPath));
         } else if (file.endsWith('.scss') && !file.startsWith('_')) {
-            entryPoints.push(fullPath);
+            scssFiles.push(fullPath);
         }
     });
 
-    return entryPoints;
+    return scssFiles;
+}
+
+function compileScss(filePath) {
+    try {
+        const result = sass.compile(filePath, {
+            sourceMap: false,
+            style: 'compressed'
+        });
+
+        const fileName = path.basename(filePath, '.scss') + '.css';
+        const outputPath = path.join('dist', 'css', fileName);
+        const outputDir = path.dirname(outputPath);
+
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir, { recursive: true });
+        }
+
+        fs.writeFileSync(outputPath, result.css);
+        console.log(`✓ Compiled: ${filePath} → ${outputPath}`);
+    } catch (error) {
+        console.error(`✗ Error compiling ${filePath}:`, error.message);
+    }
 }
 
 const scriptEntryPoints = getEntryPoints('assets/scripts/main');
-const scssEntryPoints = getScssEntryPoints('assets/styles');
+const scssFiles = getScssFiles('assets/styles');
 
+// Compile SCSS files
+scssFiles.forEach(compileScss);
+
+// Build TypeScript/JavaScript
 const buildConfig = {
-    entryPoints: [...scriptEntryPoints, ...scssEntryPoints],
+    entryPoints: scriptEntryPoints,
     bundle: true,
     minify: true,
     sourcemap: false,
-    outdir: 'dist',
-    outbase: 'assets',
-    plugins: [wpExternalsPlugin, scssPlugin],
+    outdir: 'dist/main',
+    plugins: [wpExternalsPlugin],
     target: 'es2020',
     format: 'iife',
     loader: {
         '.tsx': 'tsx',
         '.ts': 'ts',
-        '.scss': 'css',
         '.png': 'file',
         '.jpg': 'file',
         '.jpeg': 'file',

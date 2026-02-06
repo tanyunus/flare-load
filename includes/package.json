@@ -4,13 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "npm run dev:ts & npm run dev:scss",
+    "dev": "npm run build:images && npm run dev:ts",
     "dev:ts": "node build-dev.js",
-    "dev:scss": "sass --watch assets/styles:dist/css",
-    "build:images": "xcopy assets\\images dist\\images /E /I /Y",
-    "build": "npm run build:ts && npm run build:scss && npm run build:images",
+    "build:images": "node -e \"require('fs').cpSync('assets/images', 'dist/images', {recursive: true, force: true})\"",
+    "build": "npm run build:images && npm run build:ts",
     "build:ts": "node build.js",
-    "build:scss": "sass --style=compressed --no-source-map assets/styles:dist/css",
     "build:prod": "npm run build"
   },
   "keywords": [],

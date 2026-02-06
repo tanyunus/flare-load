@@ -1,3 +1,5 @@
+// Dev build script
+
 const esbuild = require('esbuild');
 const fs = require('fs');
 const path = require('path');
@@ -127,8 +129,7 @@ const buildConfig = {
     bundle: true,
     minify: false,
     sourcemap: true,
-    outdir: 'dist',
-    outbase: 'assets/scripts',
+    outdir: 'dist/main',
     plugins: [wpExternalsPlugin],
     target: 'es2020',
     format: 'iife',

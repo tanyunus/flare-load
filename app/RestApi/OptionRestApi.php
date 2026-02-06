@@ -39,7 +39,6 @@ class OptionRestApi
         }
 
         sort($variantNames);
-        $jsonEncodedVariantNames = stripslashes(wp_json_encode($variantNames));
 
         return new WP_REST_Response([
             'success' => true,

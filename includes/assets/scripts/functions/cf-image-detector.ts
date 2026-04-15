@@ -6,7 +6,6 @@ export function detectAndMarkCfImages(): void {
         const data = event.detail;
         if (data.fp_cf_image_id) {
             cfImageIds.add(data.id);
-            console.log('[FP] New CF image uploaded:', data.id);
             waitForAttachmentElement(data.id);
         }
     }) as EventListener);
@@ -53,21 +52,30 @@ function markAttachmentElement(attachmentId: string | number): void {
 
     if (element && !element.classList.contains('fp-cf-badge')) {
         element.classList.add('fp-cf-badge');
-        console.log('[FP] Marked CF image:', attachmentId);
     }
 }
 
 function observeAttachmentGrid(): void {
-    // Continuously re-mark CF images every 500ms
-    setInterval(() => {
-        cfImageIds.forEach(id => {
-            const element = document.querySelector<HTMLElement>(`li.attachment[data-id="${id}"]`);
-            if (element && !element.classList.contains('fp-cf-badge')) {
-                element.classList.add('fp-cf-badge');
-                console.log('[FP] Re-marked CF image:', id);
-            }
-        });
-    }, 500);
+    function reMarkAll(): void {
+        cfImageIds.forEach(id => markAttachmentElement(id));
+    }
+
+    function attachGridObserver(): void {
+        const grid = document.querySelector('.attachments');
+        if (grid) {
+            new MutationObserver(reMarkAll).observe(grid, { childList: true, subtree: true });
+        }
+    }
+
+    // Wait for the grid container to appear, then attach the specific observer
+    const bodyObserver = new MutationObserver(() => {
+        if (document.querySelector('.attachments')) {
+            bodyObserver.disconnect();
+            attachGridObserver();
+        }
+    });
+
+    bodyObserver.observe(document.body, { childList: true, subtree: true });
 }
 
 function waitForAttachmentElement(attachmentId: string | number): void {

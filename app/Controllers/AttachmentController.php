@@ -97,7 +97,7 @@ class AttachmentController
             try {
                 CloudflareImagesApi::deleteImage($cfImageId);
             } catch (Exception $e) {
-                error_log('[ATTACHMENT][DELETE_FROM_DISK] ' . $e->getMessage());
+                Logger::log(0, '[ATTACHMENT][DELETE_FROM_DISK] ' . $e->getMessage());
             }
         }
 

@@ -5,11 +5,8 @@ export function addSwitcherToImageBlock(uploadManager: UploadManager): void {
         const iframe = document.querySelector<HTMLIFrameElement>('iframe[name="editor-canvas"]');
 
         if (!iframe || !iframe.contentDocument) {
-            console.log('[FP] Editor iframe not found');
             return;
         }
-
-        console.log('[FP] Found editor iframe, starting observer');
 
         const iframeDoc = iframe.contentDocument;
 
@@ -34,12 +31,8 @@ export function addSwitcherToImageBlock(uploadManager: UploadManager): void {
                     });
 
                     uploadButton.parentElement?.insertBefore(cfButton, uploadButton.nextSibling);
-
-                    console.log('[FP] CF upload button added to image block');
                 }
             });
-
-            addCfButtonToImageToolbar(uploadManager);
         });
 
         observer.observe(iframeDoc.body, {
@@ -51,26 +44,7 @@ export function addSwitcherToImageBlock(uploadManager: UploadManager): void {
     }, 2000);
 }
 
-function addCfButtonToImageToolbar(uploadManager: UploadManager): void {
-    const dropdowns = document.querySelectorAll('[class*="media"]');
-    console.log('[FP] Found elements with media in class (main doc):', dropdowns.length);
-
-    const menus = document.querySelectorAll('[role="menu"]');
-    console.log('[FP] Found menus (main doc):', menus.length);
-
-    menus.forEach(menu => {
-        console.log('[FP] Menu:', menu);
-        const buttons = menu.querySelectorAll('button');
-        console.log('[FP] Buttons in menu:', buttons.length);
-        buttons.forEach(btn => {
-            console.log('[FP] Button text:', btn.textContent);
-        });
-    });
-}
-
 function observeMainDocumentForDropdown(uploadManager: UploadManager): void {
-    console.log('[FP] Starting to observe main document for dropdown');
-
     const observer = new MutationObserver(() => {
         const menus = document.querySelectorAll('[role="menu"]');
 
@@ -83,15 +57,12 @@ function observeMainDocumentForDropdown(uploadManager: UploadManager): void {
             let uploadButton: HTMLButtonElement | null = null;
 
             buttons.forEach(btn => {
-                console.log('[FP] Button text:', btn.textContent);
                 if (btn.textContent?.includes('Upload')) {
                     uploadButton = btn as HTMLButtonElement;
                 }
             });
 
             if (uploadButton) {
-                console.log('[FP] Found Upload button in dropdown');
-
                 const cfButton = uploadManager.createCfUploadButton('is-next-40px-default-size components-button fp-cf-upload-toolbar-button');
                 cfButton.classList.add('components-menu-item__button');
                 cfButton.style.width = '100%';
@@ -105,8 +76,6 @@ function observeMainDocumentForDropdown(uploadManager: UploadManager): void {
 
                 // Insert right after the upload button
                 uploadButton.parentElement?.insertBefore(cfButton, uploadButton.nextSibling);
-
-                console.log('[FP] CF upload button added to toolbar dropdown');
             }
         });
     });

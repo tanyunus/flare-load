@@ -460,7 +460,7 @@ class OptionController
                 data-fp-file-name="' . AttachmentController::getAttachmentFileName($attachmentId) . '"
                 data-fp-url="' . get_the_guid($attachmentId) . '"
                 >
-                <img title="' . Utils::localize(Constants::UI_CF_BADGE_TITLE) . '" alt="Cloudflare logo" height="18" src="/wordpress/wp-content/plugins/flare-press/includes/assets/images/cf_logo.png"></span>';
+                <img title="' . Utils::localize(Constants::UI_CF_BADGE_TITLE) . '" alt="Cloudflare logo" height="18" src="' . esc_url(FLARE_PRESS_URL . 'includes/assets/images/cf_logo.png') . '"></span>';
         } else {
             echo Utils::localize(Constants::UI_CF_LOCATION_THIS_SERVER);
         }

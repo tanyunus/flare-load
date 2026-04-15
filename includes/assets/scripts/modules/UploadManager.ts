@@ -150,7 +150,9 @@ export default class UploadManager {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'fp-cf-upload-button ' + additionalClassName;
-        button.innerHTML = 'Upload to Cloudflare &nbsp;&nbsp;<img style="margin-left: auto; height: 14px;" src="/wp-content/plugins/flare-press/includes/dist/images/cf_logo_cropped.png" alt="Cloudflare logo">';
+        // Use dynamic plugin URL from wp_localize_script to support subdirectory installations
+        const logoUrl = (window.fpConfig?.pluginUrl ?? '') + 'includes/dist/images/cf_logo_cropped.png';
+        button.innerHTML = `Upload to Cloudflare &nbsp;&nbsp;<img style="margin-left: auto; height: 14px;" src="${logoUrl}" alt="Cloudflare logo">`;
         button.style.boxShadow = 'inset 0 0 0 1px #f78100, 0 0 0 currentColor';
         button.style.color = '#f78100';
         return button;

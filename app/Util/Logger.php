@@ -33,15 +33,27 @@ class Logger
     private static function updateLogFile(string $data): bool {
         $filePath = self::getLogFilePath();
 
+        if (!file_exists($filePath)) {
+            self::createLogFile();
+        }
+
         return boolval(file_put_contents($filePath, $data . PHP_EOL, FILE_APPEND | LOCK_EX));
     }
 
     private static function createLogFile(): void {
-
+        $filePath = self::getLogFilePath();
+        if (!file_exists($filePath)) {
+            file_put_contents($filePath, '');
+            chmod($filePath, 0644);
+        }
     }
 
     public static function getLogFile(): string {
-        return file_get_contents(self::getLogFilePath());
+        $filePath = self::getLogFilePath();
+        if (!file_exists($filePath)) {
+            return '';
+        }
+        return file_get_contents($filePath) ?: '';
     }
 
     private static function getLogFilePath(): string {

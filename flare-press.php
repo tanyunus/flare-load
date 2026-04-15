@@ -307,19 +307,23 @@ function fp_admin_menu(): void
 function fp_admin_print_footer_scripts(): void
 {
     if (Utils::isAdminPage('upload.php') && (empty($_GET) || $_GET['mode'] === 'grid')) {
-        wp_enqueue_script('fp-media-library-grid-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-media-library-grid.js');
+        wp_enqueue_script('fp-media-library-grid-script', FLARE_PRESS_URL . 'includes/dist/main/fp-media-library-grid.js', [], FLARE_PRESS_VERSION, true);
+        wp_localize_script('fp-media-library-grid-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL]);
     }
 
     if (Utils::isAdminPage('media-new.php')) {
-        wp_enqueue_script('fp-media-new-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-media-new.js');
+        wp_enqueue_script('fp-media-new-script', FLARE_PRESS_URL . 'includes/dist/main/fp-media-new.js', [], FLARE_PRESS_VERSION, true);
+        wp_localize_script('fp-media-new-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL]);
     }
 
     if (Utils::isFpOptionsPage()) {
-        wp_enqueue_script('fp-options-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-options.js');
+        wp_enqueue_script('fp-options-script', FLARE_PRESS_URL . 'includes/dist/main/fp-options.js', [], FLARE_PRESS_VERSION, true);
+        wp_localize_script('fp-options-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL]);
     }
 
     if ((Utils::isPostEditPage() || Utils::isAdminPage('post-new.php')) && !Utils::isMediaEditPage()) {
-        wp_enqueue_script('fp-post-script', FLARE_PRESS_PATH . 'includes/dist/main/fp-post.js');
+        wp_enqueue_script('fp-post-script', FLARE_PRESS_URL . 'includes/dist/main/fp-post.js', [], FLARE_PRESS_VERSION, true);
+        wp_localize_script('fp-post-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL]);
     }
 }
 
@@ -328,7 +332,7 @@ function fp_admin_print_footer_scripts(): void
  */
 function fp_admin_enqueue_scripts(): void
 {
-    wp_enqueue_style('fp-main-style', FLARE_PRESS_PATH . 'includes/dist/css/fp-main.css');
+    wp_enqueue_style('fp-main-style', FLARE_PRESS_URL . 'includes/dist/css/fp-main.css', [], FLARE_PRESS_VERSION);
 }
 
 /**

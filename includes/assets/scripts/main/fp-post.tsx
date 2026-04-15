@@ -149,7 +149,6 @@ addFilter(
     'flare-press/with-custom-control',
     withCustomControl
 );
-``
 
 async function getVariantNames(): Promise<string[] | false> {
     const wpNonce = window?.wp?.apiFetch?.nonceMiddleware?.nonce ?? await RestApi.getWpNonce();

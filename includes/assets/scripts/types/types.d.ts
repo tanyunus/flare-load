@@ -133,11 +133,18 @@ export interface BlockType {
     [key: string]: any;
 }
 
+// Global config injected via wp_localize_script
+export interface FpConfig {
+    pluginUrl: string;
+}
+
 declare global {
     interface Window {
         wp?: WordPressGlobal;
         uploader?: PluploadUploader;
         fp_upload_to_cf?: number;
+        fp_upload_to_cf_next?: boolean;
+        fpConfig?: FpConfig;
         jQuery?: any;
         fetch: typeof fetch;
     }

@@ -25,6 +25,18 @@ define('FLARE_PRESS_URL', plugin_dir_url(__FILE__));
 
 require_once FLARE_PRESS_PATH . 'autoload.php';
 
+register_activation_hook(__FILE__, 'fp_activate');
+
+function fp_activate(): void {
+    // Set default option values if not already configured
+    if (!get_option('fp_upload_settings')) {
+        update_option('fp_upload_settings', [
+            Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME       => false,
+            Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME => false,
+        ]);
+    }
+}
+
 add_action('plugins_loaded', 'flarePressInit');
 
 function flarePressInit(): void
@@ -306,7 +318,7 @@ function fp_admin_menu(): void
  */
 function fp_admin_print_footer_scripts(): void
 {
-    if (Utils::isAdminPage('upload.php') && (empty($_GET) || $_GET['mode'] === 'grid')) {
+    if (Utils::isAdminPage('upload.php') && (empty($_GET) || sanitize_key(wp_unslash($_GET['mode'] ?? '')) === 'grid')) {
         wp_enqueue_script('fp-media-library-grid-script', FLARE_PRESS_URL . 'includes/dist/main/fp-media-library-grid.js', [], FLARE_PRESS_VERSION, true);
         wp_localize_script('fp-media-library-grid-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL]);
     }

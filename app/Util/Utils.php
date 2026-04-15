@@ -30,7 +30,7 @@ class Utils
         $currentAdminPage = basename(admin_url($pagenow));
 
         if (empty($currentAdminPage)) {
-            $currentAdminPage = basename($_SERVER['REQUEST_URI']);
+            $currentAdminPage = basename(sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])));
         }
 
         return $currentAdminPage === $pageSlug;
@@ -108,11 +108,14 @@ class Utils
             return false;
         }
 
-        return is_admin() && $_GET['page'] === Constants::DASHBOARD_MENU_SLUG;
+        return is_admin() && sanitize_key(wp_unslash($_GET['page'])) === Constants::DASHBOARD_MENU_SLUG;
     }
 
     public static function isPostEditPage(): bool {
-        return self::isAdminPage('post.php') && !empty($_GET['post']) && $_GET['action'] === 'edit';
+        return self::isAdminPage('post.php')
+            && !empty($_GET['post'])
+            && absint($_GET['post']) > 0
+            && sanitize_key(wp_unslash($_GET['action'] ?? '')) === 'edit';
     }
 
     public static function isMediaEditPage(): bool {

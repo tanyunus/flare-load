@@ -118,7 +118,7 @@ class AttachmentController
      */
     private static function shouldUploadToCloudflare(): bool
     {
-        return $_POST[Constants::UPLOAD_TO_CF_INDICATOR] ?? false;
+        return !empty(sanitize_key(wp_unslash($_POST[Constants::UPLOAD_TO_CF_INDICATOR] ?? '')));
     }
 
     /**

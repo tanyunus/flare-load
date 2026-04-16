@@ -7,7 +7,7 @@
     "dev": "npm run build:images && npm run dev:ts",
     "dev:ts": "node build-dev.js",
     "build:images": "node -e \"require('fs').cpSync('assets/images', 'dist/images', {recursive: true, force: true})\"",
-    "build": "npm run build:images && npm run build:ts",
+    "build": "npm run build:images && npm run build:ts && npm run make-pot",
     "build:ts": "node build.js",
     "build:prod": "npm run build",
     "make-pot": "node ../tools/generate-pot.js",

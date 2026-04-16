@@ -46,8 +46,8 @@ class OptionController
     private function addSettingsPage(): void
     {
         add_menu_page(
-                Constants::UI_PAGE_TITLE,
-                Constants::DASHBOARD_MENU_TITLE,
+                Utils::localize(Constants::UI_PAGE_TITLE),
+                Utils::localize(Constants::DASHBOARD_MENU_TITLE),
                 'manage_options',
                 Constants::DASHBOARD_MENU_SLUG,
                 [$this, 'fpAdminDashboardView'],
@@ -60,8 +60,8 @@ class OptionController
     {
         add_submenu_page(
                 Constants::DASHBOARD_MENU_SLUG,
-                Constants::UI_LOG_PAGE_TITLE,
-                Constants::LOG_MENU_TITLE,
+                Utils::localize(Constants::UI_LOG_PAGE_TITLE),
+                Utils::localize(Constants::LOG_MENU_TITLE),
                 'manage_options',
                 Constants::DASHBOARD_LOG_PAGE_SLUG,
                 [$this, 'fpAdminLogView'],
@@ -83,7 +83,7 @@ class OptionController
     {
         add_settings_section(
                 Constants::DASHBOARD_API_SETTINGS_SECTION_ID,
-                Constants::UI_API_SETTINGS_SECTION_TITLE,
+                Utils::localize(Constants::UI_API_SETTINGS_SECTION_TITLE),
                 '',
                 Constants::DASHBOARD_MENU_SLUG
         );
@@ -93,7 +93,7 @@ class OptionController
     {
         add_settings_section(
                 Constants::DASHBOARD_VARIANT_SETTINGS_SECTION_ID,
-                Constants::UI_VARIANT_SETTINGS_SECTION_TITLE,
+                Utils::localize(Constants::UI_VARIANT_SETTINGS_SECTION_TITLE),
                 '',
                 Constants::DASHBOARD_MENU_SLUG
         );
@@ -103,7 +103,7 @@ class OptionController
     {
         add_settings_section(
                 Constants::DASHBOARD_UPLOAD_SETTINGS_SECTION_ID,
-                Constants::UI_UPLOAD_SETTINGS_SECTION_TITLE,
+                Utils::localize(Constants::UI_UPLOAD_SETTINGS_SECTION_TITLE),
                 '',
                 Constants::DASHBOARD_MENU_SLUG
         );
@@ -113,7 +113,7 @@ class OptionController
     {
         add_settings_section(
                 Constants::LOG_VIEWER_SECTION_ID,
-                Constants::UI_LOG_VIEWER_SECTION_TITLE,
+                Utils::localize(Constants::UI_LOG_VIEWER_SECTION_TITLE),
                 null,
                 Constants::DASHBOARD_LOG_PAGE_SLUG
         );
@@ -141,7 +141,7 @@ class OptionController
 
         add_settings_field(
                 Constants::LOG_VIEWER_FIELD_NAME,
-                Constants::UI_LOGS_FIELD_LABEL,
+                Utils::localize(Constants::UI_LOGS_FIELD_LABEL),
                 function () {
                     $this->renderLogViewer();
                 },
@@ -163,7 +163,7 @@ class OptionController
 
         add_settings_field(
                 Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME,
-                Constants::UI_CF_ACCOUNT_ID_FIELD_LABEL,
+                Utils::localize(Constants::UI_CF_ACCOUNT_ID_FIELD_LABEL),
                 function () {
                     $this->renderTextField(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME);
                 },
@@ -185,9 +185,9 @@ class OptionController
 
         add_settings_field(
                 Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME,
-                Constants::UI_CF_ACCOUNT_HASH_FIELD_LABEL,
+                Utils::localize(Constants::UI_CF_ACCOUNT_HASH_FIELD_LABEL),
                 function () {
-                    $this->renderTextField(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME, Constants::UI_CF_ACCOUNT_HASH_DESCRIPTION);
+                    $this->renderTextField(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME, Utils::localize(Constants::UI_CF_ACCOUNT_HASH_DESCRIPTION));
                 },
                 Constants::DASHBOARD_MENU_SLUG,
                 Constants::DASHBOARD_API_SETTINGS_SECTION_ID,
@@ -207,7 +207,7 @@ class OptionController
 
         add_settings_field(
                 Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME,
-                Constants::UI_CF_API_TOKEN_FIELD_LABEL,
+                Utils::localize(Constants::UI_CF_API_TOKEN_FIELD_LABEL),
                 function () {
                     $this->renderApiTokenField();
                 },
@@ -239,7 +239,7 @@ class OptionController
 
         add_settings_field(
                 Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME,
-                Constants::UI_VARIANTS_FIELD_LABEL,
+                Utils::localize(Constants::UI_VARIANTS_FIELD_LABEL),
                 function () {
                     $this->renderVariantListField();
                 },
@@ -266,7 +266,7 @@ class OptionController
                     <?php
                 }
             } else {
-                ?> <p><?php echo esc_html(Constants::UI_NO_VARIANTS_SYNCED); ?></p><?php
+                ?> <p><?php echo esc_html(Utils::localize(Constants::UI_NO_VARIANTS_SYNCED)); ?></p><?php
             }
             ?>
 
@@ -275,7 +275,7 @@ class OptionController
             <button id="fp_variant_sync_button" type="button" role="button"
                     class="fp-variant-sync-button button button-secondary">
                 <span class="dashicons dashicons-update-alt"></span>
-                <?php echo esc_html(Constants::UI_SYNC_VARIANTS_BUTTON); ?>
+                <?php echo esc_html(Utils::localize(Constants::UI_SYNC_VARIANTS_BUTTON)); ?>
             </button>
             <span id="fp_sync_variant_spinner" class="spinner"></span>
         </div>
@@ -298,7 +298,7 @@ class OptionController
 
         add_settings_field(
                 Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME,
-                Constants::UI_DEFAULT_VARIANT_FIELD_LABEL,
+                Utils::localize(Constants::UI_DEFAULT_VARIANT_FIELD_LABEL),
                 function () {
                     $this->renderDefaultVariantField();
                 },
@@ -321,7 +321,7 @@ class OptionController
                 </option>
             <?php endforeach; ?>
         </select>
-        <p class="description"><?php echo Constants::UI_DEFAULT_VARIANT_DESCRIPTION; ?></p>
+        <p class="description"><?php echo Utils::localize(Constants::UI_DEFAULT_VARIANT_DESCRIPTION); ?></p>
         <?php
     }
 
@@ -387,7 +387,7 @@ class OptionController
             }
             ?>
         </label>
-        <p class="description"><?php echo Constants::UI_CF_API_TOKEN_DESCRIPTION; ?></p>
+        <p class="description"><?php echo Utils::localize(Constants::UI_CF_API_TOKEN_DESCRIPTION); ?></p>
         <?php
     }
 
@@ -424,7 +424,7 @@ class OptionController
                         <?php checked(!empty($options[Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME])); ?> />
                 <?php echo Utils::localize(Constants::UI_KEEP_FILES_AFTER_UPLOAD_FIELD_LABEL); ?>
             </label>
-            <p class="description"><?php echo Constants::UI_KEEP_FILES_AFTER_UPLOAD_DESCRIPTION; ?></p>
+            <p class="description"><?php echo Utils::localize(Constants::UI_KEEP_FILES_AFTER_UPLOAD_DESCRIPTION); ?></p>
             <br/>
             <label>
                 <input type="checkbox"
@@ -433,7 +433,7 @@ class OptionController
                         <?php checked(!empty($options[Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME])); ?> />
                 <?php echo Utils::localize(Constants::UI_KEEP_FILES_ON_CF_AFTER_DELETE_FIELD_LABEL); ?>
             </label>
-            <p class="description"><?php echo Constants::UI_KEEP_ON_CF_AFTER_DELETE_DESCRIPTION; ?></p>
+            <p class="description"><?php echo Utils::localize(Constants::UI_KEEP_ON_CF_AFTER_DELETE_DESCRIPTION); ?></p>
         </fieldset>
 
         <?php

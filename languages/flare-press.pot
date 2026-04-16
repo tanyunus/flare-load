@@ -1,0 +1,159 @@
+# Copyright (C) 2026 Yunus Tan
+# This file is distributed under the GPL-2.0+.
+msgid ""
+msgstr ""
+"Project-Id-Version: FlarePress 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/flare-press\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-04-16T12:57:34+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: FlarePress generate-pot.js\n"
+"X-Domain: flare-press\n"
+
+#. Plugin Name of the plugin
+#: flare-press.php
+msgid "FlarePress"
+msgstr ""
+
+#. Description of the plugin
+#: flare-press.php
+msgid "WordPress plugin for uploading media directly to Cloudflare Images alongside the default uploader."
+msgstr ""
+
+#. Author of the plugin
+#: flare-press.php
+msgid "Yunus Tan"
+msgstr ""
+
+#: app/Data/Constants.php
+#: app/Data/Constants.php
+msgid "Logs"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "FlarePress Settings"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "FlarePress Logs"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "API Settings"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "Variant Settings"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "Upload Settings"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "Log Viewer"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "Uploaded to Cloudflare"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "This server"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "Location"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "File management"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "Keep a local copy of the uploaded media"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "Keep files on Cloudflare after delete"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "Cloudflare Account ID"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "Cloudflare Account Hash"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "Cloudflare Account API Token"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "Variants"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "Sync Variants"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "No variants synced yet."
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "Default Variant"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/images/hosted</i>"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/api-tokens</i>"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "Choose the largest variant without cropping as the default. <br/>This ensures the full image is clearly visible and recognizable."
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "Enable this setting if you prefer to keep a local copy of the uploaded media. The copy of the file will be kept on default upload folder"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "FlarePress deletes the copy of the attachment from Cloudflare during the deletion process.<br/>Enable this setting if you prefer to keep the file on Cloudflare."
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "DIRECT<br>CLOUDFLARE IMAGES<br>INTEGRATION"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "FlarePress plugin website"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "FlarePress developer Github profile"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-post.tsx
+msgid "Cloudflare Variants"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-post.tsx
+msgid "Choose a variant"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-post.tsx
+msgid "Select a variant..."
+msgstr ""
+
+#: includes/assets/scripts/modules/UploadManager.ts
+msgid "Upload to Cloudflare"
+msgstr ""

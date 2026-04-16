@@ -9,7 +9,8 @@
     "build:images": "node -e \"require('fs').cpSync('assets/images', 'dist/images', {recursive: true, force: true})\"",
     "build": "npm run build:images && npm run build:ts",
     "build:ts": "node build.js",
-    "build:prod": "npm run build"
+    "build:prod": "npm run build",
+    "make-pot": "node ../tools/generate-pot.js"
   },
   "keywords": [],
   "author": "",

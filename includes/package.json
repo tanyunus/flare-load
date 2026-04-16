@@ -10,7 +10,8 @@
     "build": "npm run build:images && npm run build:ts",
     "build:ts": "node build.js",
     "build:prod": "npm run build",
-    "make-pot": "node ../tools/generate-pot.js"
+    "make-pot": "node ../tools/generate-pot.js",
+    "make-json": "node ../tools/generate-json.js"
   },
   "keywords": [],
   "author": "",

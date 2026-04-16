@@ -83,7 +83,7 @@ class OptionController
     {
         add_settings_section(
                 Constants::DASHBOARD_API_SETTINGS_SECTION_ID,
-                'API Settings',
+                Constants::UI_API_SETTINGS_SECTION_TITLE,
                 '',
                 Constants::DASHBOARD_MENU_SLUG
         );
@@ -93,7 +93,7 @@ class OptionController
     {
         add_settings_section(
                 Constants::DASHBOARD_VARIANT_SETTINGS_SECTION_ID,
-                'Variant Settings',
+                Constants::UI_VARIANT_SETTINGS_SECTION_TITLE,
                 '',
                 Constants::DASHBOARD_MENU_SLUG
         );
@@ -102,8 +102,8 @@ class OptionController
     private function addUploadSettingsSection(): void
     {
         add_settings_section(
-                'fp_upload_settings_section',
-                'Upload Settings',
+                Constants::DASHBOARD_UPLOAD_SETTINGS_SECTION_ID,
+                Constants::UI_UPLOAD_SETTINGS_SECTION_TITLE,
                 '',
                 Constants::DASHBOARD_MENU_SLUG
         );
@@ -112,8 +112,8 @@ class OptionController
     private function addLogViewerSection(): void
     {
         add_settings_section(
-                'fp_log_viewer_section',
-                'Log Viewer',
+                Constants::LOG_VIEWER_SECTION_ID,
+                Constants::UI_LOG_VIEWER_SECTION_TITLE,
                 null,
                 Constants::DASHBOARD_LOG_PAGE_SLUG
         );
@@ -137,16 +137,16 @@ class OptionController
 
     private function registerLogViewer(): void
     {
-        register_setting('fp_log_field_group', Constants::LOG_VIEWER_FIELD_NAME);
+        register_setting(Constants::LOG_SETTINGS_GROUP_NAME, Constants::LOG_VIEWER_FIELD_NAME);
 
         add_settings_field(
                 Constants::LOG_VIEWER_FIELD_NAME,
-                'Logs',
+                Constants::UI_LOGS_FIELD_LABEL,
                 function () {
                     $this->renderLogViewer();
                 },
                 Constants::DASHBOARD_LOG_PAGE_SLUG,
-                'fp_log_viewer_section',
+                Constants::LOG_VIEWER_SECTION_ID,
         );
     }
 
@@ -163,7 +163,7 @@ class OptionController
 
         add_settings_field(
                 Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME,
-                'Cloudflare Account ID',
+                Constants::UI_CF_ACCOUNT_ID_FIELD_LABEL,
                 function () {
                     $this->renderTextField(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME);
                 },
@@ -185,10 +185,9 @@ class OptionController
 
         add_settings_field(
                 Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME,
-                'Cloudflare Account Hash',
+                Constants::UI_CF_ACCOUNT_HASH_FIELD_LABEL,
                 function () {
-                    $description = 'You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/images/hosted</i>';
-                    $this->renderTextField(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME, $description);
+                    $this->renderTextField(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME, Constants::UI_CF_ACCOUNT_HASH_DESCRIPTION);
                 },
                 Constants::DASHBOARD_MENU_SLUG,
                 Constants::DASHBOARD_API_SETTINGS_SECTION_ID,
@@ -208,7 +207,7 @@ class OptionController
 
         add_settings_field(
                 Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME,
-                'Cloudflare Account API Token',
+                Constants::UI_CF_API_TOKEN_FIELD_LABEL,
                 function () {
                     $this->renderApiTokenField();
                 },
@@ -240,7 +239,7 @@ class OptionController
 
         add_settings_field(
                 Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME,
-                'Variants',
+                Constants::UI_VARIANTS_FIELD_LABEL,
                 function () {
                     $this->renderVariantListField();
                 },
@@ -267,7 +266,7 @@ class OptionController
                     <?php
                 }
             } else {
-                ?> <p>'No variants synced yet.'</p><?php
+                ?> <p><?php echo esc_html(Constants::UI_NO_VARIANTS_SYNCED); ?></p><?php
             }
             ?>
 
@@ -276,7 +275,7 @@ class OptionController
             <button id="fp_variant_sync_button" type="button" role="button"
                     class="fp-variant-sync-button button button-secondary">
                 <span class="dashicons dashicons-update-alt"></span>
-                Sync Variants
+                <?php echo esc_html(Constants::UI_SYNC_VARIANTS_BUTTON); ?>
             </button>
             <span id="fp_sync_variant_spinner" class="spinner"></span>
         </div>
@@ -299,7 +298,7 @@ class OptionController
 
         add_settings_field(
                 Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME,
-                'Default Variant',
+                Constants::UI_DEFAULT_VARIANT_FIELD_LABEL,
                 function () {
                     $this->renderDefaultVariantField();
                 },
@@ -322,8 +321,7 @@ class OptionController
                 </option>
             <?php endforeach; ?>
         </select>
-        <p class="description">Choose the largest variant without cropping as the default. <br/>This ensures the full
-            image is clearly visible and recognizable.</p>
+        <p class="description"><?php echo Constants::UI_DEFAULT_VARIANT_DESCRIPTION; ?></p>
         <?php
     }
 
@@ -389,8 +387,7 @@ class OptionController
             }
             ?>
         </label>
-        <p class="description">You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/api-tokens</i>
-        </p>
+        <p class="description"><?php echo Constants::UI_CF_API_TOKEN_DESCRIPTION; ?></p>
         <?php
     }
 
@@ -427,8 +424,7 @@ class OptionController
                         <?php checked(!empty($options[Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME])); ?> />
                 <?php echo Utils::localize(Constants::UI_KEEP_FILES_AFTER_UPLOAD_FIELD_LABEL); ?>
             </label>
-            <p class="description">FlarePress deletes local attachment file after uploading it to Cloudflare.<br/>Enable
-                this setting if you prefer to keep the local copy.</p>
+            <p class="description"><?php echo Constants::UI_KEEP_FILES_AFTER_UPLOAD_DESCRIPTION; ?></p>
             <br/>
             <label>
                 <input type="checkbox"
@@ -437,8 +433,7 @@ class OptionController
                         <?php checked(!empty($options[Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME])); ?> />
                 <?php echo Utils::localize(Constants::UI_KEEP_FILES_ON_CF_AFTER_DELETE_FIELD_LABEL); ?>
             </label>
-            <p class="description">FlarePress deletes the copy of the attachment from Cloudflare during the deletion
-                process.<br/>Enable this setting if you prefer to keep the file on Cloudflare.</p>
+            <p class="description"><?php echo Constants::UI_KEEP_ON_CF_AFTER_DELETE_DESCRIPTION; ?></p>
         </fieldset>
 
         <?php

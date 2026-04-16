@@ -42,16 +42,45 @@ class Constants
     public const DASHBOARD_DEFAULT_VARIANT_FIELD_NAME = 'fp_cf_default_variant';
     public const DASHBOARD_CF_LIST_VIEW_COLUMN_ID = 'fp_cf_badge_column';
 
-    // UI strings
+    // UI strings — page & section titles
     public const UI_PAGE_TITLE = 'FlarePress Settings';
     public const UI_LOG_PAGE_TITLE = 'FlarePress Logs';
+    public const UI_API_SETTINGS_SECTION_TITLE = 'API Settings';
+    public const UI_VARIANT_SETTINGS_SECTION_TITLE = 'Variant Settings';
+    public const UI_UPLOAD_SETTINGS_SECTION_TITLE = 'Upload Settings';
+    public const UI_LOG_VIEWER_SECTION_TITLE = 'Log Viewer';
+
+    // UI strings — field labels
     public const UI_CF_BADGE_TITLE = 'Uploaded to Cloudflare';
     public const UI_CF_LOCATION_THIS_SERVER = 'This server';
     public const UI_CF_LOCATION_COLUMN_NAME = 'Location';
     public const UI_FILE_MANAGEMENT_FIELD_TITLE = 'File management';
-    public const UI_KEEP_FILES_AFTER_UPLOAD_FIELD_LABEL = 'Keep files on disk after upload';
+    public const UI_KEEP_FILES_AFTER_UPLOAD_FIELD_LABEL = 'Keep a local copy of the uploaded media';
     public const UI_KEEP_FILES_ON_CF_AFTER_DELETE_FIELD_LABEL = 'Keep files on Cloudflare after delete';
+    public const UI_LOGS_FIELD_LABEL = 'Logs';
+    public const UI_CF_ACCOUNT_ID_FIELD_LABEL = 'Cloudflare Account ID';
+    public const UI_CF_ACCOUNT_HASH_FIELD_LABEL = 'Cloudflare Account Hash';
+    public const UI_CF_API_TOKEN_FIELD_LABEL = 'Cloudflare Account API Token';
+    public const UI_VARIANTS_FIELD_LABEL = 'Variants';
+    public const UI_SYNC_VARIANTS_BUTTON = 'Sync Variants';
+    public const UI_NO_VARIANTS_SYNCED = 'No variants synced yet.';
+    public const UI_DEFAULT_VARIANT_FIELD_LABEL = 'Default Variant';
 
+    // UI strings — field descriptions
+    public const UI_CF_ACCOUNT_HASH_DESCRIPTION = 'You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/images/hosted</i>';
+    public const UI_CF_API_TOKEN_DESCRIPTION = 'You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/api-tokens</i>';
+    public const UI_DEFAULT_VARIANT_DESCRIPTION = 'Choose the largest variant without cropping as the default. <br/>This ensures the full image is clearly visible and recognizable.';
+    public const UI_KEEP_FILES_AFTER_UPLOAD_DESCRIPTION = 'Enable this setting if you prefer to keep a local copy of the uploaded media. The copy of the file will be kept on default upload folder';
+    public const UI_KEEP_ON_CF_AFTER_DELETE_DESCRIPTION = 'FlarePress deletes the copy of the attachment from Cloudflare during the deletion process.<br/>Enable this setting if you prefer to keep the file on Cloudflare.';
+
+    // UI strings — header
+    public const UI_HEADER_TAGLINE = 'DIRECT<br>CLOUDFLARE IMAGES<br>INTEGRATION';
+    public const UI_HEADER_WEBSITE_LINK_TITLE = 'FlarePress plugin website';
+    public const UI_HEADER_GITHUB_LINK_TITLE = 'FlarePress developer Github profile';
+
+    // Internal IDs
+    public const LOG_VIEWER_SECTION_ID = 'fp_log_viewer_section';
+    public const LOG_SETTINGS_GROUP_NAME = 'fp_log_field_group';
 
     // Other
     public const FP_TRANSLATION_DOMAIN = 'flare-press';

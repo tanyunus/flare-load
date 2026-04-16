@@ -66,10 +66,15 @@ By default, deleting an attachment from the WordPress media library also removes
 
 == Changelog ==
 
-= 0.1.0 =
+= 1.0.0 =
 * Initial release.
+* Direct upload to Cloudflare Images from the media library and block editor.
+* Cloudflare image variant support with per-image variant selection.
+* Visual location badge in media library list view.
+* Activity log viewer for debugging.
+* Full i18n support with Turkish (tr_TR) translation included.
 
 == Upgrade Notice ==
 
-= 0.1.0 =
+= 1.0.0 =
 Initial release.

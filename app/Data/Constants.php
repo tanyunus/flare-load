@@ -54,5 +54,5 @@ class Constants
 
 
     // Other
-    public const FP_TRANSLATION_DOMAIN = 'fp_translations';
+    public const FP_TRANSLATION_DOMAIN = 'flare-press';
 }

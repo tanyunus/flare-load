@@ -17,6 +17,7 @@
   "type": "commonjs",
   "devDependencies": {
     "@types/node": "^25.0.3",
+    "@wordpress/i18n": "^4.36.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@types/wordpress__block-editor": "^14.21.2",

@@ -1,4 +1,5 @@
 import {addFilter} from '@wordpress/hooks';
+import { __ } from '@wordpress/i18n';
 import {createHigherOrderComponent} from '@wordpress/compose';
 import {InspectorControls} from '@wordpress/block-editor';
 import {PanelBody, SelectControl, Spinner} from '@wordpress/components';
@@ -121,15 +122,15 @@ const withCustomControl = createHigherOrderComponent(
                 <>
                     <BlockEdit {...props} />
                     <InspectorControls>
-                        <PanelBody title="Cloudflare Variants" initialOpen={true}>
+                        <PanelBody title={__('Cloudflare Variants', 'flare-press')} initialOpen={true}>
                             {loading ? (
                                 <Spinner/>
                             ) : (
                                 <SelectControl
-                                    label="Choose a variant"
+                                    label={__('Choose a variant', 'flare-press')}
                                     value={attributes.cloudflareVariant || ''}
                                     options={[
-                                        {label: 'Select a variant...', value: ''},
+                                        {label: __('Select a variant...', 'flare-press'), value: ''},
                                         ...options
                                     ]}
                                     onChange={(value: string) => setAttributes({cloudflareVariant: value})}

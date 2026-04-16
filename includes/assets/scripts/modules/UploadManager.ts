@@ -1,3 +1,5 @@
+import { __ } from '@wordpress/i18n';
+
 export default class UploadManager {
     private switcherCheckbox: HTMLInputElement | null = null;
 
@@ -6,7 +8,6 @@ export default class UploadManager {
     //  - media modal uploader in post-edit and new-post pages
     public hookUploader(): void {
         if (!window.wp?.Uploader) {
-            console.log('[FP] wp.Uploader not available');
             return;
         }
 
@@ -15,8 +16,6 @@ export default class UploadManager {
 
         window.wp.Uploader.prototype.init = function() {
             const result = originalInit.apply(this, arguments as any);
-
-            console.log('[FP] wp.Uploader.prototype.init intercepted');
 
             manager.bindBeforeUploadEvent(this.uploader);
 
@@ -27,11 +26,9 @@ export default class UploadManager {
     // Hooks into uploader in /wp-admin/media-new.php page
     public hookExistingUploader(): void {
         if (!window.uploader) {
-            console.log('[FP] window.uploader not available');
             return;
         }
 
-        console.log('[FP] Hooking existing uploader instance');
         this.bindBeforeUploadEvent(window.uploader);
     }
 
@@ -40,7 +37,6 @@ export default class UploadManager {
         const form = document.querySelector<HTMLFormElement>('form#file-form');
 
         if (!form) {
-            console.log('[FP] media-new form not found');
             return;
         }
 
@@ -57,8 +53,6 @@ export default class UploadManager {
                 input.value = this.isUploadToCfEnabled() ? '1' : '0';
                 form.appendChild(input);
             }
-
-            console.log('[FP] Form submit - fp_upload_to_cf:', this.isUploadToCfEnabled() ? 1 : 0);
         });
     }
 
@@ -79,8 +73,6 @@ export default class UploadManager {
 
                     // Reset flag
                     (window as any).fp_upload_to_cf_next = false;
-
-                    console.log('[FP] Injected fp_upload_to_cf to REST API upload:', uploadToCf);
                 }
             }
 
@@ -91,7 +83,6 @@ export default class UploadManager {
     public waitForUploader(callback: () => void): void {
         const checkUploader = (): void => {
             if (window.uploader) {
-                console.log('[FP] window.uploader found');
                 callback();
             } else {
                 setTimeout(checkUploader, 100);
@@ -105,14 +96,10 @@ export default class UploadManager {
         const manager = this;
 
         uploader.bind('BeforeUpload', (up: any, file: any) => {
-            console.log('[FP] BeforeUpload event fired for file:', file.name);
-
             up.settings.multipart_params = {
                 ...up.settings.multipart_params,
                 fp_upload_to_cf: manager.isUploadToCfEnabled() ? 1 : 0
             };
-
-            console.log('[FP] Injected fp_upload_to_cf:', manager.isUploadToCfEnabled() ? 1 : 0);
         });
 
         uploader.bind('FileUploaded', (up: any, file: any, response: any) => {
@@ -141,7 +128,7 @@ export default class UploadManager {
         checkbox.name = 'fp_upload_to_cf';
 
         label.appendChild(checkbox);
-        label.appendChild(document.createTextNode(' Upload to Cloudflare'));
+        label.appendChild(document.createTextNode(' ' + __('Upload to Cloudflare', 'flare-press')));
 
         return label;
     }
@@ -152,7 +139,7 @@ export default class UploadManager {
         button.className = 'fp-cf-upload-button ' + additionalClassName;
         // Use dynamic plugin URL from wp_localize_script to support subdirectory installations
         const logoUrl = (window.fpConfig?.pluginUrl ?? '') + 'includes/dist/images/cf_logo_cropped.png';
-        button.innerHTML = `Upload to Cloudflare &nbsp;&nbsp;<img style="margin-left: auto; height: 14px;" src="${logoUrl}" alt="Cloudflare logo">`;
+        button.innerHTML = `${__('Upload to Cloudflare', 'flare-press')} &nbsp;&nbsp;<img style="margin-left: auto; height: 14px;" src="${logoUrl}" alt="Cloudflare logo">`;
         button.style.boxShadow = 'inset 0 0 0 1px #f78100, 0 0 0 currentColor';
         button.style.color = '#f78100';
         return button;

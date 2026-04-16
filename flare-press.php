@@ -321,25 +321,25 @@ function fp_admin_menu(): void
 function fp_admin_print_footer_scripts(): void
 {
     if (Utils::isAdminPage('upload.php') && (empty($_GET) || sanitize_key(wp_unslash($_GET['mode'] ?? '')) === 'grid')) {
-        wp_enqueue_script('fp-media-library-grid-script', FLARE_PRESS_URL . 'includes/dist/main/fp-media-library-grid.js', [], FLARE_PRESS_VERSION, true);
+        wp_enqueue_script('fp-media-library-grid-script', FLARE_PRESS_URL . 'includes/dist/main/fp-media-library-grid.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
         wp_localize_script('fp-media-library-grid-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL]);
         wp_set_script_translations('fp-media-library-grid-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
     if (Utils::isAdminPage('media-new.php')) {
-        wp_enqueue_script('fp-media-new-script', FLARE_PRESS_URL . 'includes/dist/main/fp-media-new.js', [], FLARE_PRESS_VERSION, true);
+        wp_enqueue_script('fp-media-new-script', FLARE_PRESS_URL . 'includes/dist/main/fp-media-new.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
         wp_localize_script('fp-media-new-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL]);
         wp_set_script_translations('fp-media-new-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
     if (Utils::isFpOptionsPage()) {
-        wp_enqueue_script('fp-options-script', FLARE_PRESS_URL . 'includes/dist/main/fp-options.js', [], FLARE_PRESS_VERSION, true);
+        wp_enqueue_script('fp-options-script', FLARE_PRESS_URL . 'includes/dist/main/fp-options.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
         wp_localize_script('fp-options-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL]);
         wp_set_script_translations('fp-options-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
     if ((Utils::isPostEditPage() || Utils::isAdminPage('post-new.php')) && !Utils::isMediaEditPage()) {
-        wp_enqueue_script('fp-post-script', FLARE_PRESS_URL . 'includes/dist/main/fp-post.js', [], FLARE_PRESS_VERSION, true);
+        wp_enqueue_script('fp-post-script', FLARE_PRESS_URL . 'includes/dist/main/fp-post.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
         wp_localize_script('fp-post-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL]);
         wp_set_script_translations('fp-post-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }

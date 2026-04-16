@@ -14,6 +14,7 @@ const path = require('path');
 const ROOT      = path.resolve(__dirname, '..');
 const POT_PATH  = path.join(ROOT, 'languages', 'flare-press.pot');
 const DOMAIN    = 'flare-press';
+const VERSION   = require(path.join(ROOT, 'includes', 'package.json')).version;
 
 // ── 1. Extract PHP constants ──────────────────────────────────────────────────
 
@@ -94,7 +95,7 @@ function buildPot(phpEntries, jsEntries) {
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: FlarePress 0.1.0\\n"
+"Project-Id-Version: FlarePress ${VERSION}\\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/flare-press\\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
 "Language-Team: LANGUAGE <LL@li.org>\\n"

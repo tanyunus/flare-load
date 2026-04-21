@@ -58,6 +58,7 @@ export default class UploadManager {
 
     public hookRestApiUpload(): void {
         const originalFetch = window.fetch;
+        const manager = this;
 
         window.fetch = async function(...args: Parameters<typeof fetch>): Promise<Response> {
             const url = args[0]?.toString() || '';
@@ -69,6 +70,18 @@ export default class UploadManager {
                     const formData = options.body;
                     formData.append('fp_upload_to_cf', (window as any).fp_upload_to_cf_next ? '1' : '0');
                 }
+
+                const response = await originalFetch.apply(this, args);
+
+                if (response.ok) {
+                    response.clone().json().then((data: any) => {
+                        if (data.fp_upload_error) {
+                            manager.showUploadError();
+                        }
+                    }).catch(() => {});
+                }
+
+                return response;
             }
 
             return originalFetch.apply(this, args);
@@ -100,6 +113,9 @@ export default class UploadManager {
         uploader.bind('FileUploaded', (up: any, file: any, response: any) => {
             try {
                 const data = JSON.parse(response.response);
+                if (data.data?.fp_upload_error) {
+                    manager.showUploadError();
+                }
                 if (data.success && data.data) {
                     window.dispatchEvent(new CustomEvent('fpFileUploaded', {
                         detail: data.data
@@ -143,6 +159,32 @@ export default class UploadManager {
         button.style.boxShadow = 'inset 0 0 0 1px #f78100, 0 0 0 currentColor';
         button.style.color = '#f78100';
         return button;
+    }
+
+    public showUploadError(): void {
+        const message = __('Upload to Cloudflare failed. The image was saved locally. Check FlarePress logs for details.', 'flare-press');
+
+        const wpData = (window as any).wp?.data;
+        if (wpData) {
+            try {
+                wpData.dispatch('core/notices').createErrorNotice(message, { isDismissible: true });
+                return;
+            } catch (e) {
+                // fall through to DOM notice
+            }
+        }
+
+        if (document.querySelector('.fp-upload-error-notice')) {
+            return;
+        }
+
+        const notice = document.createElement('div');
+        notice.className = 'notice notice-error is-dismissible fp-upload-error-notice';
+        notice.innerHTML = `<p>${message}</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss</span></button>`;
+        notice.querySelector('.notice-dismiss')?.addEventListener('click', () => notice.remove());
+
+        const wrap = document.querySelector('#wpcontent') ?? document.body;
+        wrap.insertBefore(notice, wrap.firstChild);
     }
 
     public setSwitcherCheckbox(checkbox: HTMLInputElement): void {

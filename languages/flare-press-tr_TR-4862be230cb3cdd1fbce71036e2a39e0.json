@@ -1,5 +1,5 @@
 {
-  "translation-revision-date": "2026-04-21T15:16:21.867Z",
+  "translation-revision-date": "2026-04-21T20:47:22.661Z",
   "generator": "FlarePress generate-json.js",
   "source": "languages/flare-press-tr_TR.po",
   "domain": "messages",
@@ -12,6 +12,9 @@
       },
       "Upload to Cloudflare": [
         "Cloudflare'a Yükle"
+      ],
+      "Upload to Cloudflare failed. The image was saved locally. Check FlarePress logs for details.": [
+        "Cloudflare'a yükleme başarısız oldu. Görsel yerel olarak kaydedildi. Ayrıntılar için FlarePress günlüklerine bakın."
       ]
     }
   }

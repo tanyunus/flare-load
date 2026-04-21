@@ -163,3 +163,7 @@ msgstr "Tüm görsellere varyant uygula"
 #: includes/assets/scripts/modules/UploadManager.ts
 msgid "Upload to Cloudflare"
 msgstr "Cloudflare'a Yükle"
+
+#: includes/assets/scripts/modules/UploadManager.ts
+msgid "Upload to Cloudflare failed. The image was saved locally. Check FlarePress logs for details."
+msgstr "Cloudflare'a yükleme başarısız oldu. Görsel yerel olarak kaydedildi. Ayrıntılar için FlarePress günlüklerine bakın."

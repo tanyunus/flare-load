@@ -79,6 +79,7 @@ class AttachmentController
             }
         } catch (Exception $e) {
             Logger::log(0, $e->getMessage());
+            update_post_meta($attachmentId, '_fp_upload_error', $e->getMessage());
         }
     }
 

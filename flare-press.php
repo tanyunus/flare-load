@@ -219,6 +219,23 @@ function fp_rest_api_init(): void
             'context' => array('view', 'edit')
         )
     ));
+
+    register_rest_field('attachment', 'fp_upload_error', array(
+        'get_callback' => function ($object) {
+            $error = get_post_meta($object['id'], '_fp_upload_error', true);
+            if ($error) {
+                delete_post_meta($object['id'], '_fp_upload_error');
+                return $error;
+            }
+            return null;
+        },
+        'update_callback' => null,
+        'schema' => array(
+            'description' => 'FlarePress CF upload error',
+            'type' => 'string',
+            'context' => array('view', 'edit')
+        )
+    ));
 }
 
 /**
@@ -228,6 +245,12 @@ function fp_wp_prepare_attachment_for_js(array $response, WP_Post $attachment): 
 {
     if (AttachmentController::getCloudflareIdOfAttachment($attachment->ID)) {
         $response = AttachmentController::updateAjaxQueryResponse($response, $attachment);
+    }
+
+    $error = get_post_meta($attachment->ID, '_fp_upload_error', true);
+    if ($error) {
+        delete_post_meta($attachment->ID, '_fp_upload_error');
+        $response['fp_upload_error'] = $error;
     }
 
     return $response;

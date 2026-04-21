@@ -34,7 +34,7 @@ interface ExtendedBlockEditProps<T extends Record<string, any> = Record<string, 
 }
 
 function addCustomAttribute(settings: BlockSettings, name: string): BlockSettings {
-    if (name !== 'core/image') {
+    if (name !== 'core/image' && name !== 'core/media-text') {
         return settings;
     }
 
@@ -213,6 +213,85 @@ function GalleryVariantPanel({
     );
 }
 
+function MediaTextVariantPanel({
+    BlockEdit,
+    props
+}: {
+    BlockEdit: ComponentType<ExtendedBlockEditProps<any>>;
+    props: ExtendedBlockEditProps<any>;
+}) {
+    const {attributes, setAttributes} = props;
+    const [variants, setVariants] = useState<string[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [originalUrl, setOriginalUrl] = useState<string>('');
+
+    const media = useSelect(
+        (select) => {
+            if (!attributes.mediaId) return null;
+            const {getMedia} = select(coreStore) as any;
+            return getMedia(attributes.mediaId);
+        },
+        [attributes.mediaId]
+    );
+
+    const cfImageId = media?.fp_cf_image_id;
+
+    useEffect(() => {
+        if (attributes.mediaUrl && !originalUrl) {
+            setOriginalUrl(attributes.mediaUrl);
+        }
+    }, [attributes.mediaUrl]);
+
+    useEffect(() => {
+        if (cfImageId) {
+            getVariantNames().then(result => {
+                if (result) setVariants(result);
+                setLoading(false);
+            });
+        } else {
+            setLoading(false);
+        }
+    }, [cfImageId]);
+
+    useEffect(() => {
+        if (cfImageId && attributes.cloudflareVariant && originalUrl) {
+            getAccountHash().then(result => {
+                const variantUrl = `https://imagedelivery.net/${result}/${cfImageId}/${attributes.cloudflareVariant}`;
+                setAttributes({mediaUrl: variantUrl});
+            });
+        }
+    }, [attributes.cloudflareVariant, cfImageId]);
+
+    if (!cfImageId) {
+        return <BlockEdit {...props} />;
+    }
+
+    const options = variants.map(variant => ({label: variant, value: variant}));
+
+    return (
+        <>
+            <BlockEdit {...props} />
+            <InspectorControls>
+                <PanelBody title={__('Cloudflare Variants', 'flare-press')} initialOpen={true}>
+                    {loading ? (
+                        <Spinner/>
+                    ) : (
+                        <SelectControl
+                            label={__('Choose a variant', 'flare-press')}
+                            value={attributes.cloudflareVariant || ''}
+                            options={[
+                                {label: __('Select a variant...', 'flare-press'), value: ''},
+                                ...options
+                            ]}
+                            onChange={(value: string) => setAttributes({cloudflareVariant: value})}
+                        />
+                    )}
+                </PanelBody>
+            </InspectorControls>
+        </>
+    );
+}
+
 const withCustomControl = createHigherOrderComponent(
     (BlockEdit: ComponentType<ExtendedBlockEditProps<ImageBlockAttributes>>) => {
         return (props: ExtendedBlockEditProps<ImageBlockAttributes>) => {
@@ -222,6 +301,10 @@ const withCustomControl = createHigherOrderComponent(
 
             if (props.name === 'core/gallery') {
                 return <GalleryVariantPanel BlockEdit={BlockEdit as any} props={props}/>;
+            }
+
+            if (props.name === 'core/media-text') {
+                return <MediaTextVariantPanel BlockEdit={BlockEdit as any} props={props}/>;
             }
 
             return <BlockEdit {...props} />;

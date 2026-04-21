@@ -156,6 +156,10 @@ msgstr "Bir varyant seçin"
 msgid "Select a variant..."
 msgstr "Varyant seçin..."
 
+#: includes/assets/scripts/main/fp-post.tsx
+msgid "Apply variant to all images"
+msgstr "Tüm görsellere varyant uygula"
+
 #: includes/assets/scripts/modules/UploadManager.ts
 msgid "Upload to Cloudflare"
 msgstr "Cloudflare'a Yükle"

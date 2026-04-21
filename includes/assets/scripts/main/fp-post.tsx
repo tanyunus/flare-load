@@ -5,7 +5,8 @@ import {InspectorControls} from '@wordpress/block-editor';
 import {PanelBody, SelectControl, Spinner} from '@wordpress/components';
 import {BlockEditProps} from '@wordpress/blocks';
 import {ComponentType, useEffect, useState} from '@wordpress/element';
-import {useSelect} from '@wordpress/data';
+import {useSelect, useDispatch} from '@wordpress/data';
+import {store as blockEditorStore} from '@wordpress/block-editor';
 import RestApi from "../modules/RestApi";
 import {GetAccountHashResponse, GetVariantNamesResponse} from "../types/types";
 import {store as coreStore} from '@wordpress/core-data';
@@ -55,91 +56,175 @@ addFilter(
     addCustomAttribute
 );
 
+function ImageVariantPanel({
+    BlockEdit,
+    props
+}: {
+    BlockEdit: ComponentType<ExtendedBlockEditProps<ImageBlockAttributes>>;
+    props: ExtendedBlockEditProps<ImageBlockAttributes>;
+}) {
+    const {attributes, setAttributes} = props;
+    const [variants, setVariants] = useState<string[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [originalUrl, setOriginalUrl] = useState<string>('');
+
+    const media = useSelect(
+        (select) => {
+            if (!attributes.id) return null;
+            const {getMedia} = select(coreStore) as any;
+            return getMedia(attributes.id);
+        },
+        [attributes.id]
+    );
+
+    const cfImageId = media?.fp_cf_image_id;
+
+    useEffect(() => {
+        if (attributes.url && !originalUrl) {
+            setOriginalUrl(attributes.url);
+        }
+    }, [attributes.url]);
+
+    useEffect(() => {
+        if (cfImageId) {
+            getVariantNames().then(result => {
+                if (result) setVariants(result);
+                setLoading(false);
+            });
+        } else {
+            setLoading(false);
+        }
+    }, [cfImageId]);
+
+    useEffect(() => {
+        if (cfImageId && attributes.cloudflareVariant && originalUrl) {
+            getAccountHash().then(result => {
+                const variantUrl = `https://imagedelivery.net/${result}/${cfImageId}/${attributes.cloudflareVariant}`;
+                setAttributes({url: variantUrl});
+            });
+        }
+    }, [attributes.cloudflareVariant, cfImageId]);
+
+    if (!cfImageId) {
+        return <BlockEdit {...props} />;
+    }
+
+    const options = variants.map(variant => ({label: variant, value: variant}));
+
+    return (
+        <>
+            <BlockEdit {...props} />
+            <InspectorControls>
+                <PanelBody title={__('Cloudflare Variants', 'flare-press')} initialOpen={true}>
+                    {loading ? (
+                        <Spinner/>
+                    ) : (
+                        <SelectControl
+                            label={__('Choose a variant', 'flare-press')}
+                            value={attributes.cloudflareVariant || ''}
+                            options={[
+                                {label: __('Select a variant...', 'flare-press'), value: ''},
+                                ...options
+                            ]}
+                            onChange={(value: string) => setAttributes({cloudflareVariant: value})}
+                        />
+                    )}
+                </PanelBody>
+            </InspectorControls>
+        </>
+    );
+}
+
+function GalleryVariantPanel({
+    BlockEdit,
+    props
+}: {
+    BlockEdit: ComponentType<ExtendedBlockEditProps<any>>;
+    props: ExtendedBlockEditProps<any>;
+}) {
+    const {clientId} = props;
+    const [variants, setVariants] = useState<string[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const {updateBlockAttributes} = useDispatch(blockEditorStore) as any;
+
+    const innerBlocks = useSelect(
+        (select) => (select(blockEditorStore) as any).getBlocks(clientId),
+        [clientId]
+    );
+
+    const imageIds: number[] = innerBlocks
+        .filter((b: any) => b.name === 'core/image' && b.attributes?.id)
+        .map((b: any) => b.attributes.id);
+
+    const mediaItems = useSelect(
+        (select) => {
+            const {getMedia} = select(coreStore) as any;
+            return imageIds.map((id: number) => getMedia(id));
+        },
+        [imageIds.join(',')]
+    );
+
+    const hasCfImages = mediaItems.some((m: any) => m?.fp_cf_image_id);
+
+    useEffect(() => {
+        if (!hasCfImages) return;
+        getVariantNames().then(result => {
+            if (result) setVariants(result);
+            setLoading(false);
+        });
+    }, [hasCfImages]);
+
+    if (!hasCfImages) {
+        return <BlockEdit {...props} />;
+    }
+
+    const applyVariantToAll = (variant: string) => {
+        innerBlocks.forEach((block: any) => {
+            if (block.name === 'core/image') {
+                updateBlockAttributes(block.clientId, {cloudflareVariant: variant});
+            }
+        });
+    };
+
+    const options = variants.map((v: string) => ({label: v, value: v}));
+
+    return (
+        <>
+            <BlockEdit {...props} />
+            <InspectorControls>
+                <PanelBody title={__('Cloudflare Variants', 'flare-press')} initialOpen={true}>
+                    {loading ? (
+                        <Spinner/>
+                    ) : (
+                        <SelectControl
+                            label={__('Apply variant to all images', 'flare-press')}
+                            value={''}
+                            options={[
+                                {label: __('Select a variant...', 'flare-press'), value: ''},
+                                ...options
+                            ]}
+                            onChange={applyVariantToAll}
+                        />
+                    )}
+                </PanelBody>
+            </InspectorControls>
+        </>
+    );
+}
+
 const withCustomControl = createHigherOrderComponent(
     (BlockEdit: ComponentType<ExtendedBlockEditProps<ImageBlockAttributes>>) => {
         return (props: ExtendedBlockEditProps<ImageBlockAttributes>) => {
-            if (props.name !== 'core/image') {
-                return <BlockEdit {...props} />;
+            if (props.name === 'core/image') {
+                return <ImageVariantPanel BlockEdit={BlockEdit} props={props}/>;
             }
 
-            const {attributes, setAttributes} = props;
-            const [variants, setVariants] = useState<string[]>([]);
-            const [loading, setLoading] = useState(true);
-            const [originalUrl, setOriginalUrl] = useState<string>('');
-
-            const media = useSelect(
-                (select) => {
-                    if (!attributes.id) {
-                        return null;
-                    }
-                    const {getMedia} = select(coreStore) as any;
-                    return getMedia(attributes.id);
-                },
-                [attributes.id]
-            );
-
-            const cfImageId = media?.fp_cf_image_id;
-
-            useEffect(() => {
-                if (attributes.url && !originalUrl) {
-                    setOriginalUrl(attributes.url);
-                }
-            }, [attributes.url]);
-
-            useEffect(() => {
-                if (cfImageId) {
-                    getVariantNames().then(result => {
-                        if (result) {
-                            setVariants(result);
-                        }
-                        setLoading(false);
-                    });
-                } else {
-                    setLoading(false);
-                }
-            }, [cfImageId]);
-
-            useEffect(() => {
-                if (cfImageId && attributes.cloudflareVariant && originalUrl) {
-                    getAccountHash().then(result => {
-                        const variantUrl = `https://imagedelivery.net/${result}/${cfImageId}/${attributes.cloudflareVariant}`;
-
-                        setAttributes({url: variantUrl});
-                    })
-                }
-            }, [attributes.cloudflareVariant, cfImageId]);
-
-            if (!cfImageId) {
-                return <BlockEdit {...props} />;
+            if (props.name === 'core/gallery') {
+                return <GalleryVariantPanel BlockEdit={BlockEdit as any} props={props}/>;
             }
 
-            const options = variants.map(variant => ({
-                label: variant,
-                value: variant
-            }));
-
-            return (
-                <>
-                    <BlockEdit {...props} />
-                    <InspectorControls>
-                        <PanelBody title={__('Cloudflare Variants', 'flare-press')} initialOpen={true}>
-                            {loading ? (
-                                <Spinner/>
-                            ) : (
-                                <SelectControl
-                                    label={__('Choose a variant', 'flare-press')}
-                                    value={attributes.cloudflareVariant || ''}
-                                    options={[
-                                        {label: __('Select a variant...', 'flare-press'), value: ''},
-                                        ...options
-                                    ]}
-                                    onChange={(value: string) => setAttributes({cloudflareVariant: value})}
-                                />
-                            )}
-                        </PanelBody>
-                    </InspectorControls>
-                </>
-            );
+            return <BlockEdit {...props} />;
         };
     },
     'withCustomControl'

@@ -1,5 +1,5 @@
 {
-  "translation-revision-date": "2026-04-16T13:00:48.355Z",
+  "translation-revision-date": "2026-04-21T15:16:21.872Z",
   "generator": "FlarePress generate-json.js",
   "source": "languages/flare-press-tr_TR.po",
   "domain": "messages",
@@ -18,6 +18,9 @@
       ],
       "Select a variant...": [
         "Varyant seçin..."
+      ],
+      "Apply variant to all images": [
+        "Tüm görsellere varyant uygula"
       ],
       "Upload to Cloudflare": [
         "Cloudflare'a Yükle"

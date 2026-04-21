@@ -30,6 +30,13 @@ export function addSwitcherToImageBlock(uploadManager: UploadManager): void {
                         uploadButton.click();
                     });
 
+                    // Reset CF flag when user clicks the regular upload button directly
+                    uploadButton.addEventListener('click', (e) => {
+                        if (e.isTrusted) {
+                            (window as any).fp_upload_to_cf_next = false;
+                        }
+                    });
+
                     uploadButton.parentElement?.insertBefore(cfButton, uploadButton.nextSibling);
                 }
             });
@@ -72,6 +79,13 @@ function observeMainDocumentForDropdown(uploadManager: UploadManager): void {
                 cfButton.addEventListener('click', () => {
                     (window as any).fp_upload_to_cf_next = true;
                     uploadButton.click();
+                });
+
+                // Reset CF flag when user clicks the regular upload button directly
+                uploadButton.addEventListener('click', (e) => {
+                    if (e.isTrusted) {
+                        (window as any).fp_upload_to_cf_next = false;
+                    }
                 });
 
                 // Insert right after the upload button

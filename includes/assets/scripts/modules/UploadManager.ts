@@ -67,12 +67,7 @@ export default class UploadManager {
 
                 if (options.body instanceof FormData) {
                     const formData = options.body;
-                    const uploadToCf = (window as any).fp_upload_to_cf_next ? '1' : '0';
-
-                    formData.append('fp_upload_to_cf', uploadToCf);
-
-                    // Reset flag
-                    (window as any).fp_upload_to_cf_next = false;
+                    formData.append('fp_upload_to_cf', (window as any).fp_upload_to_cf_next ? '1' : '0');
                 }
             }
 

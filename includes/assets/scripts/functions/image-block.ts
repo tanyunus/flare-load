@@ -32,11 +32,18 @@ export function addSwitcherToImageBlock(uploadManager: UploadManager): void {
         const iframeDoc = iframe.contentDocument;
         injectEditorStyles(iframeDoc);
 
+        const CF_SUPPORTED_BLOCKS = ['core/image', 'core/cover', 'core/media-text', 'core/gallery'];
+
         const observer = new MutationObserver(() => {
             const imagePlaceholders = iframeDoc.querySelectorAll('.block-editor-media-placeholder');
 
             imagePlaceholders.forEach(placeholder => {
                 if (placeholder.querySelector('.fp-cf-upload-button')) {
+                    return;
+                }
+
+                const blockWrapper = placeholder.closest<HTMLElement>('[data-type]');
+                if (!blockWrapper || !CF_SUPPORTED_BLOCKS.includes(blockWrapper.getAttribute('data-type') ?? '')) {
                     return;
                 }
 

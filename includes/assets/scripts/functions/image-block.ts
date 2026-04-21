@@ -1,5 +1,26 @@
 import UploadManager from "../modules/UploadManager";
 
+function injectEditorStyles(iframeDoc: Document): void {
+    if (iframeDoc.querySelector('#fp-editor-styles')) return;
+
+    const style = iframeDoc.createElement('style');
+    style.id = 'fp-editor-styles';
+    style.textContent = `
+        .fp-cf-upload-button {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            white-space: nowrap !important;
+        }
+        .fp-cf-upload-button img {
+            height: 12px !important;
+            width: auto !important;
+            flex-shrink: 0 !important;
+        }
+    `;
+    iframeDoc.head.appendChild(style);
+}
+
 export function addSwitcherToImageBlock(uploadManager: UploadManager): void {
     setTimeout(() => {
         const iframe = document.querySelector<HTMLIFrameElement>('iframe[name="editor-canvas"]');
@@ -9,6 +30,7 @@ export function addSwitcherToImageBlock(uploadManager: UploadManager): void {
         }
 
         const iframeDoc = iframe.contentDocument;
+        injectEditorStyles(iframeDoc);
 
         const observer = new MutationObserver(() => {
             const imagePlaceholders = iframeDoc.querySelectorAll('.block-editor-media-placeholder');
@@ -23,7 +45,6 @@ export function addSwitcherToImageBlock(uploadManager: UploadManager): void {
 
                 if (uploadButton && blockLabel) {
                     const cfButton = uploadManager.createCfUploadButton('components-button block-editor-media-placeholder__button block-editor-media-placeholder__upload-button is-next-40px-default-size is-secondary fp-switcher-for-block-placeholder');
-                    cfButton.style.marginLeft = '10px';
 
                     cfButton.addEventListener('click', () => {
                         (window as any).fp_upload_to_cf_next = true;
@@ -38,6 +59,22 @@ export function addSwitcherToImageBlock(uploadManager: UploadManager): void {
                     });
 
                     uploadButton.parentElement?.insertBefore(cfButton, uploadButton.nextSibling);
+
+                    const parentEl = uploadButton.parentElement!;
+                    const iframeWin = iframeDoc.defaultView!;
+
+                    const applyMargin = () => {
+                        iframeWin.requestAnimationFrame(() => {
+                            const uploadTop = uploadButton.getBoundingClientRect().top;
+                            const cfTop     = cfButton.getBoundingClientRect().top;
+                            const sameRow   = Math.abs(uploadTop - cfTop) < 5;
+                            cfButton.style.marginLeft = sameRow ? '8px' : '0px';
+                            cfButton.style.marginTop  = sameRow ? '0px' : '8px';
+                        });
+                    };
+
+                    applyMargin();
+                    new iframeWin.ResizeObserver(applyMargin).observe(parentEl);
                 }
             });
         });

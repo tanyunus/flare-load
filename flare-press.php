@@ -338,7 +338,7 @@ function fp_admin_print_footer_scripts(): void
         wp_set_script_translations('fp-options-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
-    if ((Utils::isPostEditPage() || Utils::isAdminPage('post-new.php')) && !Utils::isMediaEditPage()) {
+    if ((Utils::isPostEditPage() || Utils::isAdminPage('post-new.php') || Utils::isAdminPage('site-editor.php')) && !Utils::isMediaEditPage()) {
         wp_enqueue_script('fp-post-script', FLARE_PRESS_URL . 'includes/dist/main/fp-post.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
         wp_localize_script('fp-post-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL]);
         wp_set_script_translations('fp-post-script', 'flare-press', FLARE_PRESS_PATH . 'languages');

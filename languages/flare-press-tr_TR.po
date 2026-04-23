@@ -160,6 +160,14 @@ msgstr "Varyant seçin..."
 msgid "Apply variant to all images"
 msgstr "Tüm görsellere varyant uygula"
 
+#: includes/assets/scripts/main/fp-options.ts
+msgid "Connection successful."
+msgstr "Bağlantı başarılı."
+
+#: includes/assets/scripts/main/fp-options.ts
+msgid "Connection failed. Please check your API token."
+msgstr "Bağlantı başarısız. Lütfen API jetonunuzu kontrol edin."
+
 #: includes/assets/scripts/modules/UploadManager.ts
 msgid "Upload to Cloudflare"
 msgstr "Cloudflare'a Yükle"

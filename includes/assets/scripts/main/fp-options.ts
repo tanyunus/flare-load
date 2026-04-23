@@ -1,5 +1,6 @@
 import {SyncVariantsResponse} from "../types/types";
 import RestApi from "../modules/RestApi";
+import { __ } from '@wordpress/i18n';
 
 function assertElement<T extends Element>(
     element: Element | null,
@@ -24,6 +25,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    const testButton = document.querySelector<HTMLButtonElement>('#fp_test_connection_button');
+    const testResult = document.querySelector<HTMLElement>('#fp_test_connection_result');
+
     if(editApiTokenField && apiTokenField) {
         editApiTokenField.addEventListener('click', function () {
             editApiTokenField.remove();
@@ -31,6 +35,44 @@ document.addEventListener('DOMContentLoaded', function () {
             apiTokenField.name = apiTokenField.dataset?.fieldName as string;
             apiTokenField.value = '';
             apiTokenField.required = true;
+            if (testButton) testButton.disabled = true;
+        });
+
+        apiTokenField.addEventListener('input', function () {
+            if (testButton) testButton.disabled = apiTokenField.value.trim() === '';
+        });
+    }
+
+    if (testButton && testResult) {
+        testButton.addEventListener('click', async () => {
+            testButton.disabled = true;
+            testResult.textContent = '';
+
+            const body = new FormData();
+            body.append('action', 'fp_test_connection');
+
+            const apiTokenInput = document.querySelector<HTMLInputElement>('[data-field-name="fp_cf_api_token"]');
+            if (apiTokenInput && !apiTokenInput.disabled && apiTokenInput.value) {
+                body.append('fp_test_token', apiTokenInput.value);
+            }
+
+            try {
+                const response = await fetch((window as any).ajaxurl, { method: 'POST', body });
+                const data = await response.json();
+
+                if (data.success) {
+                    testResult.style.color = '#46b450';
+                    testResult.textContent = __('Connection successful.', 'flare-press');
+                } else {
+                    testResult.style.color = '#dc3232';
+                    testResult.textContent = __('Connection failed. Please check your API token.', 'flare-press');
+                }
+            } catch {
+                testResult.style.color = '#dc3232';
+                testResult.textContent = __('Connection failed. Please check your API token.', 'flare-press');
+            } finally {
+                testButton.disabled = false;
+            }
         });
     }
 });

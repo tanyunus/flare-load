@@ -88,14 +88,14 @@ class CloudflareImagesApi
      * @return array
      * @throws Exception
      */
-    public static function getVariants(): array {
+    public static function getVariants(?string $token = null): array {
         $requestUrl = self::buildRequestUrl(Constants::CF_API_MODULE_VARIANTS);
 
         if(empty($requestUrl)) {
             throw new Exception('[IMAGES_API][VARIANT_RETRIEVAL] Cannot construct api request url.');
         }
 
-        $response = self::sendData([], self::buildRequestUrl(Constants::CF_API_MODULE_VARIANTS), 'GET');
+        $response = self::sendData([], self::buildRequestUrl(Constants::CF_API_MODULE_VARIANTS), 'GET', [], $token);
         $response = json_decode($response, true);
 
         if(json_last_error() !== JSON_ERROR_NONE){
@@ -121,11 +121,11 @@ class CloudflareImagesApi
      * @return string
      * @throws Exception
      */
-    private static function sendData(array $payload, string $url, string $method = '', array $headers = []): string
+    private static function sendData(array $payload, string $url, string $method = '', array $headers = [], ?string $tokenOverride = null): string
     {
         try {
             $ch = curl_init();
-            $apiToken = self::getApiToken();
+            $apiToken = $tokenOverride ?? self::getApiToken();
             $headers[] = "Authorization: Bearer {$apiToken}";
 
             curl_setopt($ch, CURLOPT_URL, $url);

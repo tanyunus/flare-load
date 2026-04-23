@@ -63,6 +63,9 @@ class Constants
     public const UI_CF_API_TOKEN_FIELD_LABEL = 'Cloudflare Account API Token';
     public const UI_VARIANTS_FIELD_LABEL = 'Variants';
     public const UI_SYNC_VARIANTS_BUTTON = 'Sync Variants';
+    public const UI_TEST_CONNECTION_BUTTON = 'Test Connection';
+    public const UI_TEST_CONNECTION_SUCCESS = 'Connection successful.';
+    public const UI_TEST_CONNECTION_FAIL = 'Connection failed. Please check your API token.';
     public const UI_NO_VARIANTS_SYNCED = 'No variants synced yet.';
     public const UI_DEFAULT_VARIANT_FIELD_LABEL = 'Default Variant';
 

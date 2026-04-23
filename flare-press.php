@@ -9,9 +9,11 @@ License:     GPL-2.0+
 Text Domain: flare-press
 */
 
+use FlarePress\Api\CloudflareImagesApi;
 use FlarePress\Controllers\AttachmentController;
 use FlarePress\Controllers\OptionController;
 use FlarePress\Data\Constants;
+use FlarePress\Util\Logger;
 use FlarePress\Util\Utils;
 use FlarePress\RestApi\OptionRestApi;
 
@@ -53,6 +55,7 @@ function flarePressInit(): void
         add_action('admin_notices', 'fp_admin_upload_error_notice');
         add_filter('heartbeat_received', 'fp_heartbeat_upload_error', 10, 2);
         add_action('wp_ajax_fp_check_upload_error', 'fp_ajax_check_upload_error');
+        add_action('wp_ajax_fp_test_connection', 'fp_ajax_test_connection');
         add_action('admin_menu', 'fp_admin_menu');
         add_action('admin_print_footer_scripts', 'fp_admin_print_footer_scripts');
         add_action('admin_enqueue_scripts', 'fp_admin_enqueue_scripts');
@@ -333,6 +336,27 @@ function fp_heartbeat_upload_error(array $response, array $data): array
         $response['fp_upload_error'] = true;
     }
     return $response;
+}
+
+function fp_ajax_test_connection(): void
+{
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error();
+        return;
+    }
+    $accountId = get_option(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME);
+    if (empty($accountId)) {
+        wp_send_json_error(['message' => 'Account ID is required to test the connection.']);
+        return;
+    }
+    $testToken = isset($_POST['fp_test_token']) ? sanitize_text_field(wp_unslash($_POST['fp_test_token'])) : null;
+    try {
+        CloudflareImagesApi::getVariants($testToken);
+        wp_send_json_success();
+    } catch (Exception $e) {
+        Logger::log(0, '[TEST_CONNECTION] ' . $e->getMessage());
+        wp_send_json_error();
+    }
 }
 
 function fp_ajax_check_upload_error(): void

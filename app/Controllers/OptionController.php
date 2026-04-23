@@ -387,6 +387,14 @@ class OptionController
             }
             ?>
         </label>
+        <?php if (!empty($optionVal)) { ?>
+        <div class="fp-test-connection-wrap" style="margin-top:8px;">
+            <button id="fp_test_connection_button" class="button button-secondary" type="button">
+                <?php echo Utils::localize(Constants::UI_TEST_CONNECTION_BUTTON); ?>
+            </button>
+            <span id="fp_test_connection_result" style="margin-left:8px;"></span>
+        </div>
+        <?php } ?>
         <p class="description"><?php echo Utils::localize(Constants::UI_CF_API_TOKEN_DESCRIPTION); ?></p>
         <?php
     }

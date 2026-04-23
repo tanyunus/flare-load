@@ -16,6 +16,13 @@ function initPage(): void {
     createAndAppendSwitcher(uploadManager, append);
 
     uploadManager.hookUploader();
+    uploadManager.hookRestApiUpload();
+    uploadManager.waitForUploader(() => {
+        uploadManager.hookExistingUploader();
+    });
+
+    uploadManager.watchMediaAttachments();
+    uploadManager.listenHeartbeatForErrors();
 
     detectAndMarkCfImages();
 }

@@ -167,3 +167,15 @@ msgstr "Cloudflare'a Yükle"
 #: includes/assets/scripts/modules/UploadManager.ts
 msgid "Upload to Cloudflare failed. The image was saved locally. Check FlarePress logs for details."
 msgstr "Cloudflare'a yükleme başarısız oldu. Görsel yerel olarak kaydedildi. Ayrıntılar için FlarePress günlüklerine bakın."
+
+#: includes/assets/scripts/modules/UploadManager.ts
+msgid "Upload to Cloudflare failed. The image was saved locally."
+msgstr "Cloudflare'a yükleme başarısız oldu. Görsel yerel olarak kaydedildi."
+
+#: includes/assets/scripts/modules/UploadManager.ts
+msgid "Check FlarePress logs for details."
+msgstr "Ayrıntılar için FlarePress günlüklerine bakın."
+
+#: includes/assets/scripts/modules/UploadManager.ts
+msgid "uploads to Cloudflare failed. The images were saved locally."
+msgstr "görsel Cloudflare'a yüklenemedi. Görseller yerel olarak kaydedildi."

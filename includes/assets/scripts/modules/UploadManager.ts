@@ -66,19 +66,16 @@ export default class UploadManager {
             if (url.includes('/wp/v2/media')) {
                 const options = args[1] || {};
 
+                const uploadToCf = (window as any).fp_upload_to_cf_next;
+
                 if (options.body instanceof FormData) {
-                    const formData = options.body;
-                    formData.append('fp_upload_to_cf', (window as any).fp_upload_to_cf_next ? '1' : '0');
+                    options.body.append('fp_upload_to_cf', uploadToCf ? '1' : '0');
                 }
 
                 const response = await originalFetch.apply(this, args);
 
-                if (response.ok) {
-                    response.clone().json().then((data: any) => {
-                        if (data.fp_upload_error) {
-                            manager.showUploadError();
-                        }
-                    }).catch(() => {});
+                if (response.ok && uploadToCf) {
+                    manager.checkUploadError();
                 }
 
                 return response;
@@ -111,11 +108,9 @@ export default class UploadManager {
         });
 
         uploader.bind('FileUploaded', (up: any, file: any, response: any) => {
+            manager.checkUploadError();
             try {
                 const data = JSON.parse(response.response);
-                if (data.data?.fp_upload_error) {
-                    manager.showUploadError();
-                }
                 if (data.success && data.data) {
                     window.dispatchEvent(new CustomEvent('fpFileUploaded', {
                         detail: data.data
@@ -161,30 +156,84 @@ export default class UploadManager {
         return button;
     }
 
-    public showUploadError(): void {
-        const message = __('Upload to Cloudflare failed. The image was saved locally. Check FlarePress logs for details.', 'flare-press');
+    public checkUploadError(): void {
+        const ajaxUrl = (window as any).ajaxurl;
+        if (!ajaxUrl) return;
 
-        const wpData = (window as any).wp?.data;
-        if (wpData) {
-            try {
-                wpData.dispatch('core/notices').createErrorNotice(message, { isDismissible: true });
-                return;
-            } catch (e) {
-                // fall through to DOM notice
+        const body = new FormData();
+        body.append('action', 'fp_check_upload_error');
+
+        fetch(ajaxUrl, { method: 'POST', body })
+            .then(r => r.json())
+            .then((data: any) => {
+                if (data.success && data.data === true) {
+                    this.showUploadError();
+                }
+            })
+            .catch(() => {});
+    }
+
+    public listenHeartbeatForErrors(): void {
+        const manager = this;
+        (window as any).jQuery?.(document).on('heartbeat-tick', (_e: any, data: any) => {
+            if (data.fp_upload_error) {
+                manager.showUploadError();
             }
-        }
+        });
+    }
 
-        if (document.querySelector('.fp-upload-error-notice')) {
+    public watchMediaAttachments(): void {
+        const manager = this;
+        const tryBind = () => {
+            const attachments = (window as any).wp?.media?.model?.Attachments?.all;
+            if (attachments) {
+                attachments.on('add', (model: any) => {
+                    if (model.get('fp_upload_error')) {
+                        manager.showUploadError();
+                    }
+                });
+            } else {
+                setTimeout(tryBind, 500);
+            }
+        };
+        tryBind();
+    }
+
+    private buildErrorMessage(count: number): string {
+        const logsUrl = (window as any).fpConfig?.logsUrl ?? '';
+        const logsLink = logsUrl ? ` <a href="${logsUrl}" target="_blank" rel="noopener noreferrer">${__('Check FlarePress logs for details.', 'flare-press')}</a>` : '';
+
+        if (count === 1) {
+            return __('Upload to Cloudflare failed. The image was saved locally.', 'flare-press') + logsLink;
+        }
+        return count + ' ' + __('uploads to Cloudflare failed. The images were saved locally.', 'flare-press') + logsLink;
+    }
+
+    public showUploadError(): void {
+        const mediaModal = document.querySelector<HTMLElement>('.media-modal .media-frame-content');
+        const blockEditor = document.querySelector<HTMLElement>('.interface-interface-skeleton__content');
+
+        const container = mediaModal
+            ?? blockEditor
+            ?? document.querySelector<HTMLElement>('#wpcontent')
+            ?? document.body;
+        const existing = container.querySelector<HTMLElement>('.fp-upload-error-notice');
+
+        if (existing) {
+            const count = parseInt(existing.dataset.errorCount || '1', 10) + 1;
+            existing.dataset.errorCount = String(count);
+            const p = existing.querySelector('p');
+            if (p) p.innerHTML = this.buildErrorMessage(count);
             return;
         }
 
         const notice = document.createElement('div');
         notice.className = 'notice notice-error is-dismissible fp-upload-error-notice';
-        notice.innerHTML = `<p>${message}</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss</span></button>`;
+        notice.dataset.errorCount = '1';
+        notice.innerHTML = `<p>${this.buildErrorMessage(1)}</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss</span></button>`;
         notice.querySelector('.notice-dismiss')?.addEventListener('click', () => notice.remove());
 
-        const wrap = document.querySelector('#wpcontent') ?? document.body;
-        wrap.insertBefore(notice, wrap.firstChild);
+        container.insertBefore(notice, container.firstChild);
     }
 
     public setSwitcherCheckbox(checkbox: HTMLInputElement): void {

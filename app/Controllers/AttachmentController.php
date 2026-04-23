@@ -80,6 +80,7 @@ class AttachmentController
         } catch (Exception $e) {
             Logger::log(0, $e->getMessage());
             update_post_meta($attachmentId, '_fp_upload_error', $e->getMessage());
+            set_transient('fp_upload_error_' . get_current_user_id(), true, 120);
         }
     }
 

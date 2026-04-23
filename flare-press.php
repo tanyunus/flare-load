@@ -50,6 +50,9 @@ function flarePressInit(): void
         add_filter('manage_media_custom_column', 'fp_manage_media_custom_column', 10, 2);
         add_filter('pre_delete_attachment', 'fp_pre_delete_attachment', 10, 3);
         add_action('add_attachment', 'fp_add_attachment', 1, 3);
+        add_action('admin_notices', 'fp_admin_upload_error_notice');
+        add_filter('heartbeat_received', 'fp_heartbeat_upload_error', 10, 2);
+        add_action('wp_ajax_fp_check_upload_error', 'fp_ajax_check_upload_error');
         add_action('admin_menu', 'fp_admin_menu');
         add_action('admin_print_footer_scripts', 'fp_admin_print_footer_scripts');
         add_action('admin_enqueue_scripts', 'fp_admin_enqueue_scripts');
@@ -312,6 +315,40 @@ function fp_add_attachment(int $attachmentId): void
     AttachmentController::handleAddAttachment($attachmentId);
 }
 
+function fp_admin_upload_error_notice(): void
+{
+    $key = 'fp_upload_error_' . get_current_user_id();
+    if (get_transient($key)) {
+        delete_transient($key);
+        $message = __('Upload to Cloudflare failed. The image was saved locally. Check FlarePress logs for details.', 'flare-press');
+        echo '<div class="notice notice-error is-dismissible"><p>' . esc_html($message) . '</p></div>';
+    }
+}
+
+function fp_heartbeat_upload_error(array $response, array $data): array
+{
+    $key = 'fp_upload_error_' . get_current_user_id();
+    if (get_transient($key)) {
+        delete_transient($key);
+        $response['fp_upload_error'] = true;
+    }
+    return $response;
+}
+
+function fp_ajax_check_upload_error(): void
+{
+    if (!current_user_can('upload_files')) {
+        wp_send_json_error();
+        return;
+    }
+    $key = 'fp_upload_error_' . get_current_user_id();
+    if (get_transient($key)) {
+        delete_transient($key);
+        wp_send_json_success(true);
+    }
+    wp_send_json_success(false);
+}
+
 /**
  * Add Location column to media library list view
  */
@@ -345,25 +382,25 @@ function fp_admin_print_footer_scripts(): void
 {
     if (Utils::isAdminPage('upload.php') && (empty($_GET) || sanitize_key(wp_unslash($_GET['mode'] ?? '')) === 'grid')) {
         wp_enqueue_script('fp-media-library-grid-script', FLARE_PRESS_URL . 'includes/dist/main/fp-media-library-grid.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('fp-media-library-grid-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL]);
+        wp_localize_script('fp-media-library-grid-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG)]);
         wp_set_script_translations('fp-media-library-grid-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
     if (Utils::isAdminPage('media-new.php')) {
         wp_enqueue_script('fp-media-new-script', FLARE_PRESS_URL . 'includes/dist/main/fp-media-new.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('fp-media-new-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL]);
+        wp_localize_script('fp-media-new-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG)]);
         wp_set_script_translations('fp-media-new-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
     if (Utils::isFpOptionsPage()) {
         wp_enqueue_script('fp-options-script', FLARE_PRESS_URL . 'includes/dist/main/fp-options.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('fp-options-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL]);
+        wp_localize_script('fp-options-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG)]);
         wp_set_script_translations('fp-options-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
     if ((Utils::isPostEditPage() || Utils::isAdminPage('post-new.php') || Utils::isAdminPage('site-editor.php')) && !Utils::isMediaEditPage()) {
         wp_enqueue_script('fp-post-script', FLARE_PRESS_URL . 'includes/dist/main/fp-post.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('fp-post-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL]);
+        wp_localize_script('fp-post-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG)]);
         wp_set_script_translations('fp-post-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 }

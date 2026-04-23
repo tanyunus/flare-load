@@ -52,6 +52,7 @@ class Constants
 
     // UI strings — field labels
     public const UI_CF_BADGE_TITLE = 'Uploaded to Cloudflare';
+    public const UI_LOCATION_FILTER_ALL = 'All locations';
     public const UI_CF_LOCATION_THIS_SERVER = 'This server';
     public const UI_CF_LOCATION_COLUMN_NAME = 'Location';
     public const UI_FILE_MANAGEMENT_FIELD_TITLE = 'File management';

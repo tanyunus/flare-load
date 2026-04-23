@@ -157,6 +157,8 @@ class AttachmentController
         $metaData['filesize'] = $newMetaData['fileSize'];
         $metaData['sizes'] = [];
 
+        update_post_meta($attachmentId, Constants::UPLOADED_IMAGE_CF_ID_NAME, $newMetaData['cloudFlareId']);
+
         clean_attachment_cache($attachmentId);
 
         return $metaData;

@@ -30,12 +30,32 @@ require_once FLARE_PRESS_PATH . 'autoload.php';
 register_activation_hook(__FILE__, 'fp_activate');
 
 function fp_activate(): void {
-    // Set default option values if not already configured
     if (!get_option('fp_upload_settings')) {
         update_option('fp_upload_settings', [
             Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME       => false,
             Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME => false,
         ]);
+    }
+
+    fp_backfill_cf_post_meta();
+}
+
+function fp_backfill_cf_post_meta(): void {
+    $attachments = get_posts([
+        'post_type'      => 'attachment',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'meta_query'     => [[
+            'key'     => Constants::UPLOADED_IMAGE_CF_ID_NAME,
+            'compare' => 'NOT EXISTS',
+        ]],
+    ]);
+
+    foreach ($attachments as $id) {
+        $meta = wp_get_attachment_metadata($id);
+        if (!empty($meta[Constants::UPLOADED_IMAGE_CF_ID_NAME])) {
+            update_post_meta($id, Constants::UPLOADED_IMAGE_CF_ID_NAME, $meta[Constants::UPLOADED_IMAGE_CF_ID_NAME]);
+        }
     }
 }
 
@@ -50,6 +70,8 @@ function flarePressInit(): void
         add_filter('render_block', 'fp_render_block', 10, 2);
         add_filter('manage_media_columns', 'fp_manage_media_columns');
         add_filter('manage_media_custom_column', 'fp_manage_media_custom_column', 10, 2);
+        add_action('restrict_manage_posts', 'fp_restrict_manage_media_location');
+        add_action('pre_get_posts', 'fp_pre_get_posts_location_filter');
         add_filter('pre_delete_attachment', 'fp_pre_delete_attachment', 10, 3);
         add_action('add_attachment', 'fp_add_attachment', 1, 3);
         add_action('admin_notices', 'fp_admin_upload_error_notice');
@@ -371,6 +393,59 @@ function fp_ajax_check_upload_error(): void
         wp_send_json_success(true);
     }
     wp_send_json_success(false);
+}
+
+/**
+ * Add Location filter dropdown to media library list view
+ */
+function fp_restrict_manage_media_location(string $postType): void
+{
+    if ($postType !== 'attachment') {
+        return;
+    }
+
+    $selected = sanitize_key(wp_unslash($_GET['fp_location'] ?? ''));
+    ?>
+    <select name="fp_location">
+        <option value=""><?php echo esc_html(Utils::localize(Constants::UI_LOCATION_FILTER_ALL)); ?></option>
+        <option value="cloudflare" <?php selected($selected, 'cloudflare'); ?>><?php echo esc_html(Utils::localize(Constants::UI_CF_BADGE_TITLE)); ?></option>
+        <option value="server" <?php selected($selected, 'server'); ?>><?php echo esc_html(Utils::localize(Constants::UI_CF_LOCATION_THIS_SERVER)); ?></option>
+    </select>
+    <?php
+}
+
+/**
+ * Filter media library query by location (Cloudflare or server)
+ */
+function fp_pre_get_posts_location_filter(WP_Query $query): void
+{
+    global $pagenow;
+
+    if (!is_admin() || !$query->is_main_query() || $pagenow !== 'upload.php') {
+        return;
+    }
+
+    $location = sanitize_key(wp_unslash($_GET['fp_location'] ?? ''));
+
+    if ($location === 'cloudflare') {
+        $query->set('meta_query', [
+            'relation' => 'AND',
+            [
+                'key'     => Constants::UPLOADED_IMAGE_CF_ID_NAME,
+                'compare' => 'EXISTS',
+            ],
+            [
+                'key'     => Constants::UPLOADED_IMAGE_CF_ID_NAME,
+                'value'   => '',
+                'compare' => '!=',
+            ],
+        ]);
+    } elseif ($location === 'server') {
+        $query->set('meta_query', [[
+            'key'     => Constants::UPLOADED_IMAGE_CF_ID_NAME,
+            'compare' => 'NOT EXISTS',
+        ]]);
+    }
 }
 
 /**

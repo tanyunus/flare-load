@@ -522,7 +522,7 @@ class OptionController
     {
         $variantNamesArray = array_keys(self::getVariants());
 
-        asort($variantNamesArray);
+        sort($variantNamesArray);
 
         return $variantNamesArray;
     }

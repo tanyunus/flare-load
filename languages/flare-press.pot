@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-04-23T13:42:08+00:00\n"
+"POT-Creation-Date: 2026-04-23T16:33:17+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: FlarePress generate-pot.js\n"
 "X-Domain: flare-press\n"
@@ -60,6 +60,10 @@ msgstr ""
 
 #: app/Data/Constants.php
 msgid "Uploaded to Cloudflare"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "All locations"
 msgstr ""
 
 #: app/Data/Constants.php

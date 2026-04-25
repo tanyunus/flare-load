@@ -40,6 +40,14 @@ function fp_activate(): void {
     fp_backfill_cf_post_meta();
 }
 
+function fp_maybe_run_backfill(): void {
+    if (get_transient('fp_backfill_v1_done')) {
+        return;
+    }
+    fp_backfill_cf_post_meta();
+    set_transient('fp_backfill_v1_done', true, WEEK_IN_SECONDS);
+}
+
 function fp_backfill_cf_post_meta(): void {
     $attachments = get_posts([
         'post_type'      => 'attachment',
@@ -82,7 +90,10 @@ function flarePressInit(): void
         add_action('admin_print_footer_scripts', 'fp_admin_print_footer_scripts');
         add_action('admin_enqueue_scripts', 'fp_admin_enqueue_scripts');
         add_filter('pre_update_option_' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'fp_pre_update_option_save_api_token', 10, 2);
+        add_action('admin_init', 'fp_maybe_run_backfill');
     }
+
+    add_filter('ajax_query_attachments_args', 'fp_ajax_query_attachments_args');
 
     # Public filters
     add_filter('wp_prepare_attachment_for_js', 'fp_wp_prepare_attachment_for_js', 5, 3);
@@ -449,6 +460,36 @@ function fp_pre_get_posts_location_filter(WP_Query $query): void
 }
 
 /**
+ * Filter media library grid view AJAX query by location
+ */
+function fp_ajax_query_attachments_args(array $query): array
+{
+    $location = sanitize_key($_REQUEST['query']['fp_location'] ?? '');
+
+    if ($location === 'cloudflare') {
+        $query['meta_query'] = [
+            'relation' => 'AND',
+            [
+                'key'     => Constants::UPLOADED_IMAGE_CF_ID_NAME,
+                'compare' => 'EXISTS',
+            ],
+            [
+                'key'     => Constants::UPLOADED_IMAGE_CF_ID_NAME,
+                'value'   => '',
+                'compare' => '!=',
+            ],
+        ];
+    } elseif ($location === 'server') {
+        $query['meta_query'] = [[
+            'key'     => Constants::UPLOADED_IMAGE_CF_ID_NAME,
+            'compare' => 'NOT EXISTS',
+        ]];
+    }
+
+    return $query;
+}
+
+/**
  * Add Location column to media library list view
  */
 function fp_manage_media_columns(array $columns): array
@@ -481,7 +522,7 @@ function fp_admin_print_footer_scripts(): void
 {
     if (Utils::isAdminPage('upload.php') && (empty($_GET) || sanitize_key(wp_unslash($_GET['mode'] ?? '')) === 'grid')) {
         wp_enqueue_script('fp-media-library-grid-script', FLARE_PRESS_URL . 'includes/dist/main/fp-media-library-grid.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('fp-media-library-grid-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG)]);
+        wp_localize_script('fp-media-library-grid-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'locationFilterLabels' => ['all' => Utils::localize(Constants::UI_LOCATION_FILTER_ALL), 'cloudflare' => Utils::localize(Constants::UI_CF_BADGE_TITLE), 'server' => Utils::localize(Constants::UI_CF_LOCATION_THIS_SERVER)]]);
         wp_set_script_translations('fp-media-library-grid-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 

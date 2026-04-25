@@ -1,8 +1,8 @@
 <?php
 
-defined('ABSPATH') || exit;
-
 namespace FlarePress\Api;
+
+defined('ABSPATH') || exit;
 
 use CURLFile;
 use Exception;

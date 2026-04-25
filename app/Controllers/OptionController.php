@@ -1,8 +1,8 @@
 <?php
 
-defined('ABSPATH') || exit;
-
 namespace FlarePress\Controllers;
+
+defined('ABSPATH') || exit;
 
 use Exception;
 use FlarePress\Api\CloudflareImagesApi;

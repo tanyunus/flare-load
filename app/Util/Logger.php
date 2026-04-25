@@ -1,8 +1,8 @@
 <?php
 
-defined('ABSPATH') || exit;
-
 namespace FlarePress\Util;
+
+defined('ABSPATH') || exit;
 
 class Logger
 {

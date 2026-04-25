@@ -1,8 +1,8 @@
 <?php
 
-defined('ABSPATH') || exit;
-
 namespace FlarePress\Data;
+
+defined('ABSPATH') || exit;
 
 class Constants
 {

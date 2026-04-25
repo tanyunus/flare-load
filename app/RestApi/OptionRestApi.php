@@ -1,8 +1,8 @@
 <?php
 
-defined('ABSPATH') || exit;
-
 namespace FlarePress\RestApi;
+
+defined('ABSPATH') || exit;
 
 use FlarePress\Controllers\OptionController;
 use WP_REST_Request;

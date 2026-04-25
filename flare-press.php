@@ -11,6 +11,7 @@ Text Domain: flare-press
 
 use FlarePress\Api\CloudflareImagesApi;
 use FlarePress\Controllers\AttachmentController;
+use FlarePress\Controllers\MigrationController;
 use FlarePress\Controllers\OptionController;
 use FlarePress\Data\Constants;
 use FlarePress\Util\Logger;
@@ -104,6 +105,11 @@ function flarePressInit(): void
             return;
         }
 
+        add_action('wp_ajax_fp_migrate_analyze',   'fp_ajax_migrate_analyze');
+        add_action('wp_ajax_fp_migrate_start',     'fp_ajax_migrate_start');
+        add_action('wp_ajax_fp_migrate_process',   'fp_ajax_migrate_process');
+        add_action('wp_ajax_fp_migrate_get_state', 'fp_ajax_migrate_get_state');
+        add_action('wp_ajax_fp_migrate_cancel',    'fp_ajax_migrate_cancel');
         add_action('rest_api_init', 'fp_rest_api_init');
         add_filter('render_block', 'fp_render_block', 10, 2);
         add_filter('manage_media_columns', 'fp_manage_media_columns');
@@ -399,6 +405,108 @@ function fp_heartbeat_upload_error(array $response, array $data): array
         $response['fp_upload_error'] = true;
     }
     return $response;
+}
+
+function fp_ajax_migrate_analyze(): void
+{
+    check_ajax_referer('fp_migrate', 'nonce');
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(null, 403);
+        return;
+    }
+
+    $scope       = sanitize_key(wp_unslash($_POST['scope'] ?? 'posts'));
+    $selectedIds = array_map('intval', (array) wp_unslash($_POST['ids'] ?? []));
+
+    wp_send_json_success(MigrationController::analyzeImages($scope, $selectedIds));
+}
+
+function fp_ajax_migrate_start(): void
+{
+    check_ajax_referer('fp_migrate', 'nonce');
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(null, 403);
+        return;
+    }
+
+    $scope        = sanitize_key(wp_unslash($_POST['scope'] ?? 'posts'));
+    $selectedIds  = array_map('intval', (array) wp_unslash($_POST['ids'] ?? []));
+    $variant      = sanitize_text_field(wp_unslash($_POST['variant'] ?? ''));
+    $deleteFromCF = !empty($_POST['delete_from_cf']);
+
+    $analysis = MigrationController::analyzeImages($scope, $selectedIds);
+
+    $queue = array_column(
+        array_filter($analysis['images'], fn($img) => $img['status'] !== 'no_variant'),
+        'id'
+    );
+
+    $state = [
+        'remaining'     => array_values($queue),
+        'processed'     => [],
+        'failed'        => [],
+        'options'       => ['variant' => $variant, 'delete_from_cf' => $deleteFromCF],
+    ];
+
+    set_transient('fp_migration_state', $state, DAY_IN_SECONDS);
+
+    wp_send_json_success($state);
+}
+
+function fp_ajax_migrate_process(): void
+{
+    check_ajax_referer('fp_migrate', 'nonce');
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(null, 403);
+        return;
+    }
+
+    $id           = (int) ($_POST['id'] ?? 0);
+    $variant      = sanitize_text_field(wp_unslash($_POST['variant'] ?? ''));
+    $deleteFromCF = !empty($_POST['delete_from_cf']);
+
+    if (!$id || empty($variant)) {
+        wp_send_json_error(['message' => 'Missing parameters.']);
+        return;
+    }
+
+    $result = MigrationController::processImage($id, $variant, $deleteFromCF);
+
+    $state = get_transient('fp_migration_state');
+    if ($state) {
+        $state['remaining'] = array_values(array_filter($state['remaining'], fn($i) => $i !== $id));
+        if ($result['status'] === 'error') {
+            $state['failed'][]    = ['id' => $id, 'reason' => $result['reason'] ?? ''];
+        } else {
+            $state['processed'][] = $id;
+        }
+        set_transient('fp_migration_state', $state, DAY_IN_SECONDS);
+    }
+
+    wp_send_json_success($result);
+}
+
+function fp_ajax_migrate_get_state(): void
+{
+    check_ajax_referer('fp_migrate', 'nonce');
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(null, 403);
+        return;
+    }
+
+    wp_send_json_success(get_transient('fp_migration_state') ?: null);
+}
+
+function fp_ajax_migrate_cancel(): void
+{
+    check_ajax_referer('fp_migrate', 'nonce');
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(null, 403);
+        return;
+    }
+
+    delete_transient('fp_migration_state');
+    wp_send_json_success();
 }
 
 function fp_ajax_test_connection(): void

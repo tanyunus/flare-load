@@ -363,7 +363,7 @@ class AttachmentController
      *
      * @return void
      */
-    private static function deleteCfThumbnail(int $attachmentId): void
+    public static function deleteCfThumbnail(int $attachmentId): void
     {
         $thumbnail = self::getCfThumbnail($attachmentId)['path'] ?? '';
 

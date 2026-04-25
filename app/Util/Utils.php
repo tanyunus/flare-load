@@ -113,6 +113,14 @@ class Utils
         return is_admin() && sanitize_key(wp_unslash($_GET['page'])) === Constants::DASHBOARD_MENU_SLUG;
     }
 
+    public static function isFpMigratePage(): bool {
+        if (!isset($_GET['page'])) {
+            return false;
+        }
+
+        return is_admin() && sanitize_key(wp_unslash($_GET['page'])) === Constants::DASHBOARD_MIGRATE_PAGE_SLUG;
+    }
+
     public static function isPostEditPage(): bool {
         return self::isAdminPage('post.php')
             && !empty($_GET['post'])

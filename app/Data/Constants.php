@@ -22,10 +22,13 @@ class Constants
     // Views
     public const DASHBOARD_VIEW = 'dashboard';
     public const LOG_VIEW = 'logs';
+    public const MIGRATE_VIEW = 'migrate';
     public const DASHBOARD_MENU_SLUG = 'flare-press-settings';
     public const DASHBOARD_LOG_PAGE_SLUG = 'flare-press-logs';
+    public const DASHBOARD_MIGRATE_PAGE_SLUG = 'flare-press-migrate';
     public const DASHBOARD_MENU_TITLE = 'FlarePress';
     public const LOG_MENU_TITLE = 'Logs';
+    public const MIGRATE_MENU_TITLE = 'Migrate to Local';
     public const LOG_VIEWER_FIELD_NAME = 'fp_log_viewer';
     public const DASHBOARD_SETTINGS_GROUP_NAME = 'fp_settings_group';
     public const DASHBOARD_VARIANT_SETTINGS_GROUP_NAME = 'fp_variant_settings_group';

@@ -43,6 +43,9 @@ class OptionController
         $this->addLogPage();
         $this->addLogViewerSection();
         $this->registerLogViewer();
+
+        // Add Migrate Page
+        $this->addMigratePage();
     }
 
     private function addSettingsPage(): void
@@ -56,6 +59,23 @@ class OptionController
                 WP_PLUGIN_DIR . '/flare-press/includes/dist/images/fp_dashboard_icon.svg',
                 5
         );
+    }
+
+    private function addMigratePage(): void
+    {
+        add_submenu_page(
+            Constants::DASHBOARD_MENU_SLUG,
+            Utils::localize(Constants::MIGRATE_MENU_TITLE),
+            Utils::localize(Constants::MIGRATE_MENU_TITLE),
+            'manage_options',
+            Constants::DASHBOARD_MIGRATE_PAGE_SLUG,
+            [$this, 'fpAdminMigrateView'],
+        );
+    }
+
+    public function fpAdminMigrateView(): void
+    {
+        Utils::renderTemplate(Constants::MIGRATE_VIEW);
     }
 
     private function addLogPage(): void

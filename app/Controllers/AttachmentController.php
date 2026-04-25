@@ -1,5 +1,7 @@
 <?php
 
+defined('ABSPATH') || exit;
+
 namespace FlarePress\Controllers;
 
 use DOMDocument;

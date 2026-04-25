@@ -64,6 +64,16 @@ By default, deleting an attachment from the WordPress media library also removes
 2. Media library list view showing the Cloudflare location badge.
 3. Block editor with the "Upload to Cloudflare" button on image blocks.
 
+== Third-party Services ==
+
+This plugin communicates with the **Cloudflare Images API** to upload, retrieve, and delete images. Requests are made when you upload an image to Cloudflare from the media library, delete a Cloudflare-hosted image, or sync your image variants from the plugin settings page.
+
+Your Cloudflare Account ID, API Token, and uploaded image files are transmitted to Cloudflare's servers.
+
+* [Cloudflare Images documentation](https://developers.cloudflare.com/images/)
+* [Cloudflare Privacy Policy](https://www.cloudflare.com/privacypolicy/)
+* [Cloudflare Terms of Service](https://www.cloudflare.com/terms/)
+
 == Changelog ==
 
 = 1.0.0 =

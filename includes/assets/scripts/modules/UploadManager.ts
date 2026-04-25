@@ -170,7 +170,7 @@ export default class UploadManager {
                     this.showUploadError();
                 }
             })
-            .catch(() => {});
+            .catch(() => { console.error('[FlarePress] Upload error check failed.'); });
     }
 
     public listenHeartbeatForErrors(): void {

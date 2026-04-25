@@ -1,5 +1,7 @@
 <?php
 
+defined('ABSPATH') || exit;
+
 namespace FlarePress\Util;
 
 use FlarePress\Data\Constants;

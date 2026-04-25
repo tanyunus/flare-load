@@ -1,5 +1,7 @@
 <?php
 
+defined('ABSPATH') || exit;
+
 namespace FlarePress\RestApi;
 
 use FlarePress\Controllers\OptionController;

@@ -1,3 +1,4 @@
+<?php defined('ABSPATH') || exit; ?>
 <div class="wrap">
     <?php include 'header.php'?>
     <form id="fp_options_form" method="post" action="options.php">

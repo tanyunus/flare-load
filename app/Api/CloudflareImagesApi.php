@@ -1,5 +1,7 @@
 <?php
 
+defined('ABSPATH') || exit;
+
 namespace FlarePress\Api;
 
 use CURLFile;
@@ -131,6 +133,8 @@ class CloudflareImagesApi
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 
             switch ($method) {
                 case 'POST':
@@ -142,7 +146,8 @@ class CloudflareImagesApi
                     break;
                 case 'DELETE':
                     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
-                default;
+                    break;
+                default:
             }
 
             $response = curl_exec($ch);

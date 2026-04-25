@@ -1,3 +1,4 @@
+<?php defined('ABSPATH') || exit; ?>
 <div class="wrap">
     <?php include 'header.php'?>
     <div class="fp-log-viewer-content">

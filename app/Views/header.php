@@ -1,4 +1,4 @@
-<?php use FlarePress\Data\Constants; use FlarePress\Util\Utils; ?>
+<?php defined('ABSPATH') || exit; use FlarePress\Data\Constants; use FlarePress\Util\Utils; ?>
 <div class="fp-header">
     <img height="120" src="<?php echo esc_url(FLARE_PRESS_URL . 'includes/dist/images/fp_logo.png') ?>">
     <div>

@@ -69,11 +69,41 @@ function fp_backfill_cf_post_meta(): void {
 
 add_action('plugins_loaded', 'flarePressInit');
 
+function fp_has_complete_credentials(): bool
+{
+    return !empty(get_option(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME))
+        && !empty(get_option(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME))
+        && !empty(get_option(Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME));
+}
+
+function fp_incomplete_setup_notice(): void
+{
+    $url     = admin_url('admin.php?page=' . Constants::DASHBOARD_MENU_SLUG);
+    $message = sprintf(
+        /* translators: %s: link to FlarePress settings page */
+        __('FlarePress is not fully configured. Please complete your <a href="%s">Cloudflare settings</a> to enable all features.', 'flare-press'),
+        esc_url($url)
+    );
+    echo '<div class="notice notice-warning is-dismissible"><p>' . wp_kses($message, ['a' => ['href' => []]]) . '</p></div>';
+}
+
 function flarePressInit(): void
 {
     load_plugin_textdomain('flare-press', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
+    $credentialsComplete = fp_has_complete_credentials();
+
     if (is_user_logged_in()) {
+        add_action('admin_menu', 'fp_admin_menu');
+        add_action('admin_enqueue_scripts', 'fp_admin_enqueue_scripts');
+        add_action('wp_ajax_fp_test_connection', 'fp_ajax_test_connection');
+        add_filter('pre_update_option_' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'fp_pre_update_option_save_api_token', 10, 2);
+
+        if (!$credentialsComplete) {
+            add_action('admin_notices', 'fp_incomplete_setup_notice');
+            return;
+        }
+
         add_action('rest_api_init', 'fp_rest_api_init');
         add_filter('render_block', 'fp_render_block', 10, 2);
         add_filter('manage_media_columns', 'fp_manage_media_columns');
@@ -85,12 +115,12 @@ function flarePressInit(): void
         add_action('admin_notices', 'fp_admin_upload_error_notice');
         add_filter('heartbeat_received', 'fp_heartbeat_upload_error', 10, 2);
         add_action('wp_ajax_fp_check_upload_error', 'fp_ajax_check_upload_error');
-        add_action('wp_ajax_fp_test_connection', 'fp_ajax_test_connection');
-        add_action('admin_menu', 'fp_admin_menu');
         add_action('admin_print_footer_scripts', 'fp_admin_print_footer_scripts');
-        add_action('admin_enqueue_scripts', 'fp_admin_enqueue_scripts');
-        add_filter('pre_update_option_' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'fp_pre_update_option_save_api_token', 10, 2);
         add_action('admin_init', 'fp_maybe_run_backfill');
+    }
+
+    if (!$credentialsComplete) {
+        return;
     }
 
     add_filter('ajax_query_attachments_args', 'fp_ajax_query_attachments_args');

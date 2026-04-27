@@ -117,7 +117,7 @@ export interface SyncVariantsResponse {
 }
 
 export interface GetVariantNamesResponse {
-    data: string;
+    data: VariantOption[];
 }
 
 export interface GetAccountHashResponse {

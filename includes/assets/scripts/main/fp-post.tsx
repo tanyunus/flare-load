@@ -8,7 +8,7 @@ import {ComponentType, useEffect, useRef, useState} from '@wordpress/element';
 import {useSelect, useDispatch} from '@wordpress/data';
 import {store as blockEditorStore} from '@wordpress/block-editor';
 import RestApi from "../modules/RestApi";
-import {GetVariantNamesResponse} from "../types/types";
+import {GetVariantNamesResponse, VariantOption} from "../types/types";
 import React from "react";
 
 function getCfImageIdFromUrl(url: string): string | null {
@@ -72,11 +72,11 @@ function ImageVariantPanel({
     props: ExtendedBlockEditProps<ImageBlockAttributes>;
 }) {
     const {attributes, setAttributes} = props;
-    const configVariants = (window as any).fpConfig?.variantNames;
-    const initialVariants: string[] = Array.isArray(configVariants) ? configVariants : [];
+    const configVariants = (window as any).fpConfig?.variantOptions;
+    const initialVariants: VariantOption[] = Array.isArray(configVariants) ? configVariants : [];
     const defaultVariant: string = (window as any).fpConfig?.defaultVariant ?? '';
     const accountHash: string = (window as any).fpConfig?.accountHash ?? '';
-    const [variants, setVariants] = useState<string[]>(initialVariants);
+    const [variants, setVariants] = useState<VariantOption[]>(initialVariants);
     const autoApplied = useRef(false);
 
     const cfImageId = getCfImageIdFromUrl(attributes.url ?? '');
@@ -106,7 +106,7 @@ function ImageVariantPanel({
         return <BlockEdit {...props} />;
     }
 
-    const options = variants.map(variant => ({label: variant, value: variant}));
+    const options = variants.map(v => ({label: v.label, value: v.name}));
 
     return (
         <>
@@ -139,10 +139,10 @@ function GalleryVariantPanel({
     props: ExtendedBlockEditProps<any>;
 }) {
     const {clientId} = props;
-    const configVariants = (window as any).fpConfig?.variantNames;
-    const initialVariants: string[] = Array.isArray(configVariants) ? configVariants : [];
+    const configVariants = (window as any).fpConfig?.variantOptions;
+    const initialVariants: VariantOption[] = Array.isArray(configVariants) ? configVariants : [];
     const defaultVariant = (window as any).fpConfig?.defaultVariant ?? '';
-    const [variants, setVariants] = useState<string[]>(initialVariants);
+    const [variants, setVariants] = useState<VariantOption[]>(initialVariants);
     const autoApplied = useRef(false);
 
     const {updateBlockAttributes} = useDispatch(blockEditorStore) as any;
@@ -187,7 +187,7 @@ function GalleryVariantPanel({
         });
     };
 
-    const options = variants.map((v: string) => ({label: v, value: v}));
+    const options = variants.map((v: VariantOption) => ({label: v.label, value: v.name}));
 
     return (
         <>
@@ -217,11 +217,11 @@ function MediaTextVariantPanel({
     props: ExtendedBlockEditProps<any>;
 }) {
     const {attributes, setAttributes} = props;
-    const configVariants = (window as any).fpConfig?.variantNames;
-    const initialVariants: string[] = Array.isArray(configVariants) ? configVariants : [];
+    const configVariants = (window as any).fpConfig?.variantOptions;
+    const initialVariants: VariantOption[] = Array.isArray(configVariants) ? configVariants : [];
     const defaultVariant: string = (window as any).fpConfig?.defaultVariant ?? '';
     const accountHash: string = (window as any).fpConfig?.accountHash ?? '';
-    const [variants, setVariants] = useState<string[]>(initialVariants);
+    const [variants, setVariants] = useState<VariantOption[]>(initialVariants);
     const autoApplied = useRef(false);
 
     const cfImageId = getCfImageIdFromUrl(attributes.mediaUrl ?? '');
@@ -251,7 +251,7 @@ function MediaTextVariantPanel({
         return <BlockEdit {...props} />;
     }
 
-    const options = variants.map(variant => ({label: variant, value: variant}));
+    const options = variants.map(v => ({label: v.label, value: v.name}));
 
     return (
         <>
@@ -303,8 +303,8 @@ addFilter(
     withCustomControl
 );
 
-async function getVariantNames(): Promise<string[] | false> {
-    const fromConfig = (window as any).fpConfig?.variantNames;
+async function getVariantNames(): Promise<VariantOption[] | false> {
+    const fromConfig = (window as any).fpConfig?.variantOptions;
     if (Array.isArray(fromConfig) && fromConfig.length > 0) {
         return fromConfig;
     }
@@ -327,7 +327,7 @@ async function getVariantNames(): Promise<string[] | false> {
 
         if (response.ok) {
             const result: GetVariantNamesResponse = await response.json();
-            return result.data as unknown as string[];
+            return result.data;
         }
 
         return false;

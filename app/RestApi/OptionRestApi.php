@@ -27,20 +27,18 @@ class OptionRestApi
     }
 
     public static function getVariantNames(WP_REST_Request $request): WP_REST_Response {
-        $variantNames = OptionController::getVariantNames();
+        $variantOptions = OptionController::getVariantOptions();
 
-        if(empty($variantNames)) {
+        if(empty($variantOptions)) {
             return new WP_REST_Response([
                 'error' => true,
                 'message' => 'Error while getting variant names.',
             ], 500);
         }
 
-        sort($variantNames);
-
         return new WP_REST_Response([
             'success' => true,
-            'data' => $variantNames,
+            'data' => $variantOptions,
         ], 200);
     }
 

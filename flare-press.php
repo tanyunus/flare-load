@@ -79,6 +79,10 @@ function fp_has_complete_credentials(): bool
 
 function fp_incomplete_setup_notice(): void
 {
+    if (Utils::isFpOptionsPage()) {
+        return;
+    }
+
     $url     = admin_url('admin.php?page=' . Constants::DASHBOARD_MENU_SLUG);
     $message = sprintf(
         /* translators: %s: link to FlarePress settings page */
@@ -683,7 +687,7 @@ function fp_admin_print_footer_scripts(): void
             'ajaxUrl'        => admin_url('admin-ajax.php'),
             'nonce'          => wp_create_nonce('fp_migrate'),
             'defaultVariant' => get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, ''),
-            'variantNames'   => OptionController::getVariantNames(),
+            'variantOptions' => OptionController::getVariantOptions(),
             'migrateUrl'     => admin_url('admin.php?page=' . Constants::DASHBOARD_MIGRATE_PAGE_SLUG),
             'logsUrl'        => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG),
         ]);

@@ -4,7 +4,7 @@ declare const fpMigrateConfig: {
     ajaxUrl: string;
     nonce: string;
     defaultVariant: string;
-    variantNames: string[];
+    variantOptions: Array<{ name: string; label: string }>;
     migrateUrl: string;
     logsUrl: string;
 };
@@ -140,12 +140,12 @@ class FpMigrateWizard {
     }
 
     private renderConfig(): void {
-        const variants   = fpMigrateConfig.variantNames;
+        const variants   = fpMigrateConfig.variantOptions;
         const noVariants = variants.length === 0;
         const variantOpts = noVariants
             ? `<option value="">${__('No variants configured', 'flare-press')}</option>`
             : variants.map(v =>
-                `<option value="${this.escHtml(v)}"${v === this.variant ? ' selected' : ''}>${this.escHtml(v)}</option>`
+                `<option value="${this.escHtml(v.name)}"${v.name === this.variant ? ' selected' : ''}>${this.escHtml(v.label)}</option>`
               ).join('');
 
         this.render(`

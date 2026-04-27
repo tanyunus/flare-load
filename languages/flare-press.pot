@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-04-26T11:07:41+00:00\n"
+"POT-Creation-Date: 2026-04-27T17:06:01+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: FlarePress generate-pot.js\n"
 "X-Domain: flare-press\n"
@@ -96,6 +96,14 @@ msgstr ""
 
 #: app/Data/Constants.php
 msgid "Cloudflare Account API Token"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "URL Signing Key"
+msgstr ""
+
+#: app/Data/Constants.php
+msgid "Optional. Hex-encoded key for Cloudflare Images signed URLs. Generate one at <em>Cloudflare Dashboard → Images → Keys</em>. When set, all image delivery URLs include a time-limited signature. Leave empty to disable."
 msgstr ""
 
 #: app/Data/Constants.php

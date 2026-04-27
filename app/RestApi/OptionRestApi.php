@@ -20,13 +20,9 @@ class OptionRestApi
             ], 500);
         }
 
-        $syncResult = array_keys($syncResult);
-        sort($syncResult);
-        $arrKeys = stripslashes(wp_json_encode($syncResult));
-
         return new WP_REST_Response([
             'success' => true,
-            'data' => $arrKeys,
+            'data' => OptionController::getVariantOptions(),
         ], 200);
     }
 

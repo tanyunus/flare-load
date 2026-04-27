@@ -43,6 +43,7 @@ class Constants
     public const DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME = 'fp_cf_account_id';
     public const DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME = 'fp_cf_account_hash';
     public const DASHBOARD_CF_API_TOKEN_FIELD_NAME = 'fp_cf_api_token';
+    public const DASHBOARD_CF_SIGNING_KEY_FIELD_NAME = 'fp_cf_signing_key';
     public const DASHBOARD_VARIANT_LIST_FIELD_NAME = 'fp_cf_variant_list';
     public const DASHBOARD_DEFAULT_VARIANT_FIELD_NAME = 'fp_cf_default_variant';
     public const DASHBOARD_CF_LIST_VIEW_COLUMN_ID = 'fp_cf_badge_column';
@@ -67,6 +68,8 @@ class Constants
     public const UI_CF_ACCOUNT_ID_FIELD_LABEL = 'Cloudflare Account ID';
     public const UI_CF_ACCOUNT_HASH_FIELD_LABEL = 'Cloudflare Account Hash';
     public const UI_CF_API_TOKEN_FIELD_LABEL = 'Cloudflare Account API Token';
+    public const UI_CF_SIGNING_KEY_FIELD_LABEL = 'URL Signing Key';
+    public const UI_CF_SIGNING_KEY_DESCRIPTION = 'Optional. Hex-encoded key for Cloudflare Images signed URLs. Generate one at <em>Cloudflare Dashboard → Images → Keys</em>. When set, all image delivery URLs include a time-limited signature. Leave empty to disable.';
     public const UI_VARIANTS_FIELD_LABEL = 'Variants';
     public const UI_SYNC_VARIANTS_BUTTON = 'Sync Variants';
     public const UI_TEST_CONNECTION_BUTTON = 'Test Connection';

@@ -35,8 +35,8 @@ class OptionController
         $this->registerAccountIDField();
         $this->registerAccountHashField();
         $this->registerAPITokenField();
+        $this->registerSigningKeyField();
         $this->registerFileManagementField();
-        $this->registerVariantListField();
         $this->registerDefaultVariantField();
 
         // Add Log Page
@@ -235,69 +235,62 @@ class OptionController
         );
     }
 
-    private function registerVariantListField(): void
+    private function registerSigningKeyField(): void
     {
-        $variantNames = $this->getVariantNamesAsArray();
-
         register_setting(
-                Constants::DASHBOARD_VARIANT_SETTINGS_GROUP_NAME,
-                Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME,
-                [
-                        'sanitize_callback' => function ($value) use ($variantNames) {
-                            $sanitized = sanitize_text_field($value);
-
-                            if (in_array($sanitized, $variantNames, true)) {
-                                return $sanitized;
-                            }
-
-                            return $variantNames[0];
-                        },
-                        'default' => $variantNames[0],
-                ]
+            Constants::DASHBOARD_SETTINGS_GROUP_NAME,
+            Constants::DASHBOARD_CF_SIGNING_KEY_FIELD_NAME,
+            [
+                'sanitize_callback' => function ($input) {
+                    // Explicit remove action submitted via checkbox
+                    $action = sanitize_key(wp_unslash($_POST['fp_cf_signing_key_action'] ?? 'keep'));
+                    if ($action === 'remove') {
+                        return '';
+                    }
+                    $cleaned = preg_replace('/[^0-9a-fA-F]/', '', sanitize_text_field($input));
+                    // Empty submission keeps the existing key
+                    if (empty($cleaned)) {
+                        return get_option(Constants::DASHBOARD_CF_SIGNING_KEY_FIELD_NAME, '');
+                    }
+                    return $cleaned;
+                },
+                'default' => '',
+            ]
         );
 
         add_settings_field(
-                Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME,
-                Utils::localize(Constants::UI_VARIANTS_FIELD_LABEL),
-                function () {
-                    $this->renderVariantListField();
-                },
-                Constants::DASHBOARD_MENU_SLUG,
-                Constants::DASHBOARD_VARIANT_SETTINGS_SECTION_ID,
+            Constants::DASHBOARD_CF_SIGNING_KEY_FIELD_NAME,
+            Utils::localize(Constants::UI_CF_SIGNING_KEY_FIELD_LABEL),
+            function () {
+                $this->renderSigningKeyField();
+            },
+            Constants::DASHBOARD_MENU_SLUG,
+            Constants::DASHBOARD_API_SETTINGS_SECTION_ID,
         );
     }
 
-    private function renderVariantListField(): void
+    private function renderSigningKeyField(): void
     {
-        $variantsArray = $this->getVariantNamesAsArray();
-
-        if (empty($variantsArray)) {
-            $variantsArray = array_keys(self::syncVariants());
-        }
-
+        $hasKey = !empty(get_option(Constants::DASHBOARD_CF_SIGNING_KEY_FIELD_NAME));
         ?>
-        <div id="fp_variant_list_field" class="fp-variant-list-field">
-            <?php
-            if (!empty($variantsArray)) {
-                foreach ($variantsArray as $variant) {
-                    ?>
-                    <code><?php echo $variant ?></code>
-                    <?php
-                }
-            } else {
-                ?> <p><?php echo esc_html(Utils::localize(Constants::UI_NO_VARIANTS_SYNCED)); ?></p><?php
-            }
-            ?>
-
+        <input
+            type="password"
+            value=""
+            name="<?php echo esc_attr(Constants::DASHBOARD_CF_SIGNING_KEY_FIELD_NAME) ?>"
+            id="<?php echo esc_attr(Constants::DASHBOARD_CF_SIGNING_KEY_FIELD_NAME) ?>"
+            placeholder="<?php echo $hasKey ? esc_attr(__('Key configured — leave blank to keep, enter new to replace', 'flare-press')) : '' ?>"
+            autocomplete="new-password"
+            class="regular-text"/>
+        <?php if ($hasKey) { ?>
+        <div style="margin-top:6px;">
+            <input type="hidden" name="fp_cf_signing_key_action" value="keep">
+            <label>
+                <input type="checkbox" name="fp_cf_signing_key_action" value="remove">
+                <?php esc_html_e('Remove signing key', 'flare-press'); ?>
+            </label>
         </div>
-        <div class="fp-sync-button-and-spinner">
-            <button id="fp_variant_sync_button" type="button" role="button"
-                    class="fp-variant-sync-button button button-secondary">
-                <span class="dashicons dashicons-update-alt"></span>
-                <?php echo esc_html(Utils::localize(Constants::UI_SYNC_VARIANTS_BUTTON)); ?>
-            </button>
-            <span id="fp_sync_variant_spinner" class="spinner"></span>
-        </div>
+        <?php } ?>
+        <p class="description"><?php echo wp_kses(Utils::localize(Constants::UI_CF_SIGNING_KEY_DESCRIPTION), ['em' => []]); ?></p>
         <?php
     }
 
@@ -328,18 +321,26 @@ class OptionController
 
     private function renderDefaultVariantField(): void
     {
-        $currentValue = get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, $this->getVariantNamesAsArray()[0]);
-        $options = $this->getVariantNamesAsArray();
+        $currentValue = get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, $this->getVariantNamesAsArray()[0] ?? '');
+        $options      = self::getVariantOptions();
 
         ?>
-        <select name="<?php echo Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME ?>"
-                id="<?php echo Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME ?>">
-            <?php foreach ($options as $option) : ?>
-                <option value="<?php echo esc_attr($option); ?>" <?php selected($currentValue, $option); ?>>
-                    <?php echo esc_html($option); ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+        <div class="fp-sync-button-and-spinner">
+            <select name="<?php echo Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME ?>"
+                    id="<?php echo Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME ?>">
+                <?php foreach ($options as $opt) : ?>
+                    <option value="<?php echo esc_attr($opt['name']); ?>" <?php selected($currentValue, $opt['name']); ?>>
+                        <?php echo esc_html($opt['label']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <button id="fp_variant_sync_button" type="button" role="button"
+                    class="fp-variant-sync-button button button-secondary">
+                <span class="dashicons dashicons-update-alt"></span>
+                <?php echo esc_html(Utils::localize(Constants::UI_SYNC_VARIANTS_BUTTON)); ?>
+            </button>
+            <span id="fp_sync_variant_spinner" class="spinner"></span>
+        </div>
         <p class="description"><?php echo Utils::localize(Constants::UI_DEFAULT_VARIANT_DESCRIPTION); ?></p>
         <?php
     }
@@ -546,6 +547,53 @@ class OptionController
         sort($variantNamesArray);
 
         return $variantNamesArray;
+    }
+
+    /**
+     * Build a human-readable label for a variant, e.g. "blob (10000×10000, Watermarked)".
+     *
+     * @param string $name        Variant slug
+     * @param array  $variantData Full variant object from CF API
+     * @return string
+     */
+    public static function buildVariantLabel(string $name, array $variantData): string
+    {
+        $options = $variantData['options'] ?? [];
+        $width   = isset($options['width'])  ? (int) $options['width']  : null;
+        $height  = isset($options['height']) ? (int) $options['height'] : null;
+        $draw    = $options['draw'] ?? [];
+
+        $parts = [];
+        if ($width && $height) {
+            $parts[] = $width . '×' . $height;
+        }
+        if (!empty($draw)) {
+            $parts[] = 'Watermarked';
+        }
+
+        return $name . (!empty($parts) ? ' (' . implode(', ', $parts) . ')' : '');
+    }
+
+    /**
+     * Return sorted variant options array, each item containing 'name' and 'label'.
+     *
+     * @return array<array{name: string, label: string}>
+     */
+    public static function getVariantOptions(): array
+    {
+        $variants = self::getVariants();
+        $options  = [];
+
+        foreach ($variants as $name => $data) {
+            $options[] = [
+                'name'  => $name,
+                'label' => self::buildVariantLabel($name, is_array($data) ? $data : []),
+            ];
+        }
+
+        usort($options, fn($a, $b) => strcmp($a['name'], $b['name']));
+
+        return $options;
     }
 
     /**

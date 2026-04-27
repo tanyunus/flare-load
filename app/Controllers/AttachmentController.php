@@ -471,6 +471,10 @@ class AttachmentController
      * Constructs variant url by given variant name in format:
      *   https://imagedelivery.net/<account-hash>/<image-id>/<variant>
      *
+     * When a signing key is configured, appends a time-limited HMAC-SHA256
+     * token so the URL is valid for Cloudflare Images "Require Signed URLs" variants:
+     *   ?token=<expiry>-<base64url_hmac>
+     *
      * @param string $variant Variant slug/id as string
      * @param string $imageId Image id of the image uploaded to Cloudflare
      *
@@ -479,10 +483,27 @@ class AttachmentController
     public static function getVariantUrl(string $variant, string $imageId): string|false {
         $accountHash = get_option(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME);
 
-        if(!$accountHash){
+        if (!$accountHash) {
             return false;
         }
 
-        return Constants::CF_CDN_URL . $accountHash . '/' . $imageId . '/' . $variant;
+        $pathname = '/' . $accountHash . '/' . $imageId . '/' . $variant;
+        $baseUrl  = Constants::CF_CDN_URL . ltrim($pathname, '/');
+
+        $signingKeyHex = get_option(Constants::DASHBOARD_CF_SIGNING_KEY_FIELD_NAME, '');
+        if (empty($signingKeyHex)) {
+            return $baseUrl;
+        }
+
+        $keyBytes = @hex2bin($signingKeyHex);
+        if ($keyBytes === false) {
+            return $baseUrl;
+        }
+
+        $expiry = (string) (time() + (int) apply_filters('fp_signed_url_expiry', 604800));
+        $hmac   = hash_hmac('sha256', $expiry . $pathname, $keyBytes, true);
+        $token  = rtrim(strtr(base64_encode($hmac), '+/', '-_'), '=');
+
+        return $baseUrl . '?token=' . $expiry . '-' . $token;
     }
 }

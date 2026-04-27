@@ -56,9 +56,6 @@ body.media-new-php {
   }
 }
 
-.fp-variant-list-field {
-  margin-bottom: 12px;
-}
 
 .fp-variant-sync-button {
   display: flex !important;
@@ -69,6 +66,7 @@ body.media-new-php {
 .fp-sync-button-and-spinner {
   display: flex;
   align-items: center;
+  gap: 4px;
 }
 
 .fp-sync-button-and-spinner {

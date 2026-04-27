@@ -107,8 +107,13 @@ export interface StatsResult {
     initialized: boolean;
 }
 
+export interface VariantOption {
+    name: string;
+    label: string;
+}
+
 export interface SyncVariantsResponse {
-    data: string;
+    data: VariantOption[];
 }
 
 export interface GetVariantNamesResponse {

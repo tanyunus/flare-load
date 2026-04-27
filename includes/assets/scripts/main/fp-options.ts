@@ -1,4 +1,4 @@
-import {SyncVariantsResponse} from "../types/types";
+import {SyncVariantsResponse, VariantOption} from "../types/types";
 import RestApi from "../modules/RestApi";
 import { __ } from '@wordpress/i18n';
 
@@ -13,15 +13,14 @@ function assertElement<T extends Element>(
 
 document.addEventListener('DOMContentLoaded', function () {
     const syncButton = document.querySelector<HTMLButtonElement>('#fp_variant_sync_button');
-    const variantListField = document.querySelector<HTMLElement>('#fp_variant_list_field');
     const spinner = document.querySelector<HTMLElement>('#fp_sync_variant_spinner');
     const defaultVariantSelect = document.querySelector<HTMLSelectElement>('#fp_cf_default_variant');
     const editApiTokenField = document.querySelector<HTMLButtonElement>('#fp_change_api_token_button');
     const apiTokenField = document.querySelector<HTMLInputElement>('[data-field-name="fp_cf_api_token"]');
 
-    if (syncButton && variantListField) {
+    if (syncButton) {
         syncButton.addEventListener('click', async () => {
-            await handleSyncVariants(syncButton, variantListField, spinner, defaultVariantSelect);
+            await handleSyncVariants(syncButton, spinner, defaultVariantSelect);
         });
     }
 
@@ -77,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-async function syncVariants(): Promise<string[] | false> {
+async function syncVariants(): Promise<VariantOption[] | false> {
     const wpNonce = await RestApi.getWpNonce();
 
     if (!wpNonce) {
@@ -96,7 +95,7 @@ async function syncVariants(): Promise<string[] | false> {
 
         if (response.ok) {
             const result: SyncVariantsResponse = await response.json();
-            return JSON.parse(result.data) as string[];
+            return result.data;
         }
 
         return false;
@@ -106,76 +105,35 @@ async function syncVariants(): Promise<string[] | false> {
     }
 }
 
-function renderNewVariants(variantArray: string[]): string {
-    let finalHtml = '';
-
-    variantArray.forEach(variant => {
-        finalHtml += `<code>${variant}</code> `;
-    });
-
-    return finalHtml;
-}
-
 function updateDefaultVariantOptions(
     defaultVariantField: HTMLSelectElement,
-    variantArray: string[]
+    variants: VariantOption[]
 ): string {
     const currentlySelected = defaultVariantField.selectedOptions[0]?.value || '';
-    let finalHtml = '';
-
-    variantArray.forEach(variant => {
-        const isSelected = currentlySelected === variant;
-        finalHtml += `<option value="${variant}"${isSelected ? ` selected="${variant}"` : ''}>${variant}</option>`;
-    });
-
-    return finalHtml;
+    return variants.map(v => {
+        const isSelected = currentlySelected === v.name;
+        return `<option value="${v.name}"${isSelected ? ` selected="${v.name}"` : ''}>${v.label}</option>`;
+    }).join('');
 }
 
 async function handleSyncVariants(
     syncButton: HTMLButtonElement,
-    variantListField: HTMLElement,
     spinner: HTMLElement | null,
     defaultVariantSelect: HTMLSelectElement | null
 ): Promise<void> {
-    // Disable UI elements
-    syncButton.toggleAttribute('disabled', true);
-    if (defaultVariantSelect) {
-        defaultVariantSelect.toggleAttribute('disabled', true);
-    }
-    if (spinner) {
-        spinner.classList.toggle('is-active', true);
-    }
+    syncButton.disabled = true;
+    if (defaultVariantSelect) defaultVariantSelect.disabled = true;
+    if (spinner) spinner.classList.add('is-active');
 
     const syncedVariants = await syncVariants();
 
-    if (Array.isArray(syncedVariants)) {
-        variantListField.innerHTML = renderNewVariants(syncedVariants);
-
-        if (defaultVariantSelect) {
-            defaultVariantSelect.innerHTML = updateDefaultVariantOptions(
-                defaultVariantSelect,
-                syncedVariants
-            );
-        }
-
-        // Re-enable UI elements
-        syncButton.toggleAttribute('disabled', false);
-        if (defaultVariantSelect) {
-            defaultVariantSelect.toggleAttribute('disabled', false);
-        }
-        if (spinner) {
-            spinner.classList.toggle('is-active', false);
-        }
-    } else {
-        // Handle error case - re-enable buttons even if sync failed
-        syncButton.toggleAttribute('disabled', false);
-        if (defaultVariantSelect) {
-            defaultVariantSelect.toggleAttribute('disabled', false);
-        }
-        if (spinner) {
-            spinner.classList.toggle('is-active', false);
-        }
-
+    if (Array.isArray(syncedVariants) && defaultVariantSelect) {
+        defaultVariantSelect.innerHTML = updateDefaultVariantOptions(defaultVariantSelect, syncedVariants);
+    } else if (!syncedVariants) {
         console.error('Failed to sync variants');
     }
+
+    syncButton.disabled = false;
+    if (defaultVariantSelect) defaultVariantSelect.disabled = false;
+    if (spinner) spinner.classList.remove('is-active');
 }

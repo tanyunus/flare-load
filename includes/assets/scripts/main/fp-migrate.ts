@@ -106,19 +106,41 @@ class FpMigrateWizard {
     }
 
     private renderResumePrompt(state: MigrationState): void {
-        const total = state.remaining.length + state.processed.length + state.failed.length;
+        const total     = state.remaining.length + state.processed.length + state.failed.length;
+        const done      = state.processed.length;
+        const failed    = state.failed.length;
+        const remaining = state.remaining.length;
+        const pct       = total > 0 ? Math.round(((done + failed) / total) * 100) : 0;
+
+        const failedCard = failed > 0
+            ? `<div class="fp-migrate-card fp-card-red">
+                   <span class="fp-migrate-card-num">${failed}</span>
+                   <span class="fp-migrate-card-lbl">${__('Failed', 'flare-press')}</span>
+               </div>`
+            : '';
+
         this.render(`
             <div class="fp-migrate-wizard">
-                <div class="notice notice-warning fp-migrate-resume-prompt">
-                    <p>
-                        <strong>${__('Migration in progress', 'flare-press')}</strong> &mdash;
-                        ${state.processed.length} ${__('done', 'flare-press')},
-                        ${state.failed.length} ${__('failed', 'flare-press')},
-                        ${state.remaining.length} ${__('remaining', 'flare-press')}
-                        (${total} ${__('total', 'flare-press')}).
-                    </p>
-                    <p>
-                        <button id="fp-resume-btn" class="button button-primary">${__('Resume', 'flare-press')}</button>
+                <div class="notice notice-warning inline fp-migrate-resume-prompt">
+                    <p><strong>${__('Paused or interrupted migration found', 'flare-press')}</strong></p>
+                    <p>${__('A migration was previously started but did not complete. Each image is processed individually — only the remaining items below need to be migrated.', 'flare-press')}</p>
+                    <div class="fp-migrate-cards">
+                        <div class="fp-migrate-card fp-card-green">
+                            <span class="fp-migrate-card-num">${done}</span>
+                            <span class="fp-migrate-card-lbl">${__('Completed', 'flare-press')}</span>
+                        </div>
+                        ${failedCard}
+                        <div class="fp-migrate-card fp-card-blue">
+                            <span class="fp-migrate-card-num">${remaining}</span>
+                            <span class="fp-migrate-card-lbl">${__('Remaining', 'flare-press')}</span>
+                        </div>
+                        <div class="fp-migrate-card">
+                            <span class="fp-migrate-card-num">${pct}%</span>
+                            <span class="fp-migrate-card-lbl">${__('Progress', 'flare-press')}</span>
+                        </div>
+                    </div>
+                    <p class="submit">
+                        <button id="fp-resume-btn" class="button button-primary">${__('Continue Migration', 'flare-press')}</button>
                         &nbsp;
                         <button id="fp-fresh-btn" class="button">${__('Start Fresh', 'flare-press')}</button>
                     </p>

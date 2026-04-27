@@ -460,8 +460,11 @@ function fp_ajax_migrate_start(): void
 
 function fp_ajax_migrate_process(): void
 {
+    ob_start();
+
     check_ajax_referer('fp_migrate', 'nonce');
     if (!current_user_can('manage_options')) {
+        ob_end_clean();
         wp_send_json_error(null, 403);
         return;
     }
@@ -471,6 +474,7 @@ function fp_ajax_migrate_process(): void
     $deleteFromCF = !empty($_POST['delete_from_cf']);
 
     if (!$id || empty($variant)) {
+        ob_end_clean();
         wp_send_json_error(['message' => 'Missing parameters.']);
         return;
     }
@@ -488,6 +492,7 @@ function fp_ajax_migrate_process(): void
         set_transient('fp_migration_state', $state, DAY_IN_SECONDS);
     }
 
+    ob_end_clean();
     wp_send_json_success($result);
 }
 

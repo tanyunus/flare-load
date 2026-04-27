@@ -84,12 +84,12 @@ class MigrationController
             self::restoreAsWordPressAttachment($attachmentId, $filePath);
             self::cleanupCFData($attachmentId, $cfId, $deleteFromCF);
 
-            Logger::log($attachmentId, "[MIGRATION] Success ({$source}): attachment #{$attachmentId}");
+            Logger::log(3, "[MIGRATION] #{$attachmentId}: success ({$source})");
 
             return ['status' => $source];
 
         } catch (Exception $e) {
-            Logger::log($attachmentId, '[MIGRATION] Error: ' . $e->getMessage());
+            Logger::log(0, "[MIGRATION] #{$attachmentId}: " . $e->getMessage());
             return ['status' => 'error', 'reason' => $e->getMessage()];
         }
     }
@@ -158,23 +158,88 @@ class MigrationController
 
         // Regenerate metadata and all thumbnail sizes exactly like a fresh WordPress upload
         require_once ABSPATH . 'wp-admin/includes/image.php';
+        wp_raise_memory_limit('image');
         $metadata = wp_generate_attachment_metadata($attachmentId, $filePath);
         wp_update_attachment_metadata($attachmentId, $metadata);
     }
 
     /**
-     * Removes CF-specific post meta and thumbnail, optionally deletes from Cloudflare.
+     * Removes CF-specific post meta and thumbnail, updates post_content URLs,
+     * and optionally deletes the image from Cloudflare.
+     *
+     * CF meta is deleted FIRST so that wp_get_attachment_url() already returns
+     * the new local URL when updatePostContent() reads it.
      */
     private static function cleanupCFData(int $attachmentId, string $cfId, bool $deleteFromCF): void
     {
         delete_post_meta($attachmentId, Constants::UPLOADED_IMAGE_CF_ID_NAME);
         AttachmentController::deleteCfThumbnail($attachmentId);
 
+        self::updatePostContent($attachmentId, $cfId);
+
         if ($deleteFromCF) {
             try {
                 CloudflareImagesApi::deleteImage($cfId);
             } catch (Exception $e) {
-                Logger::log($attachmentId, '[MIGRATION] CF delete failed (image migrated locally): ' . $e->getMessage());
+                Logger::log(1, "[MIGRATION] #{$attachmentId}: CF delete failed: " . $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Replaces all Cloudflare delivery URLs for this image in post_content
+     * with the new local WordPress attachment URL.
+     *
+     * Handles all variants and signed URL query strings:
+     *   https://imagedelivery.net/{hash}/{cfId}/{variant}(?token=...)
+     */
+    private static function updatePostContent(int $attachmentId, string $cfId): void
+    {
+        global $wpdb;
+
+        $accountHash = get_option(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME);
+        if (!$accountHash) {
+            return;
+        }
+
+        $newUrl = wp_get_attachment_url($attachmentId);
+        if (!$newUrl) {
+            return;
+        }
+
+        $cfUrlPrefix = 'imagedelivery.net/' . $accountHash . '/' . $cfId . '/';
+
+        $posts = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT ID, post_content FROM {$wpdb->posts}
+                 WHERE post_content LIKE %s
+                   AND post_status NOT IN ('auto-draft', 'trash')",
+                '%' . $wpdb->esc_like($cfUrlPrefix) . '%'
+            )
+        );
+
+        if (empty($posts)) {
+            return;
+        }
+
+        $pattern = '#https?://imagedelivery\.net/'
+            . preg_quote($accountHash, '#') . '/'
+            . preg_quote($cfId, '#')
+            . '/[^"\'\\s<>]+#';
+
+        foreach ($posts as $post) {
+            $newContent = preg_replace($pattern, $newUrl, $post->post_content);
+
+            if ($newContent !== null && $newContent !== $post->post_content) {
+                $wpdb->update(
+                    $wpdb->posts,
+                    ['post_content' => $newContent],
+                    ['ID' => $post->ID],
+                    ['%s'],
+                    ['%d']
+                );
+                clean_post_cache((int) $post->ID);
+                Logger::log(3, "[MIGRATION] #{$attachmentId}: updated post_content in post #{$post->ID}");
             }
         }
     }

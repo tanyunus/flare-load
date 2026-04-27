@@ -43,9 +43,6 @@ class OptionController
         $this->addLogPage();
         $this->addLogViewerSection();
         $this->registerLogViewer();
-
-        // Add Migrate Page
-        $this->addMigratePage();
     }
 
     private function addSettingsPage(): void
@@ -61,7 +58,7 @@ class OptionController
         );
     }
 
-    private function addMigratePage(): void
+    public static function addMigratePage(): void
     {
         add_submenu_page(
             Constants::DASHBOARD_MENU_SLUG,
@@ -69,11 +66,11 @@ class OptionController
             Utils::localize(Constants::MIGRATE_MENU_TITLE),
             'manage_options',
             Constants::DASHBOARD_MIGRATE_PAGE_SLUG,
-            [$this, 'fpAdminMigrateView'],
+            [self::class, 'fpAdminMigrateView'],
         );
     }
 
-    public function fpAdminMigrateView(): void
+    public static function fpAdminMigrateView(): void
     {
         Utils::renderTemplate(Constants::MIGRATE_VIEW);
     }
@@ -396,6 +393,7 @@ class OptionController
                     <?php echo empty($optionVal) ? 'id="' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME . '"' : '' ?>
                     <?php echo !empty($optionVal) ? 'disabled' : '' ?>
                     <?php echo empty($optionVal) ? 'required' : '' ?>
+                    autocomplete="new-password"
                     class="regular-text"/>
 
             <?php
@@ -432,6 +430,7 @@ class OptionController
                     name="<?php echo $optionName ?>"
                     id="<?php echo $optionName ?>"
                     type="text"
+                    autocomplete="new-password"
                     class="regular-text"/>
         </label>
         <?php

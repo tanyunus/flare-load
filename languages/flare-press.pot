@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-04-25T15:13:05+00:00\n"
+"POT-Creation-Date: 2026-04-26T11:07:41+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: FlarePress generate-pot.js\n"
 "X-Domain: flare-press\n"
@@ -161,7 +161,223 @@ msgid "FlarePress developer Github profile"
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
-msgid "Migration wizard loading…"
+msgid "Request failed"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Loading…"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Migration in progress"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "done"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "failed"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "remaining"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "total"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Resume"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Start Fresh"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "No variants configured"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Migrate to Local"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "This wizard downloads your Cloudflare Images back to your server and restores them as standard WordPress attachments."
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "No variants found. Please sync your variants in FlarePress settings first."
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Download Variant"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "The Cloudflare Images variant to download as the main image."
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Images to Migrate"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "All Cloudflare images"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Images attached to posts/pages"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Select images manually"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "After Migration"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Delete images from Cloudflare after successful migration"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Warning: This is irreversible. Deleted Cloudflare images cannot be recovered."
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Continue"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Loading images…"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Failed to load images. Please try again."
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Select Images"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Choose which images to migrate. Images with no variant configured will be skipped."
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Select all"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Thumbnail"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Title"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Status"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "No Cloudflare images found."
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Back"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Analyzing…"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Analysis failed. Please try again."
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Analysis Results"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Total"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Ready to migrate"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Already have local copy"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "No variant — will skip"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Nothing to migrate."
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Start Migration"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Migrating…"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Pause"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Processing"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "error"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Retry Failed"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Migration Complete"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Migrated successfully"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Failed"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "View Log"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Run Again"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Ready"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Has local copy"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "No variant"
 msgstr ""
 
 #: includes/assets/scripts/main/fp-post.tsx

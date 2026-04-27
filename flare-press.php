@@ -105,6 +105,7 @@ function flarePressInit(): void
             return;
         }
 
+        add_action('admin_menu', [OptionController::class, 'addMigratePage']);
         add_action('wp_ajax_fp_migrate_analyze',   'fp_ajax_migrate_analyze');
         add_action('wp_ajax_fp_migrate_start',     'fp_ajax_migrate_start');
         add_action('wp_ajax_fp_migrate_process',   'fp_ajax_migrate_process');
@@ -684,6 +685,7 @@ function fp_admin_print_footer_scripts(): void
             'defaultVariant' => get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, ''),
             'variantNames'   => OptionController::getVariantNames(),
             'migrateUrl'     => admin_url('admin.php?page=' . Constants::DASHBOARD_MIGRATE_PAGE_SLUG),
+            'logsUrl'        => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG),
         ]);
         wp_set_script_translations('fp-migrate-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }

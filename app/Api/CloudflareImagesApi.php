@@ -10,16 +10,6 @@ use FlarePress\Data\Constants;
 
 class CloudflareImagesApi
 {
-    /**
-     * Directly upload given image file to Cloudflare Images
-     * with given image file name.
-     *
-     * @param string $imageFile
-     * @param string $imageFileName
-     *
-     * @return array
-     * @throws Exception
-     */
     public static function uploadImage(string $imageFile, string $imageFileName): array {
         $mimeType = mime_content_type($imageFile);
 
@@ -54,14 +44,6 @@ class CloudflareImagesApi
         return $response;
     }
 
-    /**
-     * Delete image of given Cloudflare ID from Cloudflare Images
-     *
-     * @param string $cloudFlareImageId
-     *
-     * @return array
-     * @throws Exception
-     */
     public static function deleteImage(string $cloudFlareImageId): array {
         $requestUrl = self::buildRequestUrl($cloudFlareImageId);
 
@@ -84,12 +66,6 @@ class CloudflareImagesApi
         return $response;
     }
 
-    /**
-     * Get all variants defined in Cloudflare Images account.
-     *
-     * @return array
-     * @throws Exception
-     */
     public static function getVariants(?string $token = null): array {
         $requestUrl = self::buildRequestUrl(Constants::CF_API_MODULE_VARIANTS);
 
@@ -111,18 +87,7 @@ class CloudflareImagesApi
         return $response['result']['variants'];
     }
 
-    /**
-     * Make a cURL request to a URL and get the response as plain string.
-     * Current support for methods: GET, POST, DELETE
-     *
-     * @param array $payload
-     * @param string $url
-     * @param string $method
-     * @param array $headers
-     *
-     * @return string
-     * @throws Exception
-     */
+    /** Supports GET, POST, DELETE. */
     private static function sendData(array $payload, string $url, string $method = '', array $headers = [], ?string $tokenOverride = null): string
     {
         try {
@@ -168,13 +133,6 @@ class CloudflareImagesApi
         }
     }
 
-
-    /**
-     * Constructs request url to be used in API requests.
-     *
-     * @return string
-     * @param string $additional
-     */
     private static function buildRequestUrl(string $additional = ''): string {
         $accountId = get_option(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME);
 
@@ -191,11 +149,6 @@ class CloudflareImagesApi
         return $url;
     }
 
-    /**
-     * Get API token from DB. Empty if option or value not found.
-     *
-     * @return string
-     */
     private static function getApiToken(): string {
         return get_option(Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME) ?? '';
     }

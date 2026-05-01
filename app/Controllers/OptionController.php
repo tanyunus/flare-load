@@ -14,13 +14,6 @@ class OptionController
 {
     private array $variantNames;
 
-    /**
-     * Class itself serves as an initializer for setting up
-     * option pages of plugin. All the stuff necessary to set up pages
-     * run inside constructor itself.
-     *
-     * Static methods provide option related data operations.
-     */
     public function __construct()
     {
         $this->variantNames = self::getVariantNamesAsArray();
@@ -469,15 +462,6 @@ class OptionController
         <?php
     }
 
-    /**
-     * Place a Cloudflare logo to the end of each row that is Cloudflare image
-     * in page: /wp-admin/upload.php?mode=list
-     *
-     * @param string $columnName
-     * @param $attachmentId
-     *
-     * @return void
-     */
     public static function addLocationInfoToListViewRow(string $columnName, $attachmentId): void
     {
         if ($columnName === Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID && AttachmentController::getCloudflareIdOfAttachment($attachmentId)) {
@@ -492,15 +476,8 @@ class OptionController
     }
 
     /**
-     * Get variants recorded in db by plugin options page.
-     *
-     * These variants are not directly from Cloudflare API itself.
-     * They are of course retrieved from Cloudflare API. But manually.
-     * So each time this function called. The variants you'll get are
-     * the variants that are manually synced recently to WordPress DB by user
-     * in plugin options page.
-     *
-     * @return array
+     * Returns variants cached in the DB from the last manual sync.
+     * These aren't fetched live from Cloudflare — the user syncs them via the settings page.
      */
     public static function getVariants(): array
     {
@@ -521,11 +498,6 @@ class OptionController
         return $variantsArray;
     }
 
-    /**
-     * Get all variant names as array from variantNames property.
-     *
-     * @return array
-     */
     private function getVariantNamesAsArray(): array
     {
         if (empty($this->variantNames)) {
@@ -535,11 +507,6 @@ class OptionController
         return $this->variantNames;
     }
 
-    /**
-     * Get all variant names as array.
-     *
-     * @return array
-     */
     public static function getVariantNames(): array
     {
         $variantNamesArray = array_keys(self::getVariants());
@@ -549,13 +516,7 @@ class OptionController
         return $variantNamesArray;
     }
 
-    /**
-     * Build a human-readable label for a variant, e.g. "blob (10000×10000, Watermarked)".
-     *
-     * @param string $name        Variant slug
-     * @param array  $variantData Full variant object from CF API
-     * @return string
-     */
+    /** e.g. "blob (10000×10000, Watermarked)" */
     public static function buildVariantLabel(string $name, array $variantData): string
     {
         $options = $variantData['options'] ?? [];
@@ -574,11 +535,6 @@ class OptionController
         return $name . (!empty($parts) ? ' (' . implode(', ', $parts) . ')' : '');
     }
 
-    /**
-     * Return sorted variant options array, each item containing 'name' and 'label'.
-     *
-     * @return array<array{name: string, label: string}>
-     */
     public static function getVariantOptions(): array
     {
         $variants = self::getVariants();
@@ -596,11 +552,6 @@ class OptionController
         return $options;
     }
 
-    /**
-     * Sync variants from Cloudflare to WordPress db.
-     *
-     * @return array
-     */
     public static function syncVariants(): array
     {
         try {
@@ -621,11 +572,6 @@ class OptionController
         return $variantsFromCloudflare;
     }
 
-    /**
-     * Get account hash from plugin options.
-     *
-     * @return string
-     */
     public static function getAccountHash(): string
     {
         return get_option(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME) ?? '';

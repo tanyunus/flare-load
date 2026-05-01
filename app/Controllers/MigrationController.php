@@ -12,8 +12,8 @@ use FlarePress\Util\Logger;
 class MigrationController
 {
     /**
-     * Returns analysis of attachments that would be affected by migration.
-     * Used to show a pre-migration summary to the user.
+     * Builds a summary of which CF attachments have a local copy, need downloading,
+     * or have no variant — shown on the pre-migration review screen.
      */
     public static function analyzeImages(string $scope, array $selectedIds = []): array
     {
@@ -58,9 +58,8 @@ class MigrationController
     }
 
     /**
-     * Returns a single page of CF attachments for the select-images UI.
-     * Only the current page's items are fully processed (status, thumbnail, parent).
-     * All IDs are loaded as integers — lightweight even at 20k+ items.
+     * Returns one page of CF attachments for the image selector.
+     * Loads all IDs upfront (a cheap integer-only query), then slices to the requested page.
      */
     public static function listImages(string $scope, int $page, int $perPage): array
     {
@@ -107,9 +106,8 @@ class MigrationController
     }
 
     /**
-     * Migrates a single attachment to local storage.
-     * Uses local copy if available, otherwise downloads the selected variant from Cloudflare.
-     * Restores the attachment as a native WordPress attachment (thumbnails regenerated).
+     * Migrates one attachment: uses the local original if it still exists on disk,
+     * otherwise downloads the chosen CF variant. Restores as a standard WordPress attachment.
      */
     public static function processImage(int $attachmentId, string $variant, bool $deleteFromCF): array
     {
@@ -144,8 +142,8 @@ class MigrationController
     }
 
     /**
-     * Checks whether a local copy of the original image exists on disk.
-     * Derives the expected path from the stored thumbnail directory and original filename.
+     * Returns the original file path if it still exists on disk.
+     * Derived from the stored thumbnail directory and the original filename.
      */
     public static function getLocalFile(int $attachmentId): string|false
     {
@@ -162,9 +160,6 @@ class MigrationController
         return file_exists($fullPath) ? $fullPath : false;
     }
 
-    /**
-     * Downloads the chosen variant from Cloudflare to the current uploads directory.
-     */
     private static function downloadFromCloudflare(int $attachmentId, string $variant, string $cfId): string
     {
         $variantUrl = AttachmentController::getVariantUrl($variant, $cfId);
@@ -191,10 +186,6 @@ class MigrationController
         return $destPath;
     }
 
-    /**
-     * Restores a file as a native WordPress attachment:
-     * updates _wp_attached_file, guid, and regenerates all thumbnail sizes.
-     */
     private static function restoreAsWordPressAttachment(int $attachmentId, string $filePath): void
     {
         $uploadDir    = wp_upload_dir();
@@ -205,7 +196,7 @@ class MigrationController
         $properUrl = $uploadDir['baseurl'] . '/' . $relativePath;
         AttachmentController::updateAttachmentGuid($attachmentId, $properUrl);
 
-        // Regenerate metadata and all thumbnail sizes exactly like a fresh WordPress upload
+        // Regenerate metadata and thumbnail sizes exactly as WordPress does on a fresh upload.
         require_once ABSPATH . 'wp-admin/includes/image.php';
         wp_raise_memory_limit('image');
         $metadata = wp_generate_attachment_metadata($attachmentId, $filePath);
@@ -213,11 +204,8 @@ class MigrationController
     }
 
     /**
-     * Removes CF-specific post meta and thumbnail, updates post_content URLs,
-     * and optionally deletes the image from Cloudflare.
-     *
-     * CF meta is deleted FIRST so that wp_get_attachment_url() already returns
-     * the new local URL when updatePostContent() reads it.
+     * CF meta is deleted before updatePostContent() runs so wp_get_attachment_url()
+     * already returns the new local URL by the time we rewrite post_content.
      */
     private static function cleanupCFData(int $attachmentId, string $cfId, bool $deleteFromCF): void
     {
@@ -236,10 +224,8 @@ class MigrationController
     }
 
     /**
-     * Replaces all Cloudflare delivery URLs for this image in post_content
-     * with the new local WordPress attachment URL.
-     *
-     * Handles all variants and signed URL query strings:
+     * Replaces all CF delivery URLs for this image in post_content with the new local URL.
+     * Matches any variant and signed URL query strings:
      *   https://imagedelivery.net/{hash}/{cfId}/{variant}(?token=...)
      */
     private static function updatePostContent(int $attachmentId, string $cfId): void
@@ -293,9 +279,6 @@ class MigrationController
         }
     }
 
-    /**
-     * Resolves which attachment IDs to include based on the chosen scope.
-     */
     private static function resolveAttachmentIds(string $scope, array $selectedIds): array
     {
         if ($scope === 'selected') {
@@ -333,7 +316,7 @@ class MigrationController
     }
 
     /**
-     * Returns the original filename stored at upload time, with a sanitized fallback.
+     * Falls back to mime-type + sanitized post title if the filename wasn't stored at upload time.
      */
     private static function getOriginalFilename(int $attachmentId): string
     {
@@ -351,8 +334,7 @@ class MigrationController
     }
 
     /**
-     * Returns a usable thumbnail URL for the migration UI.
-     * Prefers the local CF thumbnail; falls back to standard WP thumbnail.
+     * Prefers the local CF thumbnail; falls back to WordPress's standard attachment thumbnail.
      */
     private static function getThumbnailUrl(int $attachmentId): string
     {

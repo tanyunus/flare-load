@@ -137,7 +137,6 @@ function flarePressInit(): void
 
     add_filter('ajax_query_attachments_args', 'fp_ajax_query_attachments_args');
 
-    # Public filters
     add_filter('wp_prepare_attachment_for_js', 'fp_wp_prepare_attachment_for_js', 5, 3);
     add_filter('wp_get_attachment_image', 'fp_wp_get_attachment_image', 15, 5);
     add_filter('wp_get_attachment_image_src', 'fp_wp_get_attachment_image_src', 10, 4);
@@ -172,17 +171,11 @@ function fp_get_sample_permalink_html(string $return, int $postId, string|null $
     return $return;
 }
 
-/**
- * Modify basename before it's being returned.
- */
 function fp_get_attached_file(string $file, int $attachmentId): string
 {
-    //  1. Check if it's post editing page
     if (Utils::isAdminPage('post.php')) {
         $cfId = AttachmentController::getCloudflareIdOfAttachment($attachmentId);
-        // 2. Check if image is uploaded to Cloudflare
         if ($cfId) {
-            // 3. Replace basename with file's actual name stored in db
             $file = str_replace(wp_basename($file), get_the_title($attachmentId), $file);
         }
     }
@@ -190,9 +183,6 @@ function fp_get_attached_file(string $file, int $attachmentId): string
     return $file;
 }
 
-/**
- * Modify api token submission value if empty and save old data.
- */
 function fp_pre_update_option_save_api_token(mixed $newValue, mixed $oldValue): mixed
 {
     if (empty(trim($newValue))) {
@@ -202,9 +192,6 @@ function fp_pre_update_option_save_api_token(mixed $newValue, mixed $oldValue): 
     return $newValue;
 }
 
-/**
- * Modify block attributes before they're rendered to contain plugin features.
- */
 function fp_render_block($blockContent, $block)
 {
     if ($block['blockName'] !== 'core/image') {
@@ -248,16 +235,9 @@ function fp_render_block($blockContent, $block)
     return $blockContent;
 }
 
-/**
- * Add new rest api endpoints
- */
 function fp_rest_api_init(): void
 {
-    # Provides variant synchronization through rest api if the current user
-    # is capable of managing options.
-    #
-    # In plugin settings page we have a 'Sync Variants' button.
-    # This button is tied to this endpoint and triggers variant sync process.
+    // Restricted to manage_options; triggered by the "Sync Variants" button in settings.
     if(current_user_can('manage_options')) {
         register_rest_route('flare-press/v1', '/sync-variants', array(
             'methods' => 'POST',
@@ -268,8 +248,7 @@ function fp_rest_api_init(): void
         ));
     }
 
-    # Provides variant names as array.
-    # Used in post editor blocks contain image insertion mechanics.
+    // Used by post editor blocks that insert CF images.
     register_rest_route('flare-press/v1', '/get-variant-names', array(
         'methods' => 'GET',
         'callback' => [OptionRestApi::class, 'getVariantNames'],
@@ -278,8 +257,7 @@ function fp_rest_api_init(): void
         }
     ));
 
-    # Provides Cloudflare account hash.
-    # Used in post editor for generating Cloudflare image urls on the fly.
+    // Used by the post editor to build CF image URLs client-side.
     register_rest_route('flare-press/v1', '/get-account-hash', array(
         'methods' => 'GET',
         'callback' => [OptionRestApi::class, 'getAccountHash'],
@@ -319,9 +297,6 @@ function fp_rest_api_init(): void
     ));
 }
 
-/**
- * Modifying ajax response right after upload and before sending it
- * */
 function fp_wp_prepare_attachment_for_js(array $response, WP_Post $attachment): array
 {
     if (AttachmentController::getCloudflareIdOfAttachment($attachment->ID)) {
@@ -337,9 +312,6 @@ function fp_wp_prepare_attachment_for_js(array $response, WP_Post $attachment): 
     return $response;
 }
 
-/**
- * Modify HTML img element before rendering image
- */
 function fp_wp_get_attachment_image(string $html, int $attachmentId): string
 {
     $cfId = AttachmentController::getCloudflareIdOfAttachment($attachmentId);
@@ -351,9 +323,6 @@ function fp_wp_get_attachment_image(string $html, int $attachmentId): string
     return $html;
 }
 
-/**
- * Modify attachment source before rendering image
- */
 function fp_wp_get_attachment_image_src(array|false $image, int $attachmentId): array|false
 {
     $cfId = AttachmentController::getCloudflareIdOfAttachment($attachmentId);
@@ -371,9 +340,6 @@ function fp_wp_get_attachment_image_src(array|false $image, int $attachmentId): 
     return $image;
 }
 
-/**
- * Modify attachment url
- */
 function fp_wp_get_attachment_url(string $attachmentUrl, int $attachmentId): string
 {
     $cfId = AttachmentController::getCloudflareIdOfAttachment($attachmentId);
@@ -385,9 +351,6 @@ function fp_wp_get_attachment_url(string $attachmentUrl, int $attachmentId): str
     return $attachmentUrl;
 }
 
-/**
- * Control attachment upload process
- */
 function fp_add_attachment(int $attachmentId): void
 {
     AttachmentController::handleAddAttachment($attachmentId);
@@ -570,9 +533,6 @@ function fp_ajax_check_upload_error(): void
     wp_send_json_success(false);
 }
 
-/**
- * Add Location filter dropdown to media library list view
- */
 function fp_restrict_manage_media_location(string $postType): void
 {
     if ($postType !== 'attachment') {
@@ -589,9 +549,6 @@ function fp_restrict_manage_media_location(string $postType): void
     <?php
 }
 
-/**
- * Filter media library query by location (Cloudflare or server)
- */
 function fp_pre_get_posts_location_filter(WP_Query $query): void
 {
     global $pagenow;
@@ -623,9 +580,6 @@ function fp_pre_get_posts_location_filter(WP_Query $query): void
     }
 }
 
-/**
- * Filter media library grid view AJAX query by location
- */
 function fp_ajax_query_attachments_args(array $query): array
 {
     $location = sanitize_key($_REQUEST['query']['fp_location'] ?? '');
@@ -653,9 +607,6 @@ function fp_ajax_query_attachments_args(array $query): array
     return $query;
 }
 
-/**
- * Add Location column to media library list view
- */
 function fp_manage_media_columns(array $columns): array
 {
     $columns[Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID] = Utils::localize(Constants::UI_CF_LOCATION_COLUMN_NAME);
@@ -663,25 +614,16 @@ function fp_manage_media_columns(array $columns): array
     return $columns;
 }
 
-/**
- * Add location info under Location column in media library list view
- */
 function fp_manage_media_custom_column(string $columnName, int $attachmentId): void
 {
     OptionController::addLocationInfoToListViewRow($columnName, $attachmentId);
 }
 
-/**
- * Initialize dashboard
- */
 function fp_admin_menu(): void
 {
     new OptionController();
 }
 
-/**
- * Add scripts for dashboard
- */
 function fp_admin_print_footer_scripts(): void
 {
     if (Utils::isAdminPage('upload.php') && (empty($_GET) || sanitize_key(wp_unslash($_GET['mode'] ?? '')) === 'grid')) {
@@ -722,17 +664,11 @@ function fp_admin_print_footer_scripts(): void
     }
 }
 
-/**
- * Add styles for dashboard
- */
 function fp_admin_enqueue_scripts(): void
 {
     wp_enqueue_style('fp-main-style', FLARE_PRESS_URL . 'includes/dist/css/fp-main.css', [], FLARE_PRESS_VERSION);
 }
 
-/**
- * Delete attachment image from Cloudflare storage before WordPress' actual deletion takes place
- */
 function fp_pre_delete_attachment(WP_Post|false|null $delete, WP_Post $post, bool $forceDelete): WP_Post|false|null
 {
     return AttachmentController::handleDeleteAttachment($delete, $post, $forceDelete);

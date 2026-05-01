@@ -3,9 +3,6 @@ import { __ } from '@wordpress/i18n';
 export default class UploadManager {
     private switcherCheckbox: HTMLInputElement | null = null;
 
-    // Hooks into
-    //  - default uploader in /wp-admin/upload.php page
-    //  - media modal uploader in post-edit and new-post pages
     public hookUploader(): void {
         if (!window.wp?.Uploader) {
             return;
@@ -23,7 +20,6 @@ export default class UploadManager {
         };
     }
 
-    // Hooks into uploader in /wp-admin/media-new.php page
     public hookExistingUploader(): void {
         if (!window.uploader) {
             return;
@@ -32,7 +28,6 @@ export default class UploadManager {
         this.bindBeforeUploadEvent(window.uploader);
     }
 
-    // Hooks into browser uploader in /wp-admin/media-new.php page
     public hookBrowserUploaderForm(): void {
         const form = document.querySelector<HTMLFormElement>('form#file-form');
 
@@ -41,7 +36,6 @@ export default class UploadManager {
         }
 
         form.addEventListener('submit', (e) => {
-            // Add hidden input with our custom param
             const existingInput = form.querySelector<HTMLInputElement>('input[name="fp_upload_to_cf"]');
 
             if (existingInput) {
@@ -117,7 +111,6 @@ export default class UploadManager {
                     }));
                 }
             } catch (e) {
-                // Parsing failed
             }
         });
     }
@@ -143,7 +136,6 @@ export default class UploadManager {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'fp-cf-upload-button ' + additionalClassName;
-        // Use dynamic plugin URL from wp_localize_script to support subdirectory installations
         const logoUrl = (window.fpConfig?.pluginUrl ?? '') + 'includes/dist/images/cf_logo_cropped.png';
         const img = document.createElement('img');
         img.src = logoUrl;

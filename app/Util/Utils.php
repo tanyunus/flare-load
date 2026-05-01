@@ -8,23 +8,11 @@ use FlarePress\Data\Constants;
 
 class Utils
 {
-    /**
-     * Translates given string in this plugin's own translation domain
-     *
-     * @param string $string
-     * @return string
-     */
     public static function localize(string $string): string
     {
         return __($string, Constants::FP_TRANSLATION_DOMAIN);
     }
 
-    /**
-     * Checks current admin page
-     *
-     * @param string $pageSlug Page slug with extension of the page
-     * @return bool
-     */
     public static function isAdminPage(string $pageSlug): bool
     {
         global $pagenow;
@@ -38,11 +26,6 @@ class Utils
         return $currentAdminPage === $pageSlug;
     }
 
-    /**
-     * Returns all images uploaded to Cloudflare as array
-     *
-     * @return array Images uploaded to Cloudflare
-     */
     public static function getCloudflareImages(): array
     {
         $attachments = get_posts(array(
@@ -71,12 +54,6 @@ class Utils
         return $filteredAttachments;
     }
 
-    /**
-     * Deletes file from disk.
-     *
-     * @param string $filePath
-     * @return bool
-     */
     public static function deleteFileFromDisk(string $filePath): bool
     {
         $fileRealPath = realpath($filePath);
@@ -88,13 +65,6 @@ class Utils
         return unlink($fileRealPath);
     }
 
-    /**
-     * Renders given HTML template file with provided data.
-     *
-     * @param string $template HTML template file name under views folder.
-     * @param array $data
-     * @return void
-     */
     public static function renderTemplate(string $template, array $data = []): void
     {
         extract($data);

@@ -138,7 +138,6 @@ export interface BlockType {
     [key: string]: any;
 }
 
-// Global config injected via wp_localize_script
 export interface FpConfig {
     pluginUrl: string;
 }

@@ -1,7 +1,6 @@
 const cfImageIds = new Set<string | number>();
 
 export function detectAndMarkCfImages(): void {
-    // Listen for file upload completion
     window.addEventListener('fpFileUploaded', ((event: CustomEvent) => {
         const data = event.detail;
         if (data.fp_cf_image_id) {
@@ -10,7 +9,6 @@ export function detectAndMarkCfImages(): void {
         }
     }) as EventListener);
 
-    // Hook into jQuery AJAX to catch media library responses
     if (window.jQuery) {
         window.jQuery(document).ajaxComplete((event: any, xhr: any, settings: any) => {
             if (settings.url?.includes('admin-ajax.php')) {
@@ -18,20 +16,17 @@ export function detectAndMarkCfImages(): void {
                     const response = JSON.parse(xhr.responseText);
                     processCfImageResponse(response);
                 } catch (e) {
-                    // Not JSON or parsing failed
                 }
             }
         });
     }
 
-    // Also observe DOM for attachment elements
     observeAttachmentGrid();
 }
 
 function processCfImageResponse(response: any): void {
     if (!response) return;
 
-    // Handle array of attachments
     if (Array.isArray(response.data)) {
         response.data.forEach((attachment: any) => {
             if (attachment.fp_cf_image_id) {
@@ -39,9 +34,7 @@ function processCfImageResponse(response: any): void {
                 markAttachmentElement(attachment.id);
             }
         });
-    }
-    // Handle single attachment
-    else if (response.data?.fp_cf_image_id) {
+    } else if (response.data?.fp_cf_image_id) {
         cfImageIds.add(response.data.id);
         markAttachmentElement(response.data.id);
     }
@@ -67,7 +60,6 @@ function observeAttachmentGrid(): void {
         }
     }
 
-    // Wait for the grid container to appear, then attach the specific observer
     const bodyObserver = new MutationObserver(() => {
         if (document.querySelector('.attachments')) {
             bodyObserver.disconnect();

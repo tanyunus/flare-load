@@ -2,9 +2,9 @@
 Contributors: tanyunus
 Tags: cloudflare, images, cdn, media, upload
 Requires at least: 5.9
-Tested up to: 6.7
+Tested up to: 6.9
 Stable tag: 1.0.0
-Requires PHP: 7.4
+Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -82,7 +82,6 @@ Your Cloudflare Account ID, API Token, and uploaded image files are transmitted 
 * Cloudflare image variant support with per-image variant selection.
 * Visual location badge in media library list view.
 * Activity log viewer for debugging.
-* Full i18n support with Turkish (tr_TR) translation included.
 
 == Upgrade Notice ==
 

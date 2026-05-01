@@ -1,4 +1,7 @@
 <?php
+
+defined('ABSPATH') || exit;
+
 /**
  * FlarePress test data seeder
  *
@@ -163,7 +166,7 @@ function fp_seed_run(): void
 
         if (is_wp_error($postId)) {
             WP_CLI::warning("Post #{$i} (local) failed: " . $postId->get_error_message());
-            @unlink($filePath);
+            wp_delete_file($filePath);
             $bar->tick();
             continue;
         }
@@ -182,7 +185,7 @@ function fp_seed_run(): void
         if (is_wp_error($attachmentId)) {
             WP_CLI::warning("Attachment #{$i} (local) failed: " . $attachmentId->get_error_message());
             wp_delete_post($postId, true);
-            @unlink($filePath);
+            wp_delete_file($filePath);
             $bar->tick();
             continue;
         }
@@ -334,7 +337,8 @@ function fp_seed_sample_image(string $dir): string
 function fp_seed_rmdir(string $dir): void
 {
     foreach (glob($dir . '/*') as $item) {
-        is_dir($item) ? fp_seed_rmdir($item) : unlink($item);
+        is_dir($item) ? fp_seed_rmdir($item) : wp_delete_file($item);
     }
+    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
     rmdir($dir);
 }

@@ -137,11 +137,11 @@ class OptionController
         <label>
             <textarea
                     class="fp-log-viewer-textarea"
-                    id="<?php echo Constants::LOG_VIEWER_FIELD_NAME ?>"
-                    name="<?php echo Constants::LOG_VIEWER_FIELD_NAME ?>"
+                    id="<?php echo esc_attr(Constants::LOG_VIEWER_FIELD_NAME) ?>"
+                    name="<?php echo esc_attr(Constants::LOG_VIEWER_FIELD_NAME) ?>"
                     rows="20"
                     disabled
-            ><?php echo trim(Logger::getLogFile()) ?></textarea>
+            ><?php echo esc_textarea(Logger::getLogFile()) ?></textarea>
         </label>
         <p class="description"></p>
         <?php
@@ -149,7 +149,9 @@ class OptionController
 
     private function registerLogViewer(): void
     {
-        register_setting(Constants::LOG_SETTINGS_GROUP_NAME, Constants::LOG_VIEWER_FIELD_NAME);
+        register_setting(Constants::LOG_SETTINGS_GROUP_NAME, Constants::LOG_VIEWER_FIELD_NAME, [
+            'sanitize_callback' => 'sanitize_textarea_field',
+        ]);
 
         add_settings_field(
                 Constants::LOG_VIEWER_FIELD_NAME,
@@ -319,8 +321,8 @@ class OptionController
 
         ?>
         <div class="fp-sync-button-and-spinner">
-            <select name="<?php echo Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME ?>"
-                    id="<?php echo Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME ?>">
+            <select name="<?php echo esc_attr(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME) ?>"
+                    id="<?php echo esc_attr(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME) ?>">
                 <?php foreach ($options as $opt) : ?>
                     <option value="<?php echo esc_attr($opt['name']); ?>" <?php selected($currentValue, $opt['name']); ?>>
                         <?php echo esc_html($opt['label']); ?>
@@ -334,7 +336,7 @@ class OptionController
             </button>
             <span id="fp_sync_variant_spinner" class="spinner"></span>
         </div>
-        <p class="description"><?php echo Utils::localize(Constants::UI_DEFAULT_VARIANT_DESCRIPTION); ?></p>
+        <p class="description"><?php echo esc_html(Utils::localize(Constants::UI_DEFAULT_VARIANT_DESCRIPTION)); ?></p>
         <?php
     }
 
@@ -382,9 +384,9 @@ class OptionController
             <input
                     type="password"
                     value="<?php echo !empty($optionVal) ? '••••••••••••••••••••••' : '' ?>"
-                    data-field-name="<?php echo Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME ?>"
-                    <?php echo empty($optionVal) ? 'name="' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME . '"' : '' ?>
-                    <?php echo empty($optionVal) ? 'id="' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME . '"' : '' ?>
+                    data-field-name="<?php echo esc_attr(Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME) ?>"
+                    <?php echo empty($optionVal) ? 'name="' . esc_attr(Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME) . '"' : '' ?>
+                    <?php echo empty($optionVal) ? 'id="' . esc_attr(Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME) . '"' : '' ?>
                     <?php echo !empty($optionVal) ? 'disabled' : '' ?>
                     <?php echo empty($optionVal) ? 'required' : '' ?>
                     autocomplete="new-password"
@@ -404,12 +406,12 @@ class OptionController
         <?php if (!empty($optionVal)) { ?>
         <div class="fp-test-connection-wrap" style="margin-top:8px;">
             <button id="fp_test_connection_button" class="button button-secondary" type="button">
-                <?php echo Utils::localize(Constants::UI_TEST_CONNECTION_BUTTON); ?>
+                <?php echo esc_html(Utils::localize(Constants::UI_TEST_CONNECTION_BUTTON)); ?>
             </button>
             <span id="fp_test_connection_result" style="margin-left:8px;"></span>
         </div>
         <?php } ?>
-        <p class="description"><?php echo Utils::localize(Constants::UI_CF_API_TOKEN_DESCRIPTION); ?></p>
+        <p class="description"><?php echo esc_html(Utils::localize(Constants::UI_CF_API_TOKEN_DESCRIPTION)); ?></p>
         <?php
     }
 
@@ -420,9 +422,9 @@ class OptionController
         ?>
         <label>
             <input
-                    value="<?php echo $optionVal ?>"
-                    name="<?php echo $optionName ?>"
-                    id="<?php echo $optionName ?>"
+                    value="<?php echo esc_attr($optionVal) ?>"
+                    name="<?php echo esc_attr($optionName) ?>"
+                    id="<?php echo esc_attr($optionName) ?>"
                     type="text"
                     autocomplete="new-password"
                     class="regular-text"/>
@@ -430,7 +432,7 @@ class OptionController
         <?php
         if (!empty($description)) {
             ?>
-            <p class="description"><?php echo $description ?></p>
+            <p class="description"><?php echo esc_html($description) ?></p>
             <?php
         }
     }
@@ -442,21 +444,21 @@ class OptionController
         <fieldset>
             <label>
                 <input type="checkbox"
-                       name="<?php echo Constants::DASHBOARD_UPLOAD_SETTINGS_NAME ?>[<?php echo Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME ?>]"
+                       name="<?php echo esc_attr(Constants::DASHBOARD_UPLOAD_SETTINGS_NAME) ?>[<?php echo esc_attr(Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME) ?>]"
                        value="1"
                         <?php checked(!empty($options[Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME])); ?> />
-                <?php echo Utils::localize(Constants::UI_KEEP_FILES_AFTER_UPLOAD_FIELD_LABEL); ?>
+                <?php echo esc_html(Utils::localize(Constants::UI_KEEP_FILES_AFTER_UPLOAD_FIELD_LABEL)); ?>
             </label>
-            <p class="description"><?php echo Utils::localize(Constants::UI_KEEP_FILES_AFTER_UPLOAD_DESCRIPTION); ?></p>
+            <p class="description"><?php echo esc_html(Utils::localize(Constants::UI_KEEP_FILES_AFTER_UPLOAD_DESCRIPTION)); ?></p>
             <br/>
             <label>
                 <input type="checkbox"
-                       name="<?php echo Constants::DASHBOARD_UPLOAD_SETTINGS_NAME ?>[<?php echo Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME ?>]"
+                       name="<?php echo esc_attr(Constants::DASHBOARD_UPLOAD_SETTINGS_NAME) ?>[<?php echo esc_attr(Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME) ?>]"
                        value="1"
                         <?php checked(!empty($options[Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME])); ?> />
-                <?php echo Utils::localize(Constants::UI_KEEP_FILES_ON_CF_AFTER_DELETE_FIELD_LABEL); ?>
+                <?php echo esc_html(Utils::localize(Constants::UI_KEEP_FILES_ON_CF_AFTER_DELETE_FIELD_LABEL)); ?>
             </label>
-            <p class="description"><?php echo Utils::localize(Constants::UI_KEEP_ON_CF_AFTER_DELETE_DESCRIPTION); ?></p>
+            <p class="description"><?php echo esc_html(Utils::localize(Constants::UI_KEEP_ON_CF_AFTER_DELETE_DESCRIPTION)); ?></p>
         </fieldset>
 
         <?php
@@ -471,7 +473,7 @@ class OptionController
                 >
                 <img title="' . esc_attr(Utils::localize(Constants::UI_CF_BADGE_TITLE)) . '" alt="Cloudflare logo" height="18" src="' . esc_url(FLARE_PRESS_URL . 'dist/images/cf_logo.png') . '"></span>';
         } else {
-            echo Utils::localize(Constants::UI_CF_LOCATION_THIS_SERVER);
+            echo esc_html(Utils::localize(Constants::UI_CF_LOCATION_THIS_SERVER));
         }
     }
 

@@ -34,7 +34,6 @@ class Logger
         $filePath = self::getLogFilePath();
         if (!file_exists($filePath)) {
             file_put_contents($filePath, '');
-            chmod($filePath, 0644);
         }
     }
 

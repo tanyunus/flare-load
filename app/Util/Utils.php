@@ -58,11 +58,13 @@ class Utils
     {
         $fileRealPath = realpath($filePath);
 
-        if (!is_writable($fileRealPath)) {
+        if (!$fileRealPath) {
             return false;
         }
 
-        return unlink($fileRealPath);
+        wp_delete_file($fileRealPath);
+
+        return !file_exists($fileRealPath);
     }
 
     public static function renderTemplate(string $template, array $data = []): void

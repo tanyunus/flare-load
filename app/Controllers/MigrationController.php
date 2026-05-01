@@ -178,10 +178,12 @@ class MigrationController
         $filename  = wp_unique_filename($uploadDir['path'], self::getOriginalFilename($attachmentId));
         $destPath  = $uploadDir['path'] . '/' . $filename;
 
-        if (!rename($tempFile, $destPath)) {
-            @unlink($tempFile);
+        if (!copy($tempFile, $destPath)) {
+            wp_delete_file($tempFile);
             throw new Exception('Failed to move downloaded file to uploads directory.');
         }
+
+        wp_delete_file($tempFile);
 
         return $destPath;
     }

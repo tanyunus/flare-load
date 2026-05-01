@@ -8,3 +8,4 @@ package-lock.json
 tsconfig.json
 .gitignore
 .distignore
+assets/ASSETS.md

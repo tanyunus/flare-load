@@ -3,6 +3,8 @@
 Plugin Name: FlarePress
 Description: WordPress plugin for uploading media directly to Cloudflare Images alongside the default uploader.
 Version:     1.0.0
+Requires at least: 5.9
+Requires PHP:      8.0
 Author:      Yunus Tan
 Author URI:  https://github.com/tanyunus/
 License:     GPL-2.0+
@@ -94,8 +96,6 @@ function fp_incomplete_setup_notice(): void
 
 function flarePressInit(): void
 {
-    load_plugin_textdomain('flare-press', false, dirname(plugin_basename(__FILE__)) . '/languages');
-
     $credentialsComplete = fp_has_complete_credentials();
 
     if (is_user_logged_in()) {
@@ -398,8 +398,8 @@ function fp_ajax_migrate_list(): void
     }
 
     $scope   = sanitize_key(wp_unslash($_POST['scope'] ?? 'all'));
-    $page    = max(1, (int) ($_POST['page']     ?? 1));
-    $perPage = max(1, min(100, (int) ($_POST['per_page'] ?? 20)));
+    $page    = max(1, absint(wp_unslash($_POST['page']     ?? 1)));
+    $perPage = max(1, min(100, absint(wp_unslash($_POST['per_page'] ?? 20))));
 
     wp_send_json_success(MigrationController::listImages($scope, $page, $perPage));
 }
@@ -447,7 +447,7 @@ function fp_ajax_migrate_process(): void
         return;
     }
 
-    $id           = (int) ($_POST['id'] ?? 0);
+    $id           = absint(wp_unslash($_POST['id'] ?? 0));
     $variant      = sanitize_text_field(wp_unslash($_POST['variant'] ?? ''));
     $deleteFromCF = !empty($_POST['delete_from_cf']);
 

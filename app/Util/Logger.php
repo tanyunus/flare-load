@@ -43,7 +43,31 @@ class Logger
         if (!file_exists($filePath)) {
             return '';
         }
-        return file_get_contents($filePath) ?: '';
+
+        $maxBytes = 100 * 1024;
+        $fileSize = filesize($filePath);
+
+        if ($fileSize <= $maxBytes) {
+            return file_get_contents($filePath) ?: '';
+        }
+
+        $handle = fopen($filePath, 'r');
+        if (!$handle) {
+            return '';
+        }
+
+        fseek($handle, -$maxBytes, SEEK_END);
+        $content = fread($handle, $maxBytes);
+        fclose($handle);
+
+        // Drop the partial first line caused by mid-line seek.
+        $firstNewline = strpos($content, "\n");
+        if ($firstNewline !== false) {
+            $content = substr($content, $firstNewline + 1);
+        }
+
+        $skippedKb = round(($fileSize - $maxBytes) / 1024);
+        return "[Showing last 100 KB — {$skippedKb} KB of older entries not shown]\n" . $content;
     }
 
     private static function getLogFilePath(): string {

@@ -1,8 +1,5 @@
-# Deny access to everything by default
-Order Deny,Allow
-Deny from all
-
-# Allow access only to /includes/dist/ directory
-<FilesMatch "^(includes/dist/)">
-    Allow from all
+# Block direct PHP access; dist/ assets (JS, CSS, images) are served normally.
+<FilesMatch "\.php$">
+    Order Deny,Allow
+    Deny from all
 </FilesMatch>

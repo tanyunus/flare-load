@@ -1,8 +1,8 @@
 # Build output
-includes/dist/
+dist/
 
 # Dependencies
-includes/node_modules/
+node_modules/
 
 # IDE
 .idea/

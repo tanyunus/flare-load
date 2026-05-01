@@ -1,4 +1,4 @@
-// Dev build script
+// Prod build script
 
 const esbuild = require('esbuild');
 const fs = require('fs');
@@ -72,8 +72,8 @@ function getScssFiles(dir) {
 function compileScss(filePath) {
     try {
         const result = sass.compile(filePath, {
-            sourceMap: true,
-            style: 'expanded'
+            sourceMap: false,
+            style: 'compressed'
         });
 
         const fileName = path.basename(filePath, '.scss') + '.css';
@@ -91,44 +91,18 @@ function compileScss(filePath) {
     }
 }
 
-function watchScss(dir) {
-    const scssFiles = getScssFiles(dir);
+const scriptEntryPoints = getEntryPoints('src/scripts/main');
+const scssFiles = getScssFiles('src/styles');
 
-    scssFiles.forEach(file => {
-        compileScss(file);
+// Compile SCSS files
+scssFiles.forEach(compileScss);
 
-        fs.watch(file, (eventType) => {
-            if (eventType === 'change') {
-                console.log(`\nChange detected in ${file}`);
-                compileScss(file);
-            }
-        });
-    });
-
-    fs.watch(dir, { recursive: true }, (eventType, filename) => {
-        if (filename && filename.endsWith('.scss')) {
-            const fullPath = path.join(dir, filename);
-            if (fs.existsSync(fullPath) && !path.basename(filename).startsWith('_')) {
-                console.log(`\nChange detected in ${fullPath}`);
-                const allScssFiles = getScssFiles(dir);
-                allScssFiles.forEach(compileScss);
-            } else if (path.basename(filename).startsWith('_')) {
-                console.log(`\nPartial changed: ${filename}, recompiling all SCSS...`);
-                const allScssFiles = getScssFiles(dir);
-                allScssFiles.forEach(compileScss);
-            }
-        }
-    });
-}
-
-const scriptEntryPoints = getEntryPoints('assets/scripts/main');
-const scssFiles = getScssFiles('assets/styles');
-
+// Build TypeScript/JavaScript
 const buildConfig = {
     entryPoints: scriptEntryPoints,
     bundle: true,
-    minify: false,
-    sourcemap: true,
+    minify: true,
+    sourcemap: false,
     outdir: 'dist/main',
     plugins: [wpExternalsPlugin],
     target: 'es2020',
@@ -149,11 +123,4 @@ const buildConfig = {
     },
 };
 
-esbuild.context(buildConfig).then(ctx => {
-    ctx.watch();
-    console.log('Watching for changes...');
-    console.log(`Watching ${scriptEntryPoints.length} TypeScript file(s)`);
-    console.log(`Watching ${scssFiles.length} SCSS file(s)`);
-
-    watchScss('assets/styles');
-}).catch(() => process.exit(1));
+esbuild.build(buildConfig).catch(() => process.exit(1));

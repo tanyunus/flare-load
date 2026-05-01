@@ -46,7 +46,7 @@ class OptionController
                 'manage_options',
                 Constants::DASHBOARD_MENU_SLUG,
                 [$this, 'fpAdminDashboardView'],
-                WP_PLUGIN_DIR . '/flare-press/includes/dist/images/fp_dashboard_icon.svg',
+                WP_PLUGIN_DIR . '/flare-press/dist/images/fp_dashboard_icon.svg',
                 5
         );
     }
@@ -469,7 +469,7 @@ class OptionController
                 data-fp-file-name="' . AttachmentController::getAttachmentFileName($attachmentId) . '"
                 data-fp-url="' . get_the_guid($attachmentId) . '"
                 >
-                <img title="' . Utils::localize(Constants::UI_CF_BADGE_TITLE) . '" alt="Cloudflare logo" height="18" src="' . esc_url(FLARE_PRESS_URL . 'includes/assets/images/cf_logo.png') . '"></span>';
+                <img title="' . Utils::localize(Constants::UI_CF_BADGE_TITLE) . '" alt="Cloudflare logo" height="18" src="' . esc_url(FLARE_PRESS_URL . 'dist/images/cf_logo.png') . '"></span>';
         } else {
             echo Utils::localize(Constants::UI_CF_LOCATION_THIS_SERVER);
         }

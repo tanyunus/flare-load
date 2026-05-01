@@ -14,7 +14,7 @@ const path = require('path');
 const ROOT      = path.resolve(__dirname, '..');
 const POT_PATH  = path.join(ROOT, 'languages', 'flare-press.pot');
 const DOMAIN    = 'flare-press';
-const VERSION   = require(path.join(ROOT, 'includes', 'package.json')).version;
+const VERSION   = require(path.join(ROOT, 'package.json')).version;
 
 // ── 1. Extract PHP constants ──────────────────────────────────────────────────
 
@@ -188,7 +188,7 @@ msgstr ""
 
 const phpConst = extractPhpConstants(path.join(ROOT, 'app/Data/Constants.php'));
 const phpSrc   = extractPhpStrings();
-const jsAll    = extractJsStrings(path.join(ROOT, 'includes/assets/scripts'));
+const jsAll    = extractJsStrings(path.join(ROOT, 'src/scripts'));
 
 const pot      = buildPot(phpConst, phpSrc, jsAll);
 

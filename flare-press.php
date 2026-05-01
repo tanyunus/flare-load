@@ -627,25 +627,25 @@ function fp_admin_menu(): void
 function fp_admin_print_footer_scripts(): void
 {
     if (Utils::isAdminPage('upload.php') && (empty($_GET) || sanitize_key(wp_unslash($_GET['mode'] ?? '')) === 'grid')) {
-        wp_enqueue_script('fp-media-library-grid-script', FLARE_PRESS_URL . 'includes/dist/main/fp-media-library-grid.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
+        wp_enqueue_script('fp-media-library-grid-script', FLARE_PRESS_URL . 'dist/main/fp-media-library-grid.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
         wp_localize_script('fp-media-library-grid-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'locationFilterLabels' => ['all' => Utils::localize(Constants::UI_LOCATION_FILTER_ALL), 'cloudflare' => Utils::localize(Constants::UI_CF_BADGE_TITLE), 'server' => Utils::localize(Constants::UI_CF_LOCATION_THIS_SERVER)]]);
         wp_set_script_translations('fp-media-library-grid-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
     if (Utils::isAdminPage('media-new.php')) {
-        wp_enqueue_script('fp-media-new-script', FLARE_PRESS_URL . 'includes/dist/main/fp-media-new.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
+        wp_enqueue_script('fp-media-new-script', FLARE_PRESS_URL . 'dist/main/fp-media-new.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
         wp_localize_script('fp-media-new-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG)]);
         wp_set_script_translations('fp-media-new-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
     if (Utils::isFpOptionsPage()) {
-        wp_enqueue_script('fp-options-script', FLARE_PRESS_URL . 'includes/dist/main/fp-options.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
+        wp_enqueue_script('fp-options-script', FLARE_PRESS_URL . 'dist/main/fp-options.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
         wp_localize_script('fp-options-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG)]);
         wp_set_script_translations('fp-options-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
     if (Utils::isFpMigratePage()) {
-        wp_enqueue_script('fp-migrate-script', FLARE_PRESS_URL . 'includes/dist/main/fp-migrate.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
+        wp_enqueue_script('fp-migrate-script', FLARE_PRESS_URL . 'dist/main/fp-migrate.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
         wp_localize_script('fp-migrate-script', 'fpMigrateConfig', [
             'ajaxUrl'        => admin_url('admin-ajax.php'),
             'nonce'          => wp_create_nonce('fp_migrate'),
@@ -658,7 +658,7 @@ function fp_admin_print_footer_scripts(): void
     }
 
     if ((Utils::isPostEditPage() || Utils::isAdminPage('post-new.php') || Utils::isAdminPage('site-editor.php')) && !Utils::isMediaEditPage()) {
-        wp_enqueue_script('fp-post-script', FLARE_PRESS_URL . 'includes/dist/main/fp-post.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
+        wp_enqueue_script('fp-post-script', FLARE_PRESS_URL . 'dist/main/fp-post.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
         wp_localize_script('fp-post-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'defaultVariant' => get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, ''), 'variantOptions' => OptionController::getVariantOptions(), 'accountHash' => OptionController::getAccountHash()]);
         wp_set_script_translations('fp-post-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
@@ -666,7 +666,7 @@ function fp_admin_print_footer_scripts(): void
 
 function fp_admin_enqueue_scripts(): void
 {
-    wp_enqueue_style('fp-main-style', FLARE_PRESS_URL . 'includes/dist/css/fp-main.css', [], FLARE_PRESS_VERSION);
+    wp_enqueue_style('fp-main-style', FLARE_PRESS_URL . 'dist/css/fp-main.css', [], FLARE_PRESS_VERSION);
 }
 
 function fp_pre_delete_attachment(WP_Post|false|null $delete, WP_Post $post, bool $forceDelete): WP_Post|false|null

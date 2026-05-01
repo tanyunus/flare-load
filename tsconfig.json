@@ -11,5 +11,5 @@
     "noEmit": true,
     "jsx": "react"
   },
-  "include": ["assets/scripts/**/*"]
+  "include": ["src/scripts/**/*"]
 }

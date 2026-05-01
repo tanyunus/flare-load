@@ -299,7 +299,7 @@ class OptionController
                         'sanitize_callback' => function ($input) {
                             return $this->sanitizeDefaultVariantField($input);
                         },
-                        'default' => $this->getVariantNamesAsArray()[0]
+                        'default' => $this->getVariantNamesAsArray()[0] ?? ''
                 )
         );
 

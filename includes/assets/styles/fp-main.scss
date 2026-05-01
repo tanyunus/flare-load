@@ -195,6 +195,28 @@ body.media-new-php {
   }
 }
 
+.fp-migrate-pagination {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.fp-page-info {
+  color: #646970;
+  font-size: 13px;
+}
+
+.fp-muted {
+  color: #a7aaad;
+}
+
+.fp-migrate-selected-count {
+  color: #646970;
+  font-size: 13px;
+  margin-bottom: 0;
+}
+
 .fp-migrate-badge {
   display: inline-block;
   padding: 2px 8px;

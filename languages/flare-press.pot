@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-04-27T17:06:01+00:00\n"
+"POT-Creation-Date: 2026-05-01T11:37:01+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: FlarePress generate-pot.js\n"
 "X-Domain: flare-press\n"
@@ -177,27 +177,31 @@ msgid "Loading…"
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
-msgid "Migration in progress"
+msgid "Failed"
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
-msgid "done"
+msgid "Paused or interrupted migration found"
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
-msgid "failed"
+msgid "A migration was previously started but did not complete. Each image is processed individually — only the remaining items below need to be migrated."
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
-msgid "remaining"
+msgid "Completed"
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
-msgid "total"
+msgid "Remaining"
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
-msgid "Resume"
+msgid "Progress"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Continue Migration"
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
@@ -261,11 +265,27 @@ msgid "Continue"
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
-msgid "Loading images…"
+msgid "Failed to load images. Please try again."
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
-msgid "Failed to load images. Please try again."
+msgid "No Cloudflare images found."
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Previous"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Page"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "total"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
+msgid "Next"
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
@@ -277,7 +297,7 @@ msgid "Choose which images to migrate. Images with no variant configured will be
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
-msgid "Select all"
+msgid "Select all on this page"
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
@@ -289,11 +309,15 @@ msgid "Title"
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
+msgid "Attached to"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
 msgid "Status"
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
-msgid "No Cloudflare images found."
+msgid "Selected"
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
@@ -345,6 +369,10 @@ msgid "Pause"
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
+msgid "Resume"
+msgstr ""
+
+#: includes/assets/scripts/main/fp-migrate.ts
 msgid "Processing"
 msgstr ""
 
@@ -362,10 +390,6 @@ msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts
 msgid "Migrated successfully"
-msgstr ""
-
-#: includes/assets/scripts/main/fp-migrate.ts
-msgid "Failed"
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts

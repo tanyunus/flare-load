@@ -111,6 +111,7 @@ function flarePressInit(): void
 
         add_action('admin_menu', [OptionController::class, 'addMigratePage']);
         add_action('wp_ajax_fp_migrate_analyze',   'fp_ajax_migrate_analyze');
+        add_action('wp_ajax_fp_migrate_list',      'fp_ajax_migrate_list');
         add_action('wp_ajax_fp_migrate_start',     'fp_ajax_migrate_start');
         add_action('wp_ajax_fp_migrate_process',   'fp_ajax_migrate_process');
         add_action('wp_ajax_fp_migrate_get_state', 'fp_ajax_migrate_get_state');
@@ -424,6 +425,21 @@ function fp_ajax_migrate_analyze(): void
     $selectedIds = array_map('intval', (array) wp_unslash($_POST['ids'] ?? []));
 
     wp_send_json_success(MigrationController::analyzeImages($scope, $selectedIds));
+}
+
+function fp_ajax_migrate_list(): void
+{
+    check_ajax_referer('fp_migrate', 'nonce');
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(null, 403);
+        return;
+    }
+
+    $scope   = sanitize_key(wp_unslash($_POST['scope'] ?? 'all'));
+    $page    = max(1, (int) ($_POST['page']     ?? 1));
+    $perPage = max(1, min(100, (int) ($_POST['per_page'] ?? 20)));
+
+    wp_send_json_success(MigrationController::listImages($scope, $page, $perPage));
 }
 
 function fp_ajax_migrate_start(): void

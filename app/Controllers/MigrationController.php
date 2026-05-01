@@ -58,6 +58,55 @@ class MigrationController
     }
 
     /**
+     * Returns a single page of CF attachments for the select-images UI.
+     * Only the current page's items are fully processed (status, thumbnail, parent).
+     * All IDs are loaded as integers — lightweight even at 20k+ items.
+     */
+    public static function listImages(string $scope, int $page, int $perPage): array
+    {
+        $allIds     = self::resolveAttachmentIds($scope, []);
+        $total      = count($allIds);
+        $totalPages = max(1, (int) ceil($total / $perPage));
+        $page       = max(1, min($page, $totalPages));
+        $pageIds    = array_slice($allIds, ($page - 1) * $perPage, $perPage);
+
+        $images = [];
+        foreach ($pageIds as $id) {
+            $localFile = self::getLocalFile($id);
+            $cfId      = AttachmentController::getCloudflareIdOfAttachment($id);
+
+            if ($localFile) {
+                $status = 'local_copy';
+            } elseif ($cfId) {
+                $status = 'download_needed';
+            } else {
+                $status = 'no_variant';
+            }
+
+            $post     = get_post($id);
+            $parentId = $post ? (int) $post->post_parent : 0;
+            $parent   = $parentId ? get_post($parentId) : null;
+
+            $images[] = [
+                'id'           => $id,
+                'title'        => get_the_title($id) ?: self::getOriginalFilename($id),
+                'thumbnail'    => self::getThumbnailUrl($id),
+                'status'       => $status,
+                'parent_id'    => $parentId,
+                'parent_title' => $parent ? $parent->post_title : '',
+                'parent_url'   => $parentId ? (string) get_edit_post_link($parentId, 'raw') : '',
+            ];
+        }
+
+        return [
+            'total'       => $total,
+            'total_pages' => $totalPages,
+            'page'        => $page,
+            'images'      => $images,
+        ];
+    }
+
+    /**
      * Migrates a single attachment to local storage.
      * Uses local copy if available, otherwise downloads the selected variant from Cloudflare.
      * Restores the attachment as a native WordPress attachment (thumbnails regenerated).

@@ -16,6 +16,9 @@ interface AnalysisImage {
     title: string;
     thumbnail: string;
     status: 'download_needed' | 'local_copy' | 'no_variant';
+    parent_id: number;
+    parent_title: string;
+    parent_url: string;
 }
 
 interface AnalysisResult {
@@ -23,6 +26,13 @@ interface AnalysisResult {
     download_needed: number;
     local_copy: number;
     no_variant: number;
+    images: AnalysisImage[];
+}
+
+interface ListImagesResult {
+    total: number;
+    total_pages: number;
+    page: number;
     images: AnalysisImage[];
 }
 
@@ -51,6 +61,8 @@ class FpMigrateWizard {
     private running: boolean = false;
     private counts = { processed: 0, failed: 0 };
     private failedIds: number[] = [];
+    private currentPage: number = 1;
+    private readonly pageSize: number = 20;
 
     constructor(root: HTMLElement) {
         this.root = root;
@@ -225,42 +237,73 @@ class FpMigrateWizard {
         });
     }
 
-    private async renderSelectImages(): Promise<void> {
-        this.render(`<div class="fp-migrate-wizard"><p class="fp-migrate-loading">${__('Loading images…', 'flare-press')}</p></div>`);
-        let images: AnalysisImage[];
+    private async renderSelectImages(page: number = 1): Promise<void> {
+        this.renderSelectShell(page, null);
+        let result: ListImagesResult;
         try {
-            const result = await this.ajax<AnalysisResult>('fp_migrate_analyze', { scope: 'all', ids: [] });
-            images = result.images;
+            result = await this.ajax<ListImagesResult>('fp_migrate_list', {
+                scope:    'all',
+                page,
+                per_page: this.pageSize,
+            });
         } catch {
             this.render(`<div class="fp-migrate-wizard"><div class="notice notice-error inline"><p>${__('Failed to load images. Please try again.', 'flare-press')}</p></div></div>`);
             return;
         }
+        this.currentPage = result.page;
+        this.renderSelectShell(result.page, result);
+    }
 
-        const rows = images.map(img => `
-            <tr>
-                <td class="fp-migrate-select-check"><input type="checkbox" class="fp-img-check" value="${img.id}"${this.selectedIds.includes(img.id) ? ' checked' : ''}></td>
-                <td class="fp-migrate-thumb">${img.thumbnail ? `<img src="${this.escHtml(img.thumbnail)}" alt="">` : ''}</td>
-                <td>${this.escHtml(img.title)}</td>
-                <td><span class="fp-migrate-badge fp-badge-${img.status}">${this.statusLabel(img.status)}</span></td>
-            </tr>
-        `).join('');
+    private renderSelectShell(page: number, result: ListImagesResult | null): void {
+        const total      = result?.total      ?? 0;
+        const totalPages = result?.total_pages ?? 1;
+        const images     = result?.images      ?? [];
+
+        const rows = result === null
+            ? `<tr><td colspan="5"><span class="fp-migrate-loading">${__('Loading…', 'flare-press')}</span></td></tr>`
+            : images.length === 0
+                ? `<tr><td colspan="5">${__('No Cloudflare images found.', 'flare-press')}</td></tr>`
+                : images.map(img => {
+                    const parentCell = img.parent_title
+                        ? `<a href="${this.escHtml(img.parent_url)}" target="_blank" rel="noopener">${this.escHtml(this.truncate(img.parent_title, 40))}</a>`
+                        : `<span class="fp-muted">—</span>`;
+                    return `
+                        <tr>
+                            <td class="fp-migrate-select-check"><input type="checkbox" class="fp-img-check" value="${img.id}"${this.selectedIds.includes(img.id) ? ' checked' : ''}></td>
+                            <td class="fp-migrate-thumb">${img.thumbnail ? `<img src="${this.escHtml(img.thumbnail)}" alt="">` : ''}</td>
+                            <td>${this.escHtml(img.title)}</td>
+                            <td>${parentCell}</td>
+                            <td><span class="fp-migrate-badge fp-badge-${img.status}">${this.statusLabel(img.status)}</span></td>
+                        </tr>`;
+                }).join('');
+
+        const pagination = totalPages > 1 ? `
+            <div class="fp-migrate-pagination">
+                <button class="button fp-page-btn" data-page="${page - 1}"${page <= 1 ? ' disabled' : ''}>&laquo; ${__('Previous', 'flare-press')}</button>
+                <span class="fp-page-info">${__('Page', 'flare-press')} ${page} / ${totalPages} &nbsp;(${total} ${__('total', 'flare-press')})</span>
+                <button class="button fp-page-btn" data-page="${page + 1}"${page >= totalPages ? ' disabled' : ''}>${__('Next', 'flare-press')} &raquo;</button>
+            </div>
+        ` : '';
 
         this.render(`
             <div class="fp-migrate-wizard">
                 <h2 class="fp-migrate-step-title">${__('Select Images', 'flare-press')}</h2>
                 <p>${__('Choose which images to migrate. Images with no variant configured will be skipped.', 'flare-press')}</p>
-                <label class="fp-migrate-select-all-label"><input type="checkbox" id="fp-select-all"> ${__('Select all', 'flare-press')}</label>
+                <label class="fp-migrate-select-all-label"><input type="checkbox" id="fp-select-all"> ${__('Select all on this page', 'flare-press')}</label>
                 <table class="widefat fp-migrate-image-table">
                     <thead>
                         <tr>
                             <th style="width:32px"></th>
                             <th style="width:60px">${__('Thumbnail', 'flare-press')}</th>
                             <th>${__('Title', 'flare-press')}</th>
+                            <th>${__('Attached to', 'flare-press')}</th>
                             <th style="width:140px">${__('Status', 'flare-press')}</th>
                         </tr>
                     </thead>
-                    <tbody>${rows || `<tr><td colspan="4">${__('No Cloudflare images found.', 'flare-press')}</td></tr>`}</tbody>
+                    <tbody>${rows}</tbody>
                 </table>
+                ${pagination}
+                <p class="fp-migrate-selected-count">${__('Selected', 'flare-press')}: <strong id="fp-selected-count">${this.selectedIds.length}</strong></p>
                 <p class="submit">
                     <button id="fp-select-back" class="button">${__('Back', 'flare-press')}</button>
                     <button id="fp-select-next" class="button button-primary">${__('Continue', 'flare-press')}</button>
@@ -271,14 +314,45 @@ class FpMigrateWizard {
         this.on('#fp-select-all', 'change', e => {
             const all = (e.target as HTMLInputElement).checked;
             this.root.querySelectorAll<HTMLInputElement>('.fp-img-check').forEach(cb => { cb.checked = all; });
+            this.syncPageSelections();
         });
-        this.on('#fp-select-back', 'click', () => this.renderConfig());
+
+        this.root.querySelectorAll<HTMLInputElement>('.fp-img-check').forEach(cb => {
+            cb.addEventListener('change', () => this.syncPageSelections());
+        });
+
+        this.root.querySelectorAll<HTMLButtonElement>('.fp-page-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.syncPageSelections();
+                this.renderSelectImages(parseInt(btn.dataset.page ?? '1', 10));
+            });
+        });
+
+        this.on('#fp-select-back', 'click', () => {
+            this.syncPageSelections();
+            this.renderConfig();
+        });
         this.on('#fp-select-next', 'click', () => {
-            this.selectedIds = Array.from(
-                this.root.querySelectorAll<HTMLInputElement>('.fp-img-check:checked')
-            ).map(cb => parseInt(cb.value, 10));
+            this.syncPageSelections();
             this.renderAnalysis();
         });
+    }
+
+    private syncPageSelections(): void {
+        this.root.querySelectorAll<HTMLInputElement>('.fp-img-check').forEach(cb => {
+            const id = parseInt(cb.value, 10);
+            if (cb.checked) {
+                if (!this.selectedIds.includes(id)) this.selectedIds.push(id);
+            } else {
+                this.selectedIds = this.selectedIds.filter(x => x !== id);
+            }
+        });
+        const countEl = this.root.querySelector('#fp-selected-count');
+        if (countEl) countEl.textContent = String(this.selectedIds.length);
+    }
+
+    private truncate(str: string, max: number): string {
+        return str.length > max ? str.slice(0, max) + '…' : str;
     }
 
     private async renderAnalysis(): Promise<void> {

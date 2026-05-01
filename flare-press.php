@@ -637,7 +637,7 @@ function fp_admin_print_footer_scripts(): void
 
     if (Utils::isFpOptionsPage()) {
         wp_enqueue_script('fp-options-script', FLARE_PRESS_URL . 'dist/main/fp-options.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('fp-options-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'testConnectionNonce' => wp_create_nonce('fp_test_connection')]);
+        wp_localize_script('fp-options-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'testConnectionNonce' => wp_create_nonce('fp_test_connection'), 'restNonce' => wp_create_nonce('wp_rest')]);
         wp_set_script_translations('fp-options-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 

@@ -99,7 +99,7 @@ function flarePressInit(): void
     $credentialsComplete = fp_has_complete_credentials();
 
     if (is_user_logged_in()) {
-        add_action('admin_menu', 'fp_admin_menu');
+        add_action('admin_menu', fn() => new OptionController($credentialsComplete));
         add_action('admin_enqueue_scripts', 'fp_admin_enqueue_scripts');
         add_action('wp_ajax_fp_test_connection', 'fp_ajax_test_connection');
         add_filter('pre_update_option_' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'fp_pre_update_option_save_api_token', 10, 2);
@@ -109,7 +109,6 @@ function flarePressInit(): void
             return;
         }
 
-        add_action('admin_menu', [OptionController::class, 'addMigratePage']);
         add_action('wp_ajax_fp_migrate_analyze',   'fp_ajax_migrate_analyze');
         add_action('wp_ajax_fp_migrate_list',      'fp_ajax_migrate_list');
         add_action('wp_ajax_fp_migrate_start',     'fp_ajax_migrate_start');
@@ -619,10 +618,6 @@ function fp_manage_media_custom_column(string $columnName, int $attachmentId): v
     OptionController::addLocationInfoToListViewRow($columnName, $attachmentId);
 }
 
-function fp_admin_menu(): void
-{
-    new OptionController();
-}
 
 function fp_admin_print_footer_scripts(): void
 {

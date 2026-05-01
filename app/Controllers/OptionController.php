@@ -14,14 +14,12 @@ class OptionController
 {
     private array $variantNames;
 
-    public function __construct()
+    public function __construct(bool $addMigratePage = false)
     {
         $this->variantNames = self::getVariantNamesAsArray();
 
-        // Add page
         $this->addSettingsPage();
 
-        // Add sections and fields
         $this->addUploadSettingsSection();
         $this->addApiSettingsSection();
         $this->addVariantSettingsSection();
@@ -32,7 +30,10 @@ class OptionController
         $this->registerFileManagementField();
         $this->registerDefaultVariantField();
 
-        // Add Log Page
+        if ($addMigratePage) {
+            self::addMigratePage();
+        }
+
         $this->addLogPage();
         $this->addLogViewerSection();
         $this->registerLogViewer();
@@ -77,7 +78,6 @@ class OptionController
                 'manage_options',
                 Constants::DASHBOARD_LOG_PAGE_SLUG,
                 [$this, 'fpAdminLogView'],
-                5
         );
     }
 

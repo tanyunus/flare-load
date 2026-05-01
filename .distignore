@@ -1,6 +1,7 @@
 # Development tools — excluded from release package
 tools/
 src/
+node_modules/
 build.js
 build-dev.js
 package.json
@@ -8,4 +9,8 @@ package-lock.json
 tsconfig.json
 .gitignore
 .distignore
+.idea/
+README.md
+flare-press.log
 assets/ASSETS.md
+languages/.gitkeep

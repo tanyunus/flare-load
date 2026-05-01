@@ -82,6 +82,7 @@ Your Cloudflare Account ID, API Token, and uploaded image files are transmitted 
 * Cloudflare image variant support with per-image variant selection.
 * Visual location badge in media library list view.
 * Activity log viewer for debugging.
+* Migrate to Local tool to move Cloudflare-hosted images back to WordPress.
 
 == Upgrade Notice ==
 

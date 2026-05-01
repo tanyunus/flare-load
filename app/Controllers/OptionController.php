@@ -348,7 +348,7 @@ class OptionController
             return $input;
         }
 
-        return $allowedValues[0];
+        return $allowedValues[0] ?? '';
     }
 
     private function registerFileManagementField(): void

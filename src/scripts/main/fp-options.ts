@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const body = new FormData();
             body.append('action', 'fp_test_connection');
+            body.append('nonce', (window as any).fpConfig?.testConnectionNonce ?? '');
 
             const apiTokenInput = document.querySelector<HTMLInputElement>('[data-field-name="fp_cf_api_token"]');
             if (apiTokenInput && !apiTokenInput.disabled && apiTokenInput.value) {

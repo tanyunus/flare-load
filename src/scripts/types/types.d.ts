@@ -140,6 +140,7 @@ export interface BlockType {
 
 export interface FpConfig {
     pluginUrl: string;
+    testConnectionNonce?: string;
 }
 
 declare global {

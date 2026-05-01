@@ -46,28 +46,39 @@ class Logger
 
         $maxBytes = 100 * 1024;
         $fileSize = filesize($filePath);
+        $truncated = false;
 
         if ($fileSize <= $maxBytes) {
-            return file_get_contents($filePath) ?: '';
+            $raw = file_get_contents($filePath) ?: '';
+        } else {
+            $handle = fopen($filePath, 'r');
+            if (!$handle) {
+                return '';
+            }
+
+            fseek($handle, -$maxBytes, SEEK_END);
+            $raw = fread($handle, $maxBytes);
+            fclose($handle);
+
+            // Drop the partial first line caused by mid-line seek.
+            $firstNewline = strpos($raw, "\n");
+            if ($firstNewline !== false) {
+                $raw = substr($raw, $firstNewline + 1);
+            }
+
+            $truncated = true;
+            $skippedKb = round(($fileSize - $maxBytes) / 1024);
         }
 
-        $handle = fopen($filePath, 'r');
-        if (!$handle) {
-            return '';
+        $lines = array_filter(explode("\n", rtrim($raw)));
+        $lines = array_reverse($lines);
+        $output = implode("\n", $lines);
+
+        if ($truncated) {
+            $output .= "\n[{$skippedKb} KB of older entries not shown]";
         }
 
-        fseek($handle, -$maxBytes, SEEK_END);
-        $content = fread($handle, $maxBytes);
-        fclose($handle);
-
-        // Drop the partial first line caused by mid-line seek.
-        $firstNewline = strpos($content, "\n");
-        if ($firstNewline !== false) {
-            $content = substr($content, $firstNewline + 1);
-        }
-
-        $skippedKb = round(($fileSize - $maxBytes) / 1024);
-        return "[Showing last 100 KB — {$skippedKb} KB of older entries not shown]\n" . $content;
+        return $output;
     }
 
     private static function getLogFilePath(): string {

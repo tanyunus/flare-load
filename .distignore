@@ -1,0 +1,10 @@
+# Development tools — excluded from release package
+tools/
+src/
+build.js
+build-dev.js
+package.json
+package-lock.json
+tsconfig.json
+.gitignore
+.distignore

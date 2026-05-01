@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-05-01T11:37:01+00:00\n"
+"POT-Creation-Date: 2026-05-01T11:44:26+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: FlarePress generate-pot.js\n"
 "X-Domain: flare-press\n"
@@ -29,7 +29,6 @@ msgstr ""
 msgid "Yunus Tan"
 msgstr ""
 
-#: app/Data/Constants.php
 #: app/Data/Constants.php
 msgid "Logs"
 msgstr ""
@@ -59,14 +58,17 @@ msgid "Log Viewer"
 msgstr ""
 
 #: app/Data/Constants.php
+#: includes/assets/scripts/main/fp-media-library-grid.ts
 msgid "Uploaded to Cloudflare"
 msgstr ""
 
 #: app/Data/Constants.php
+#: includes/assets/scripts/main/fp-media-library-grid.ts
 msgid "All locations"
 msgstr ""
 
 #: app/Data/Constants.php
+#: includes/assets/scripts/main/fp-media-library-grid.ts
 msgid "This server"
 msgstr ""
 
@@ -166,6 +168,38 @@ msgstr ""
 
 #: app/Data/Constants.php
 msgid "FlarePress developer Github profile"
+msgstr ""
+
+#: app/Controllers/OptionController.php
+msgid "Key configured — leave blank to keep, enter new to replace"
+msgstr ""
+
+#: app/RestApi/OptionRestApi.php
+msgid "Variants not synced. Please check logs."
+msgstr ""
+
+#: app/RestApi/OptionRestApi.php
+msgid "Error while getting variant names."
+msgstr ""
+
+#: app/RestApi/OptionRestApi.php
+msgid "Error while getting account hash."
+msgstr ""
+
+#: flare-press.php
+msgid "FlarePress is not fully configured. Please complete your <a href=\"%s\">Cloudflare settings</a> to enable all features."
+msgstr ""
+
+#: flare-press.php
+msgid "Upload to Cloudflare failed. The image was saved locally. Check FlarePress logs for details."
+msgstr ""
+
+#: flare-press.php
+msgid "Missing parameters."
+msgstr ""
+
+#: flare-press.php
+msgid "Account ID is required to test the connection."
 msgstr ""
 
 #: includes/assets/scripts/main/fp-migrate.ts

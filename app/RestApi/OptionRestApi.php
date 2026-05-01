@@ -16,7 +16,7 @@ class OptionRestApi
         if(empty($syncResult)) {
             return new WP_REST_Response([
                 'error' => true,
-                'message' => 'Variants not synced. Please check logs.',
+                'message' => __('Variants not synced. Please check logs.', 'flare-press'),
             ], 500);
         }
 
@@ -32,7 +32,7 @@ class OptionRestApi
         if(empty($variantOptions)) {
             return new WP_REST_Response([
                 'error' => true,
-                'message' => 'Error while getting variant names.',
+                'message' => __('Error while getting variant names.', 'flare-press'),
             ], 500);
         }
 
@@ -48,7 +48,7 @@ class OptionRestApi
         if(empty($accountHash)) {
             return new WP_REST_Response([
                 'error' => true,
-                'message' => 'Error while getting account hash.',
+                'message' => __('Error while getting account hash.', 'flare-press'),
             ], 500);
         }
 

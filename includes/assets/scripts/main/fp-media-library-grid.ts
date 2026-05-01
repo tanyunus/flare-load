@@ -1,3 +1,4 @@
+import { __ } from '@wordpress/i18n';
 import UploadManager from "../modules/UploadManager";
 import {createAndAppendSwitcher} from "../functions/media-library-pages";
 import {detectAndMarkCfImages} from "../functions/cf-image-detector";
@@ -21,9 +22,9 @@ function addLocationFilter(): void {
     if (!wp?.media?.view?.AttachmentsBrowser) return;
 
     const labels          = (window as any).fpConfig?.locationFilterLabels ?? {};
-    const allLabel        = (labels.all        as string) || 'All locations';
-    const cloudflareLabel = (labels.cloudflare as string) || 'Uploaded to Cloudflare';
-    const serverLabel     = (labels.server     as string) || 'This server';
+    const allLabel        = (labels.all        as string) || __('All locations', 'flare-press');
+    const cloudflareLabel = (labels.cloudflare as string) || __('Uploaded to Cloudflare', 'flare-press');
+    const serverLabel     = (labels.server     as string) || __('This server', 'flare-press');
 
     const originalCreateToolbar = wp.media.view.AttachmentsBrowser.prototype.createToolbar;
 

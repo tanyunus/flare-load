@@ -491,7 +491,7 @@ function fp_ajax_migrate_process(): void
 
     if (!$id || empty($variant)) {
         ob_end_clean();
-        wp_send_json_error(['message' => 'Missing parameters.']);
+        wp_send_json_error(['message' => __('Missing parameters.', 'flare-press')]);
         return;
     }
 
@@ -543,7 +543,7 @@ function fp_ajax_test_connection(): void
     }
     $accountId = get_option(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME);
     if (empty($accountId)) {
-        wp_send_json_error(['message' => 'Account ID is required to test the connection.']);
+        wp_send_json_error(['message' => __('Account ID is required to test the connection.', 'flare-press')]);
         return;
     }
     $testToken = isset($_POST['fp_test_token']) ? sanitize_text_field(wp_unslash($_POST['fp_test_token'])) : null;

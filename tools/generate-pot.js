@@ -41,6 +41,48 @@ function isUiConstant(name) {
     return UI_PREFIXES.some(p => name.startsWith(p)) || UI_EXTRA_KEYS.includes(name);
 }
 
+// ── 1b. Extract PHP __() calls from source files ──────────────────────────────
+
+const PHP_DIRS   = ['app', 'flare-press.php'];
+const PHP_I18N_RE = /__\(\s*'((?:[^'\\]|\\.)*)'\s*,\s*'flare-press'/g;
+
+function extractPhpStrings() {
+    const entries = [];
+
+    function scanFile(filePath) {
+        const rel = path.relative(ROOT, filePath).replace(/\\/g, '/');
+        const src = fs.readFileSync(filePath, 'utf8');
+        const re  = new RegExp(PHP_I18N_RE.source, 'g');
+        let m;
+        while ((m = re.exec(src)) !== null) {
+            const value = m[1].replace(/\\'/g, "'").replace(/\\\\/g, '\\');
+            entries.push({ value, file: rel });
+        }
+    }
+
+    function scanDir(dir) {
+        for (const f of fs.readdirSync(dir, { withFileTypes: true })) {
+            const full = path.join(dir, f.name);
+            if (f.isDirectory()) {
+                scanDir(full);
+            } else if (f.name.endsWith('.php')) {
+                scanFile(full);
+            }
+        }
+    }
+
+    for (const target of PHP_DIRS) {
+        const full = path.join(ROOT, target);
+        if (fs.statSync(full).isDirectory()) {
+            scanDir(full);
+        } else {
+            scanFile(full);
+        }
+    }
+
+    return entries;
+}
+
 // ── 2. Extract JS __() calls ──────────────────────────────────────────────────
 
 function extractJsStrings(dir) {
@@ -72,23 +114,29 @@ function escapePot(str) {
     return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
 }
 
-function buildPot(phpEntries, jsEntries) {
+function buildPot(phpConstEntries, phpSrcEntries, jsEntries) {
     const now  = new Date().toISOString().replace(/\.\d{3}Z$/, '+00:00');
     const seen = new Map(); // msgid → [locations]
 
-    // Collect PHP entries
-    for (const e of phpEntries) {
-        if (!isUiConstant(e.name)) continue;
-        if (!seen.has(e.value)) seen.set(e.value, []);
-        seen.get(e.value).push(e.file);
+    function add(value, file) {
+        if (!seen.has(value)) seen.set(value, []);
+        if (!seen.get(value).includes(file)) seen.get(value).push(file);
     }
 
-    // Collect JS entries (deduplicate across files)
+    // Collect PHP constant entries (UI strings from Constants.php)
+    for (const e of phpConstEntries) {
+        if (!isUiConstant(e.name)) continue;
+        add(e.value, e.file);
+    }
+
+    // Collect PHP __() calls from source files
+    for (const e of phpSrcEntries) {
+        add(e.value, e.file);
+    }
+
+    // Collect JS entries
     for (const e of jsEntries) {
-        if (!seen.has(e.value)) seen.set(e.value, []);
-        if (!seen.get(e.value).includes(e.file)) {
-            seen.get(e.value).push(e.file);
-        }
+        add(e.value, e.file);
     }
 
     let out = `# Copyright (C) ${new Date().getFullYear()} Yunus Tan
@@ -138,13 +186,15 @@ msgstr ""
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
-const phpAll  = extractPhpConstants(path.join(ROOT, 'app/Data/Constants.php'));
-const jsAll   = extractJsStrings(path.join(ROOT, 'includes/assets/scripts'));
+const phpConst = extractPhpConstants(path.join(ROOT, 'app/Data/Constants.php'));
+const phpSrc   = extractPhpStrings();
+const jsAll    = extractJsStrings(path.join(ROOT, 'includes/assets/scripts'));
 
-const pot     = buildPot(phpAll, jsAll);
+const pot      = buildPot(phpConst, phpSrc, jsAll);
 
 fs.writeFileSync(POT_PATH, pot, 'utf8');
 
+const phpConstCount = phpConst.filter(e => isUiConstant(e.name)).length;
 console.log(`✓ Generated ${POT_PATH}`);
-console.log(`  PHP strings : ${phpAll.filter(e => isUiConstant(e.name)).length}`);
+console.log(`  PHP strings : ${phpConstCount + phpSrc.length} (${phpConstCount} constants + ${phpSrc.length} __() calls)`);
 console.log(`  JS strings  : ${jsAll.length}`);

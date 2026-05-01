@@ -458,7 +458,7 @@ class OptionController
                         <?php checked(!empty($options[Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME])); ?> />
                 <?php echo esc_html(Utils::localize(Constants::UI_KEEP_FILES_ON_CF_AFTER_DELETE_FIELD_LABEL)); ?>
             </label>
-            <p class="description"><?php echo esc_html(Utils::localize(Constants::UI_KEEP_ON_CF_AFTER_DELETE_DESCRIPTION)); ?></p>
+            <p class="description"><?php echo wp_kses(Utils::localize(Constants::UI_KEEP_ON_CF_AFTER_DELETE_DESCRIPTION), ['br' => []]); ?></p>
         </fieldset>
 
         <?php

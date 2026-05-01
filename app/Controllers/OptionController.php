@@ -336,7 +336,7 @@ class OptionController
             </button>
             <span id="fp_sync_variant_spinner" class="spinner"></span>
         </div>
-        <p class="description"><?php echo esc_html(Utils::localize(Constants::UI_DEFAULT_VARIANT_DESCRIPTION)); ?></p>
+        <p class="description"><?php echo wp_kses(Utils::localize(Constants::UI_DEFAULT_VARIANT_DESCRIPTION), ['br' => []]); ?></p>
         <?php
     }
 
@@ -411,7 +411,7 @@ class OptionController
             <span id="fp_test_connection_result" style="margin-left:8px;"></span>
         </div>
         <?php } ?>
-        <p class="description"><?php echo esc_html(Utils::localize(Constants::UI_CF_API_TOKEN_DESCRIPTION)); ?></p>
+        <p class="description"><?php echo wp_kses(Utils::localize(Constants::UI_CF_API_TOKEN_DESCRIPTION), ['i' => [], 'b' => []]); ?></p>
         <?php
     }
 
@@ -432,7 +432,7 @@ class OptionController
         <?php
         if (!empty($description)) {
             ?>
-            <p class="description"><?php echo esc_html($description) ?></p>
+            <p class="description"><?php echo wp_kses($description, ['i' => [], 'b' => [], 'em' => [], 'br' => [], 'a' => ['href' => [], 'target' => []]]) ?></p>
             <?php
         }
     }

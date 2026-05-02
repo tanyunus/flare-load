@@ -84,7 +84,7 @@ async function syncVariants(): Promise<VariantOption[] | false> {
         return false;
     }
 
-    const url = '/wp-json/flare-press/v1/sync-variants';
+    const url = (window.fpConfig?.restUrl ?? '/wp-json/flare-press/v1/') + 'sync-variants';
 
     try {
         const response = await fetch(url, {

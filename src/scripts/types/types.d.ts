@@ -142,6 +142,7 @@ export interface FpConfig {
     pluginUrl: string;
     testConnectionNonce?: string;
     restNonce?: string;
+    restUrl?: string;
 }
 
 declare global {

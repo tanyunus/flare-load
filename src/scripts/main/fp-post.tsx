@@ -315,7 +315,7 @@ async function getVariantNames(): Promise<VariantOption[] | false> {
         return false;
     }
 
-    const url = '/wp-json/flare-press/v1/get-variant-names';
+    const url = (window.fpConfig?.restUrl ?? '/wp-json/flare-press/v1/') + 'get-variant-names';
 
     try {
         const response = await fetch(url, {

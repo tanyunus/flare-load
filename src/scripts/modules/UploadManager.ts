@@ -136,13 +136,7 @@ export default class UploadManager {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'fp-cf-upload-button ' + additionalClassName;
-        const logoUrl = (window.fpConfig?.pluginUrl ?? '') + 'includes/dist/images/cf_logo_cropped.png';
-        const img = document.createElement('img');
-        img.src = logoUrl;
-        img.alt = 'Cloudflare logo';
-
         button.appendChild(document.createTextNode(__('Upload to Cloudflare', 'flare-press')));
-        button.appendChild(img);
         button.style.boxShadow = 'inset 0 0 0 1px #f78100, 0 0 0 currentColor';
         button.style.color = '#f78100';
         return button;

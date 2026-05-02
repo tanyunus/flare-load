@@ -5,8 +5,8 @@ Requires at least: 5.9
 Tested up to: 6.9
 Stable tag: 1.0.0
 Requires PHP: 8.0
-License: GPLv2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
+License: GPLv3 or later
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 Upload media directly to Cloudflare Images from the WordPress media library.
 

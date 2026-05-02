@@ -81,7 +81,7 @@ class Logger
     }
 
     private static function getLogFilePath(): string {
-        return WP_PLUGIN_DIR . '/flare-press/' . self::LOG_FILE;
+        return FLARE_PRESS_PATH . self::LOG_FILE;
     }
 
     private static function getLevel(int $level): string {

@@ -7,7 +7,7 @@ Requires at least: 5.9
 Requires PHP:      8.0
 Author:      Yunus Tan
 Author URI:  https://github.com/tanyunus/
-License:     GPL-2.0+
+License:     GPL-3.0+
 Text Domain: flare-press
 */
 

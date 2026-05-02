@@ -1,5 +1,4 @@
 # Block direct PHP access; dist/ assets (JS, CSS, images) are served normally.
 <FilesMatch "\.php$">
-    Order Deny,Allow
-    Deny from all
+    Require all denied
 </FilesMatch>

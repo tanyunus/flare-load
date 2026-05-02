@@ -58,6 +58,10 @@ By default, local files are deleted after a successful Cloudflare upload to save
 
 By default, deleting an attachment from the WordPress media library also removes it from Cloudflare Images. You can disable this in the plugin settings.
 
+= Is FlarePress compatible with image optimisation plugins such as Smush, ShortPixel, or Imagify? =
+
+It depends on your File Management setting. If **Delete local file after upload** is enabled (the default), the local copy is removed once an image is uploaded to Cloudflare, so optimisation plugins will not be able to process it. If you rely on a local optimisation plugin, enable **Keep local file after upload** in the FlarePress settings.
+
 == Screenshots ==
 
 1. Plugin settings page with API credentials and variant management.

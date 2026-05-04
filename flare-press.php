@@ -590,9 +590,9 @@ function fp_restrict_manage_media_location(string $postType): void
     $selected = sanitize_key(wp_unslash($_GET['fp_location'] ?? ''));
     ?>
     <select name="fp_location">
-        <option value=""><?php echo esc_html(Utils::localize(Constants::UI_LOCATION_FILTER_ALL)); ?></option>
-        <option value="cloudflare" <?php selected($selected, 'cloudflare'); ?>><?php echo esc_html(Utils::localize(Constants::UI_CF_BADGE_TITLE)); ?></option>
-        <option value="server" <?php selected($selected, 'server'); ?>><?php echo esc_html(Utils::localize(Constants::UI_CF_LOCATION_THIS_SERVER)); ?></option>
+        <option value=""><?php echo esc_html(__('All locations', 'flare-press')); ?></option>
+        <option value="cloudflare" <?php selected($selected, 'cloudflare'); ?>><?php echo esc_html(__('Uploaded to Cloudflare', 'flare-press')); ?></option>
+        <option value="server" <?php selected($selected, 'server'); ?>><?php echo esc_html(__('This server', 'flare-press')); ?></option>
     </select>
     <?php
 }
@@ -657,7 +657,7 @@ function fp_ajax_query_attachments_args(array $query): array
 
 function fp_manage_media_columns(array $columns): array
 {
-    $columns[Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID] = Utils::localize(Constants::UI_CF_LOCATION_COLUMN_NAME);
+    $columns[Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID] = __('Location', 'flare-press');
 
     return $columns;
 }
@@ -672,7 +672,7 @@ function fp_admin_print_footer_scripts(): void
 {
     if (Utils::isAdminPage('upload.php') && (empty($_GET) || sanitize_key(wp_unslash($_GET['mode'] ?? '')) === 'grid')) {
         wp_enqueue_script('fp-media-library-grid-script', FLARE_PRESS_URL . 'dist/main/fp-media-library-grid.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('fp-media-library-grid-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'locationFilterLabels' => ['all' => Utils::localize(Constants::UI_LOCATION_FILTER_ALL), 'cloudflare' => Utils::localize(Constants::UI_CF_BADGE_TITLE), 'server' => Utils::localize(Constants::UI_CF_LOCATION_THIS_SERVER)]]);
+        wp_localize_script('fp-media-library-grid-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'locationFilterLabels' => ['all' => __('All locations', 'flare-press'), 'cloudflare' => __('Uploaded to Cloudflare', 'flare-press'), 'server' => __('This server', 'flare-press')]]);
         wp_set_script_translations('fp-media-library-grid-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 

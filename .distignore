@@ -9,6 +9,7 @@ package-lock.json
 tsconfig.json
 .gitignore
 .distignore
+.htaccess
 .idea/
 README.md
 flare-press.log

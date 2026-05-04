@@ -8,11 +8,6 @@ use FlarePress\Data\Constants;
 
 class Utils
 {
-    public static function localize(string $string): string
-    {
-        return __($string, Constants::FP_TRANSLATION_DOMAIN);
-    }
-
     public static function isAdminPage(string $pageSlug): bool
     {
         global $pagenow;

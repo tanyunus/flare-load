@@ -42,8 +42,8 @@ class OptionController
     private function addSettingsPage(): void
     {
         add_menu_page(
-                Utils::localize(Constants::UI_PAGE_TITLE),
-                Utils::localize(Constants::DASHBOARD_MENU_TITLE),
+                __('FlarePress Settings', 'flare-press'),
+                __('FlarePress', 'flare-press'),
                 'manage_options',
                 Constants::DASHBOARD_MENU_SLUG,
                 [$this, 'fpAdminDashboardView'],
@@ -56,8 +56,8 @@ class OptionController
     {
         add_submenu_page(
             Constants::DASHBOARD_MENU_SLUG,
-            Utils::localize(Constants::MIGRATE_MENU_TITLE),
-            Utils::localize(Constants::MIGRATE_MENU_TITLE),
+            __('Migrate to Local', 'flare-press'),
+            __('Migrate to Local', 'flare-press'),
             'manage_options',
             Constants::DASHBOARD_MIGRATE_PAGE_SLUG,
             [self::class, 'fpAdminMigrateView'],
@@ -73,8 +73,8 @@ class OptionController
     {
         add_submenu_page(
                 Constants::DASHBOARD_MENU_SLUG,
-                Utils::localize(Constants::UI_LOG_PAGE_TITLE),
-                Utils::localize(Constants::LOG_MENU_TITLE),
+                __('FlarePress Logs', 'flare-press'),
+                __('Logs', 'flare-press'),
                 'manage_options',
                 Constants::DASHBOARD_LOG_PAGE_SLUG,
                 [$this, 'fpAdminLogView'],
@@ -95,7 +95,7 @@ class OptionController
     {
         add_settings_section(
                 Constants::DASHBOARD_API_SETTINGS_SECTION_ID,
-                Utils::localize(Constants::UI_API_SETTINGS_SECTION_TITLE),
+                __('API Settings', 'flare-press'),
                 '',
                 Constants::DASHBOARD_MENU_SLUG
         );
@@ -105,7 +105,7 @@ class OptionController
     {
         add_settings_section(
                 Constants::DASHBOARD_VARIANT_SETTINGS_SECTION_ID,
-                Utils::localize(Constants::UI_VARIANT_SETTINGS_SECTION_TITLE),
+                __('Variant Settings', 'flare-press'),
                 '',
                 Constants::DASHBOARD_MENU_SLUG
         );
@@ -115,7 +115,7 @@ class OptionController
     {
         add_settings_section(
                 Constants::DASHBOARD_UPLOAD_SETTINGS_SECTION_ID,
-                Utils::localize(Constants::UI_UPLOAD_SETTINGS_SECTION_TITLE),
+                __('Upload Settings', 'flare-press'),
                 '',
                 Constants::DASHBOARD_MENU_SLUG
         );
@@ -125,7 +125,7 @@ class OptionController
     {
         add_settings_section(
                 Constants::LOG_VIEWER_SECTION_ID,
-                Utils::localize(Constants::UI_LOG_VIEWER_SECTION_TITLE),
+                __('Log Viewer', 'flare-press'),
                 null,
                 Constants::DASHBOARD_LOG_PAGE_SLUG
         );
@@ -155,7 +155,7 @@ class OptionController
 
         add_settings_field(
                 Constants::LOG_VIEWER_FIELD_NAME,
-                Utils::localize(Constants::UI_LOGS_FIELD_LABEL),
+                __('Logs', 'flare-press'),
                 function () {
                     $this->renderLogViewer();
                 },
@@ -177,7 +177,7 @@ class OptionController
 
         add_settings_field(
                 Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME,
-                Utils::localize(Constants::UI_CF_ACCOUNT_ID_FIELD_LABEL),
+                __('Cloudflare Account ID', 'flare-press'),
                 function () {
                     $this->renderTextField(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME);
                 },
@@ -199,9 +199,12 @@ class OptionController
 
         add_settings_field(
                 Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME,
-                Utils::localize(Constants::UI_CF_ACCOUNT_HASH_FIELD_LABEL),
+                __('Cloudflare Account Hash', 'flare-press'),
                 function () {
-                    $this->renderTextField(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME, Utils::localize(Constants::UI_CF_ACCOUNT_HASH_DESCRIPTION));
+                    $this->renderTextField(
+                        Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME,
+                        __('You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/images/hosted</i>', 'flare-press')
+                    );
                 },
                 Constants::DASHBOARD_MENU_SLUG,
                 Constants::DASHBOARD_API_SETTINGS_SECTION_ID,
@@ -221,7 +224,7 @@ class OptionController
 
         add_settings_field(
                 Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME,
-                Utils::localize(Constants::UI_CF_API_TOKEN_FIELD_LABEL),
+                __('Cloudflare Account API Token', 'flare-press'),
                 function () {
                     $this->renderApiTokenField();
                 },
@@ -255,7 +258,7 @@ class OptionController
 
         add_settings_field(
             Constants::DASHBOARD_CF_SIGNING_KEY_FIELD_NAME,
-            Utils::localize(Constants::UI_CF_SIGNING_KEY_FIELD_LABEL),
+            __('URL Signing Key', 'flare-press'),
             function () {
                 $this->renderSigningKeyField();
             },
@@ -285,7 +288,7 @@ class OptionController
             </label>
         </div>
         <?php } ?>
-        <p class="description"><?php echo wp_kses(Utils::localize(Constants::UI_CF_SIGNING_KEY_DESCRIPTION), ['em' => []]); ?></p>
+        <p class="description"><?php echo wp_kses(__('Optional. Hex-encoded key for Cloudflare Images signed URLs. Generate one at <em>Cloudflare Dashboard → Images → Keys</em>. When set, all image delivery URLs include a time-limited signature. Leave empty to disable.', 'flare-press'), ['em' => []]); ?></p>
         <?php
     }
 
@@ -305,7 +308,7 @@ class OptionController
 
         add_settings_field(
                 Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME,
-                Utils::localize(Constants::UI_DEFAULT_VARIANT_FIELD_LABEL),
+                __('Default Variant', 'flare-press'),
                 function () {
                     $this->renderDefaultVariantField();
                 },
@@ -332,11 +335,11 @@ class OptionController
             <button id="fp_variant_sync_button" type="button" role="button"
                     class="fp-variant-sync-button button button-secondary">
                 <span class="dashicons dashicons-update-alt"></span>
-                <?php echo esc_html(Utils::localize(Constants::UI_SYNC_VARIANTS_BUTTON)); ?>
+                <?php echo esc_html(__('Sync Variants', 'flare-press')); ?>
             </button>
             <span id="fp_sync_variant_spinner" class="spinner"></span>
         </div>
-        <p class="description"><?php echo wp_kses(Utils::localize(Constants::UI_DEFAULT_VARIANT_DESCRIPTION), ['br' => []]); ?></p>
+        <p class="description"><?php echo wp_kses(__('Choose the largest variant without cropping as the default. <br/>This ensures the full image is clearly visible and recognizable.', 'flare-press'), ['br' => []]); ?></p>
         <?php
     }
 
@@ -369,7 +372,7 @@ class OptionController
 
         add_settings_field(
                 Constants::DASHBOARD_FILE_MANAGEMENT_FIELD_NAME,
-                Utils::localize(Constants::UI_FILE_MANAGEMENT_FIELD_TITLE),
+                __('File management', 'flare-press'),
                 [$this, 'renderFileManagementCheckboxFields'],
                 Constants::DASHBOARD_MENU_SLUG,
                 Constants::DASHBOARD_UPLOAD_SETTINGS_SECTION_ID,
@@ -406,12 +409,12 @@ class OptionController
         <?php if (!empty($optionVal)) { ?>
         <div class="fp-test-connection-wrap" style="margin-top:8px;">
             <button id="fp_test_connection_button" class="button button-secondary" type="button">
-                <?php echo esc_html(Utils::localize(Constants::UI_TEST_CONNECTION_BUTTON)); ?>
+                <?php echo esc_html(__('Test Connection', 'flare-press')); ?>
             </button>
             <span id="fp_test_connection_result" style="margin-left:8px;"></span>
         </div>
         <?php } ?>
-        <p class="description"><?php echo wp_kses(Utils::localize(Constants::UI_CF_API_TOKEN_DESCRIPTION), ['i' => [], 'b' => []]); ?></p>
+        <p class="description"><?php echo wp_kses(__('You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/api-tokens</i>', 'flare-press'), ['i' => [], 'b' => []]); ?></p>
         <?php
     }
 
@@ -447,18 +450,18 @@ class OptionController
                        name="<?php echo esc_attr(Constants::DASHBOARD_UPLOAD_SETTINGS_NAME) ?>[<?php echo esc_attr(Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME) ?>]"
                        value="1"
                         <?php checked(!empty($options[Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME])); ?> />
-                <?php echo esc_html(Utils::localize(Constants::UI_KEEP_FILES_AFTER_UPLOAD_FIELD_LABEL)); ?>
+                <?php echo esc_html(__('Keep a local copy of the uploaded media', 'flare-press')); ?>
             </label>
-            <p class="description"><?php echo esc_html(Utils::localize(Constants::UI_KEEP_FILES_AFTER_UPLOAD_DESCRIPTION)); ?></p>
+            <p class="description"><?php echo esc_html(__('Enable this setting if you prefer to keep a local copy of the uploaded media. The copy of the file will be kept on default upload folder', 'flare-press')); ?></p>
             <br/>
             <label>
                 <input type="checkbox"
                        name="<?php echo esc_attr(Constants::DASHBOARD_UPLOAD_SETTINGS_NAME) ?>[<?php echo esc_attr(Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME) ?>]"
                        value="1"
                         <?php checked(!empty($options[Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME])); ?> />
-                <?php echo esc_html(Utils::localize(Constants::UI_KEEP_FILES_ON_CF_AFTER_DELETE_FIELD_LABEL)); ?>
+                <?php echo esc_html(__('Keep files on Cloudflare after delete', 'flare-press')); ?>
             </label>
-            <p class="description"><?php echo wp_kses(Utils::localize(Constants::UI_KEEP_ON_CF_AFTER_DELETE_DESCRIPTION), ['br' => []]); ?></p>
+            <p class="description"><?php echo wp_kses(__('FlarePress deletes the copy of the attachment from Cloudflare during the deletion process.<br/>Enable this setting if you prefer to keep the file on Cloudflare.', 'flare-press'), ['br' => []]); ?></p>
         </fieldset>
 
         <?php
@@ -471,9 +474,9 @@ class OptionController
                 data-fp-file-name="' . esc_attr(AttachmentController::getAttachmentFileName($attachmentId)) . '"
                 data-fp-url="' . esc_attr(get_the_guid($attachmentId)) . '"
                 >
-                <img title="' . esc_attr(Utils::localize(Constants::UI_CF_BADGE_TITLE)) . '" alt="Cloudflare logo" height="18" src="' . esc_url(FLARE_PRESS_URL . 'dist/images/cf_logo.png') . '"></span>';
+                <img title="' . esc_attr(__('Uploaded to Cloudflare', 'flare-press')) . '" alt="Cloudflare logo" height="18" src="' . esc_url(FLARE_PRESS_URL . 'dist/images/cf_logo.png') . '"></span>';
         } else {
-            echo esc_html(Utils::localize(Constants::UI_CF_LOCATION_THIS_SERVER));
+            echo esc_html(__('This server', 'flare-press'));
         }
     }
 

@@ -44,13 +44,19 @@ class MigrationController
 
             $post         = get_post($id);
             $parentId     = $post ? (int) $post->post_parent : 0;
+            $parent       = $parentId ? get_post($parentId) : null;
+
+            if (!$parent && $cfId) {
+                $parent   = self::findPostUsingCfImage($cfId);
+                $parentId = $parent ? (int) $parent->ID : 0;
+            }
 
             $result['images'][] = [
                 'id'           => $id,
                 'title'        => get_the_title($id) ?: self::getOriginalFilename($id),
                 'thumbnail'    => self::getThumbnailUrl($id),
                 'status'       => $status,
-                'parent_title' => $parentId ? get_the_title($parentId) : '',
+                'parent_title' => $parent ? $parent->post_title : '',
             ];
         }
 
@@ -85,6 +91,11 @@ class MigrationController
             $post     = get_post($id);
             $parentId = $post ? (int) $post->post_parent : 0;
             $parent   = $parentId ? get_post($parentId) : null;
+
+            if (!$parent && $cfId) {
+                $parent   = self::findPostUsingCfImage($cfId);
+                $parentId = $parent ? (int) $parent->ID : 0;
+            }
 
             $images[] = [
                 'id'           => $id,
@@ -281,6 +292,34 @@ class MigrationController
         }
     }
 
+    /**
+     * Falls back to a post_content search when post_parent is 0.
+     * Matches any CF delivery URL for this image ID, regardless of variant.
+     */
+    private static function findPostUsingCfImage(string $cfId): ?\WP_Post
+    {
+        global $wpdb;
+
+        $accountHash = get_option(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME);
+        if (!$accountHash) {
+            return null;
+        }
+
+        $prefix = 'imagedelivery.net/' . $accountHash . '/' . $cfId . '/';
+
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT ID FROM {$wpdb->posts}
+                 WHERE post_content LIKE %s
+                   AND post_status NOT IN ('auto-draft', 'trash')
+                 LIMIT 1",
+                '%' . $wpdb->esc_like($prefix) . '%'
+            )
+        );
+
+        return $row ? get_post((int) $row->ID) : null;
+    }
+
     private static function resolveAttachmentIds(string $scope, array $selectedIds): array
     {
         if ($scope === 'selected') {
@@ -310,7 +349,13 @@ class MigrationController
         if ($scope === 'posts') {
             $ids = array_values(array_filter(
                 $ids,
-                fn($id) => (int) get_post($id)?->post_parent !== 0
+                function ($id) {
+                    if ((int) get_post($id)?->post_parent !== 0) {
+                        return true;
+                    }
+                    $cfId = AttachmentController::getCloudflareIdOfAttachment($id);
+                    return $cfId && self::findPostUsingCfImage($cfId) !== null;
+                }
             ));
         }
 

@@ -119,7 +119,11 @@ class AttachmentController
         $cfUrl = self::getDefaultVariantUrl($cfId);
 
         if (Utils::isAdminPage('upload.php')) {
-            $cfUrl = self::getCfThumbnail($attachmentId)['path'] ?? $cfUrl;
+            $path = self::getCfThumbnail($attachmentId)['path'] ?? '';
+            if ($path) {
+                $uploads = wp_get_upload_dir();
+                $cfUrl   = str_replace(wp_normalize_path($uploads['basedir']), $uploads['baseurl'], wp_normalize_path($path));
+            }
         }
 
         $dom = new DOMDocument();

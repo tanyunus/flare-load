@@ -376,7 +376,11 @@ function fp_wp_get_attachment_image_src(array|false $image, int $attachmentId): 
     if (Utils::isMediaEditPage()) {
         $image[0] = AttachmentController::getDefaultVariantUrl($cfId);
     } else {
-        $image[0] = AttachmentController::getCfThumbnail($attachmentId)['path'];
+        $path = AttachmentController::getCfThumbnail($attachmentId)['path'] ?? '';
+        if ($path) {
+            $uploads  = wp_get_upload_dir();
+            $image[0] = str_replace(wp_normalize_path($uploads['basedir']), $uploads['baseurl'], wp_normalize_path($path));
+        }
     }
 
     return $image;

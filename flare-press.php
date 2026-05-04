@@ -96,6 +96,8 @@ function fp_incomplete_setup_notice(): void
 
 function flarePressInit(): void
 {
+    load_plugin_textdomain('flare-press', false, dirname(plugin_basename(__FILE__)) . '/languages');
+
     $credentialsComplete = fp_has_complete_credentials();
 
     if (is_user_logged_in()) {
@@ -103,6 +105,8 @@ function flarePressInit(): void
         add_action('admin_enqueue_scripts', 'fp_admin_enqueue_scripts');
         add_action('wp_ajax_fp_test_connection', 'fp_ajax_test_connection');
         add_filter('pre_update_option_' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'fp_pre_update_option_save_api_token', 10, 2);
+        add_action('add_option_'    . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'fp_on_api_token_added',   10, 2);
+        add_action('update_option_' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'fp_on_api_token_updated', 10, 2);
 
         if (!$credentialsComplete) {
             add_action('admin_notices', 'fp_incomplete_setup_notice');
@@ -189,6 +193,45 @@ function fp_pre_update_option_save_api_token(mixed $newValue, mixed $oldValue): 
     }
 
     return $newValue;
+}
+
+// add_option_{option} fires when the option is created for the very first time.
+function fp_on_api_token_added(string $option, string $value): void
+{
+    fp_maybe_auto_sync_on_first_save($value);
+}
+
+// update_option_{option} fires when the option already exists and its value changes.
+function fp_on_api_token_updated(string $oldValue, string $newValue): void
+{
+    fp_maybe_auto_sync_on_first_save($newValue);
+}
+
+function fp_maybe_auto_sync_on_first_save(string $newToken): void
+{
+    if (empty($newToken)) {
+        return;
+    }
+
+    // Skip if variants were already synced — this is not a first-time save.
+    if (!empty(get_option(Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME))) {
+        return;
+    }
+
+    // All three credentials must be present.
+    if (empty(get_option(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME))
+        || empty(get_option(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME))) {
+        return;
+    }
+
+    $variants = OptionController::syncVariants();
+
+    if (!empty($variants) && empty(get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME))) {
+        $first = array_key_first($variants);
+        if ($first) {
+            update_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, $first);
+        }
+    }
 }
 
 function fp_render_block($blockContent, $block)

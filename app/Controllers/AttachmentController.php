@@ -31,6 +31,10 @@ class AttachmentController
 
             $thumbnail = self::createThumbnailSizeOfImage($imageFile);
 
+            if (is_array($thumbnail) && isset($thumbnail['path'])) {
+                $thumbnail['path'] = wp_normalize_path($thumbnail['path']);
+            }
+
             $cloudFlareUploadResult = CloudflareImagesApi::uploadImage($imageFile, $imageFileName);
 
             self::updateAttachmentGuid($attachmentId, $cloudFlareUploadResult['result']['id']);
@@ -187,7 +191,11 @@ class AttachmentController
             $sizeArray['full']['url'] = $imgUrl;
         }
 
-        $thumbnail = self::getCfThumbnail($attachmentId)['path'] ?? $imgUrl;
+        $path      = self::getCfThumbnail($attachmentId)['path'] ?? '';
+        $uploads   = wp_get_upload_dir();
+        $thumbnail = $path
+            ? str_replace(wp_normalize_path($uploads['basedir']), $uploads['baseurl'], wp_normalize_path($path))
+            : $imgUrl;
         $sizeArray['medium']['url'] = $thumbnail;
 
         return $sizeArray;

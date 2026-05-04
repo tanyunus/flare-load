@@ -344,7 +344,7 @@ class MigrationController
 
         if (!empty($thumbnail['path'])) {
             $uploadDir = wp_upload_dir();
-            $relative  = ltrim(str_replace($uploadDir['basedir'], '', $thumbnail['path']), '/\\');
+            $relative  = ltrim(str_replace(wp_normalize_path($uploadDir['basedir']), '', wp_normalize_path($thumbnail['path'])), '/\\');
             return $uploadDir['baseurl'] . '/' . $relative;
         }
 

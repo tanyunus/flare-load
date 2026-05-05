@@ -47,26 +47,30 @@ class Logger
         $fileSize = filesize($filePath);
         $truncated = false;
 
-        if ($fileSize <= $maxBytes) {
-            $raw = file_get_contents($filePath) ?: '';
+        global $wp_filesystem;
+        if ( empty( $wp_filesystem ) ) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            WP_Filesystem();
+        }
+
+        $contents = $wp_filesystem->get_contents( $filePath );
+        if ( $contents === false ) {
+            return '';
+        }
+
+        if ( $fileSize <= $maxBytes ) {
+            $raw = $contents;
         } else {
-            $handle = fopen($filePath, 'r');
-            if (!$handle) {
-                return '';
-            }
+            $raw = substr( $contents, -$maxBytes );
 
-            fseek($handle, -$maxBytes, SEEK_END);
-            $raw = fread($handle, $maxBytes);
-            fclose($handle);
-
-            // Drop the partial first line caused by mid-line seek.
-            $firstNewline = strpos($raw, "\n");
-            if ($firstNewline !== false) {
-                $raw = substr($raw, $firstNewline + 1);
+            // Drop the partial first line caused by mid-content cut.
+            $firstNewline = strpos( $raw, "\n" );
+            if ( $firstNewline !== false ) {
+                $raw = substr( $raw, $firstNewline + 1 );
             }
 
             $truncated = true;
-            $skippedKb = round(($fileSize - $maxBytes) / 1024);
+            $skippedKb = round( ( $fileSize - $maxBytes ) / 1024 );
         }
 
         $lines = array_filter(explode("\n", rtrim($raw)));

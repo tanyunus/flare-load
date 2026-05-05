@@ -182,7 +182,7 @@ class MigrationController
         $tempFile = download_url($variantUrl, 30);
 
         if (is_wp_error($tempFile)) {
-            throw new Exception('Download failed: ' . $tempFile->get_error_message());
+            throw new Exception( esc_html( 'Download failed: ' . $tempFile->get_error_message() ) );
         }
 
         $uploadDir = wp_upload_dir();

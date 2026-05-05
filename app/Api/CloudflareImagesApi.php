@@ -86,19 +86,19 @@ class CloudflareImagesApi
     private static function parseResponse(mixed $response, string $context): array
     {
         if (is_wp_error($response)) {
-            throw new Exception("{$context} HTTP error: " . $response->get_error_message());
+            throw new Exception( esc_html( $context . ' HTTP error: ' . $response->get_error_message() ) );
         }
 
         $body = wp_remote_retrieve_body($response);
         $data = json_decode($body, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception("{$context} JSON error: " . json_last_error_msg());
+            throw new Exception( esc_html( $context . ' JSON error: ' . json_last_error_msg() ) );
         }
 
         if (empty($data['success'])) {
             $message = $data['errors'][0]['message'] ?? 'Unknown error';
-            throw new Exception("{$context} {$message}");
+            throw new Exception( esc_html( $context . ' ' . $message ) );
         }
 
         return $data;

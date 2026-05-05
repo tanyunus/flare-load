@@ -3,7 +3,7 @@ Contributors: tanyunus
 Tags: cloudflare, images, cdn, media, upload
 Requires at least: 5.9
 Tested up to: 6.9
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 Requires PHP: 8.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -79,6 +79,14 @@ Your Cloudflare Account ID, API Token, and uploaded image files are transmitted 
 * [Cloudflare Terms of Service](https://www.cloudflare.com/terms/)
 
 == Changelog ==
+
+= 1.0.1 =
+* Fix: thumbnail URLs in media library list view now display correctly instead of filesystem paths.
+* Fix: "Attached To" column in migrate page now correctly detects posts using Cloudflare images uploaded via the media grid.
+* Fix: "Images attached to posts/pages" scope now finds images referenced in post content, not only those with a direct post parent.
+* Fix: replaced fopen/fread/fclose with WP_Filesystem in Logger for WPCS compliance.
+* Fix: wrapped exception message variables with esc_html() in CloudflareImagesApi and MigrationController.
+* Fix: removed deprecated load_plugin_textdomain() call (auto-loaded by WordPress since 4.6).
 
 = 1.0.0 =
 * Initial release.

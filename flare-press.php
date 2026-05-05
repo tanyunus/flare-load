@@ -96,8 +96,6 @@ function fp_incomplete_setup_notice(): void
 
 function flarePressInit(): void
 {
-    load_plugin_textdomain('flare-press', false, dirname(plugin_basename(__FILE__)) . '/languages');
-
     $credentialsComplete = fp_has_complete_credentials();
 
     if (is_user_logged_in()) {

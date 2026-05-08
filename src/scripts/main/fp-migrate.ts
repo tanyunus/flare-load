@@ -106,7 +106,7 @@ class FpMigrateWizard {
     async init(): Promise<void> {
         this.render(`<p class="fp-migrate-loading">${__('Loading…', 'flare-press')}</p>`);
         try {
-            const state = await this.ajax<MigrationState | null>('fp_migrate_get_state');
+            const state = await this.ajax<MigrationState | null>('flarep_migrate_get_state');
             if (state && state.remaining.length > 0) {
                 this.renderResumePrompt(state);
                 return;
@@ -168,7 +168,7 @@ class FpMigrateWizard {
             this.startProgress(state.remaining, state.processed.length + state.failed.length, total);
         });
         this.on('#fp-fresh-btn', 'click', async () => {
-            await this.ajax('fp_migrate_cancel').catch(() => {});
+            await this.ajax('flarep_migrate_cancel').catch(() => {});
             this.renderConfig();
         });
     }
@@ -241,7 +241,7 @@ class FpMigrateWizard {
         this.renderSelectShell(page, null);
         let result: ListImagesResult;
         try {
-            result = await this.ajax<ListImagesResult>('fp_migrate_list', {
+            result = await this.ajax<ListImagesResult>('flarep_migrate_list', {
                 scope:    'all',
                 page,
                 per_page: this.pageSize,
@@ -359,7 +359,7 @@ class FpMigrateWizard {
         this.render(`<div class="fp-migrate-wizard"><p class="fp-migrate-loading">${__('Analyzing…', 'flare-press')}</p></div>`);
         let result: AnalysisResult;
         try {
-            result = await this.ajax<AnalysisResult>('fp_migrate_analyze', {
+            result = await this.ajax<AnalysisResult>('flarep_migrate_analyze', {
                 scope: this.scope,
                 ids:   this.selectedIds,
             });
@@ -411,7 +411,7 @@ class FpMigrateWizard {
             const btn = this.root.querySelector<HTMLButtonElement>('#fp-start-btn');
             if (btn) btn.disabled = true;
             try {
-                const state = await this.ajax<MigrationState>('fp_migrate_start', {
+                const state = await this.ajax<MigrationState>('flarep_migrate_start', {
                     scope:          this.scope,
                     ids:            this.selectedIds,
                     variant:        this.variant,
@@ -499,7 +499,7 @@ class FpMigrateWizard {
                 if (currentEl) currentEl.textContent = `${__('Processing', 'flare-press')} #${id}…`;
 
                 try {
-                    const result = await this.ajax<ProcessResult>('fp_migrate_process', {
+                    const result = await this.ajax<ProcessResult>('flarep_migrate_process', {
                         id,
                         variant:        this.variant,
                         delete_from_cf: this.deleteFromCF ? '1' : '0',
@@ -529,7 +529,7 @@ class FpMigrateWizard {
         }
 
         if (!this.paused && this.progressQueue.length === 0) {
-            await this.ajax('fp_migrate_cancel').catch(() => {});
+            await this.ajax('flarep_migrate_cancel').catch(() => {});
             this.renderSummary();
         }
     }

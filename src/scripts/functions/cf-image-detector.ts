@@ -3,7 +3,7 @@ const cfImageIds = new Set<string | number>();
 export function detectAndMarkCfImages(): void {
     window.addEventListener('fpFileUploaded', ((event: CustomEvent) => {
         const data = event.detail;
-        if (data.fp_cf_image_id) {
+        if (data.flarep_cf_image_id) {
             cfImageIds.add(data.id);
             waitForAttachmentElement(data.id);
         }
@@ -29,12 +29,12 @@ function processCfImageResponse(response: any): void {
 
     if (Array.isArray(response.data)) {
         response.data.forEach((attachment: any) => {
-            if (attachment.fp_cf_image_id) {
+            if (attachment.flarep_cf_image_id) {
                 cfImageIds.add(attachment.id);
                 markAttachmentElement(attachment.id);
             }
         });
-    } else if (response.data?.fp_cf_image_id) {
+    } else if (response.data?.flarep_cf_image_id) {
         cfImageIds.add(response.data.id);
         markAttachmentElement(response.data.id);
     }

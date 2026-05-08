@@ -36,14 +36,14 @@ export default class UploadManager {
         }
 
         form.addEventListener('submit', (e) => {
-            const existingInput = form.querySelector<HTMLInputElement>('input[name="fp_upload_to_cf"]');
+            const existingInput = form.querySelector<HTMLInputElement>('input[name="flarep_upload_to_cf"]');
 
             if (existingInput) {
                 existingInput.value = this.isUploadToCfEnabled() ? '1' : '0';
             } else {
                 const input = document.createElement('input');
                 input.type = 'hidden';
-                input.name = 'fp_upload_to_cf';
+                input.name = 'flarep_upload_to_cf';
                 input.value = this.isUploadToCfEnabled() ? '1' : '0';
                 form.appendChild(input);
             }
@@ -60,10 +60,10 @@ export default class UploadManager {
             if (url.includes('/wp/v2/media')) {
                 const options = args[1] || {};
 
-                const uploadToCf = (window as any).fp_upload_to_cf_next;
+                const uploadToCf = (window as any).flarep_upload_to_cf_next;
 
                 if (options.body instanceof FormData) {
-                    options.body.append('fp_upload_to_cf', uploadToCf ? '1' : '0');
+                    options.body.append('flarep_upload_to_cf', uploadToCf ? '1' : '0');
                 }
 
                 const response = await originalFetch.apply(this, args);
@@ -97,7 +97,7 @@ export default class UploadManager {
         uploader.bind('BeforeUpload', (up: any, file: any) => {
             up.settings.multipart_params = {
                 ...up.settings.multipart_params,
-                fp_upload_to_cf: manager.isUploadToCfEnabled() ? 1 : 0
+                flarep_upload_to_cf: manager.isUploadToCfEnabled() ? 1 : 0
             };
         });
 
@@ -119,12 +119,12 @@ export default class UploadManager {
         const label = document.createElement('label');
         label.className = 'fp-upload-switcher ' + customClass;
         label.style.marginLeft = '10px';
-        label.htmlFor = 'fp_upload_to_cf';
+        label.htmlFor = 'flarep_upload_to_cf';
 
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.id = 'fp_upload_to_cf';
-        checkbox.name = 'fp_upload_to_cf';
+        checkbox.id = 'flarep_upload_to_cf';
+        checkbox.name = 'flarep_upload_to_cf';
 
         label.appendChild(checkbox);
         label.appendChild(document.createTextNode(' ' + __('Upload to Cloudflare', 'flare-press')));
@@ -147,7 +147,7 @@ export default class UploadManager {
         if (!ajaxUrl) return;
 
         const body = new FormData();
-        body.append('action', 'fp_check_upload_error');
+        body.append('action', 'flarep_check_upload_error');
 
         fetch(ajaxUrl, { method: 'POST', body })
             .then(r => r.json())
@@ -162,7 +162,7 @@ export default class UploadManager {
     public listenHeartbeatForErrors(): void {
         const manager = this;
         (window as any).jQuery?.(document).on('heartbeat-tick', (_e: any, data: any) => {
-            if (data.fp_upload_error) {
+            if (data.flarep_upload_error) {
                 manager.showUploadError();
             }
         });
@@ -174,7 +174,7 @@ export default class UploadManager {
             const attachments = (window as any).wp?.media?.model?.Attachments?.all;
             if (attachments) {
                 attachments.on('add', (model: any) => {
-                    if (model.get('fp_upload_error')) {
+                    if (model.get('flarep_upload_error')) {
                         manager.showUploadError();
                     }
                 });

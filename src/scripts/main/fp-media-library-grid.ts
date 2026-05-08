@@ -11,9 +11,9 @@ function registerLocationAjaxPrefilter(): void {
     (window as any).jQuery?.ajaxPrefilter?.((options: any) => {
         if (!options?.data || options.data.action !== 'query-attachments') return;
         if (fpLocationFilter) {
-            options.data.query = {...(options.data.query ?? {}), fp_location: fpLocationFilter};
+            options.data.query = {...(options.data.query ?? {}), flarep_location: fpLocationFilter};
         } else if (options.data.query) {
-            delete options.data.query.fp_location;
+            delete options.data.query.flarep_location;
         }
     });
 }
@@ -38,9 +38,9 @@ function addLocationFilter(): void {
 
             createFilters() {
                 this.filters = {
-                    all:        { text: allLabel,        props: { fp_location: '' },           priority: 10 },
-                    cloudflare: { text: cloudflareLabel, props: { fp_location: 'cloudflare' }, priority: 20 },
-                    server:     { text: serverLabel,     props: { fp_location: 'server' },     priority: 30 },
+                    all:        { text: allLabel,        props: { flarep_location: '' },           priority: 10 },
+                    cloudflare: { text: cloudflareLabel, props: { flarep_location: 'cloudflare' }, priority: 20 },
+                    server:     { text: serverLabel,     props: { flarep_location: 'server' },     priority: 30 },
                 };
             },
 
@@ -48,8 +48,8 @@ function addLocationFilter(): void {
                 const filter = this.filters[this.el.value];
                 if (!filter) return;
 
-                fpLocationFilter = filter.props.fp_location || '';
-                this.model.set({ fp_location: fpLocationFilter, ignore: +new Date() });
+                fpLocationFilter = filter.props.flarep_location || '';
+                this.model.set({ flarep_location: fpLocationFilter, ignore: +new Date() });
             },
         });
 

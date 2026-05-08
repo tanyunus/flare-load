@@ -30,29 +30,29 @@ define('FLARE_PRESS_URL', plugin_dir_url(__FILE__));
 
 require_once FLARE_PRESS_PATH . 'autoload.php';
 
-register_activation_hook(__FILE__, 'fp_activate');
+register_activation_hook(__FILE__, 'flarep_activate');
 
-function fp_activate(): void {
-    if (!get_option('fp_upload_settings')) {
-        update_option('fp_upload_settings', [
+function flarep_activate(): void {
+    if (!get_option('flarep_upload_settings')) {
+        update_option('flarep_upload_settings', [
             Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME       => false,
             Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME => false,
         ]);
     }
 
-    delete_user_meta(get_current_user_id(), 'fp_setup_notice_dismissed');
-    fp_backfill_cf_post_meta();
+    delete_user_meta(get_current_user_id(), 'flarep_setup_notice_dismissed');
+    flarep_backfill_cf_post_meta();
 }
 
-function fp_maybe_run_backfill(): void {
-    if (get_transient('fp_backfill_v1_done')) {
+function flarep_maybe_run_backfill(): void {
+    if (get_transient('flarep_backfill_v1_done')) {
         return;
     }
-    fp_backfill_cf_post_meta();
-    set_transient('fp_backfill_v1_done', true, WEEK_IN_SECONDS);
+    flarep_backfill_cf_post_meta();
+    set_transient('flarep_backfill_v1_done', true, WEEK_IN_SECONDS);
 }
 
-function fp_backfill_cf_post_meta(): void {
+function flarep_backfill_cf_post_meta(): void {
     $attachments = get_posts([
         'post_type'      => 'attachment',
         'posts_per_page' => -1,
@@ -73,14 +73,14 @@ function fp_backfill_cf_post_meta(): void {
 
 add_action('plugins_loaded', 'flarePressInit');
 
-function fp_has_complete_credentials(): bool
+function flarep_has_complete_credentials(): bool
 {
     return !empty(get_option(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME))
         && !empty(get_option(Constants::DASHBOARD_CF_ACCOUNT_HASH_FIELD_NAME))
         && !empty(get_option(Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME));
 }
 
-function fp_incomplete_setup_notice(): void
+function flarep_incomplete_setup_notice(): void
 {
     $url     = admin_url('admin.php?page=' . Constants::DASHBOARD_MENU_SLUG);
     $message = sprintf(
@@ -94,11 +94,11 @@ function fp_incomplete_setup_notice(): void
         return;
     }
 
-    if (get_user_meta(get_current_user_id(), 'fp_setup_notice_dismissed', true)) {
+    if (get_user_meta(get_current_user_id(), 'flarep_setup_notice_dismissed', true)) {
         return;
     }
 
-    $nonce = wp_create_nonce('fp_dismiss_setup_notice');
+    $nonce = wp_create_nonce('flarep_dismiss_setup_notice');
     echo '<div class="notice notice-warning is-dismissible" id="fp-setup-notice"><p>' . wp_kses($message, ['a' => ['href' => []]]) . '</p></div>';
     echo '<script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -109,7 +109,7 @@ function fp_incomplete_setup_notice(): void
                 fetch(' . wp_json_encode(admin_url('admin-ajax.php')) . ', {
                     method: "POST",
                     headers: {"Content-Type": "application/x-www-form-urlencoded"},
-                    body: "action=fp_dismiss_setup_notice&nonce=' . esc_js($nonce) . '"
+                    body: "action=flarep_dismiss_setup_notice&nonce=' . esc_js($nonce) . '"
                 });
             }
         });
@@ -119,58 +119,58 @@ function fp_incomplete_setup_notice(): void
 
 function flarePressInit(): void
 {
-    $credentialsComplete = fp_has_complete_credentials();
+    $credentialsComplete = flarep_has_complete_credentials();
 
     if (is_user_logged_in()) {
         add_action('admin_menu', fn() => new OptionController($credentialsComplete));
-        add_action('admin_enqueue_scripts', 'fp_admin_enqueue_scripts');
-        add_action('wp_ajax_fp_test_connection', 'fp_ajax_test_connection');
-        add_filter('pre_update_option_' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'fp_pre_update_option_save_api_token', 10, 2);
-        add_action('add_option_'    . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'fp_on_api_token_added',   10, 2);
-        add_action('update_option_' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'fp_on_api_token_updated', 10, 2);
+        add_action('admin_enqueue_scripts', 'flarep_admin_enqueue_scripts');
+        add_action('wp_ajax_flarep_test_connection', 'flarep_ajax_test_connection');
+        add_filter('pre_update_option_' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'flarep_pre_update_option_save_api_token', 10, 2);
+        add_action('add_option_'    . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'flarep_on_api_token_added',   10, 2);
+        add_action('update_option_' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'flarep_on_api_token_updated', 10, 2);
 
         if (!$credentialsComplete) {
-            add_action('admin_notices', 'fp_incomplete_setup_notice');
-            add_action('wp_ajax_fp_dismiss_setup_notice', 'fp_ajax_dismiss_setup_notice');
+            add_action('admin_notices', 'flarep_incomplete_setup_notice');
+            add_action('wp_ajax_flarep_dismiss_setup_notice', 'flarep_ajax_dismiss_setup_notice');
             return;
         }
 
-        add_action('wp_ajax_fp_migrate_analyze',   'fp_ajax_migrate_analyze');
-        add_action('wp_ajax_fp_migrate_list',      'fp_ajax_migrate_list');
-        add_action('wp_ajax_fp_migrate_start',     'fp_ajax_migrate_start');
-        add_action('wp_ajax_fp_migrate_process',   'fp_ajax_migrate_process');
-        add_action('wp_ajax_fp_migrate_get_state', 'fp_ajax_migrate_get_state');
-        add_action('wp_ajax_fp_migrate_cancel',    'fp_ajax_migrate_cancel');
-        add_action('rest_api_init', 'fp_rest_api_init');
-        add_filter('render_block', 'fp_render_block', 10, 2);
-        add_filter('manage_media_columns', 'fp_manage_media_columns');
-        add_filter('manage_media_custom_column', 'fp_manage_media_custom_column', 10, 2);
-        add_action('restrict_manage_posts', 'fp_restrict_manage_media_location');
-        add_action('pre_get_posts', 'fp_pre_get_posts_location_filter');
-        add_filter('pre_delete_attachment', 'fp_pre_delete_attachment', 10, 3);
-        add_action('add_attachment', 'fp_add_attachment', 1, 3);
-        add_action('admin_notices', 'fp_admin_upload_error_notice');
-        add_filter('heartbeat_received', 'fp_heartbeat_upload_error', 10, 2);
-        add_action('wp_ajax_fp_check_upload_error', 'fp_ajax_check_upload_error');
-        add_action('admin_print_footer_scripts', 'fp_admin_print_footer_scripts');
-        add_action('admin_init', 'fp_maybe_run_backfill');
+        add_action('wp_ajax_flarep_migrate_analyze',   'flarep_ajax_migrate_analyze');
+        add_action('wp_ajax_flarep_migrate_list',      'flarep_ajax_migrate_list');
+        add_action('wp_ajax_flarep_migrate_start',     'flarep_ajax_migrate_start');
+        add_action('wp_ajax_flarep_migrate_process',   'flarep_ajax_migrate_process');
+        add_action('wp_ajax_flarep_migrate_get_state', 'flarep_ajax_migrate_get_state');
+        add_action('wp_ajax_flarep_migrate_cancel',    'flarep_ajax_migrate_cancel');
+        add_action('rest_api_init', 'flarep_rest_api_init');
+        add_filter('render_block', 'flarep_render_block', 10, 2);
+        add_filter('manage_media_columns', 'flarep_manage_media_columns');
+        add_filter('manage_media_custom_column', 'flarep_manage_media_custom_column', 10, 2);
+        add_action('restrict_manage_posts', 'flarep_restrict_manage_media_location');
+        add_action('pre_get_posts', 'flarep_pre_get_posts_location_filter');
+        add_filter('pre_delete_attachment', 'flarep_pre_delete_attachment', 10, 3);
+        add_action('add_attachment', 'flarep_add_attachment', 1, 3);
+        add_action('admin_notices', 'flarep_admin_upload_error_notice');
+        add_filter('heartbeat_received', 'flarep_heartbeat_upload_error', 10, 2);
+        add_action('wp_ajax_flarep_check_upload_error', 'flarep_ajax_check_upload_error');
+        add_action('admin_print_footer_scripts', 'flarep_admin_print_footer_scripts');
+        add_action('admin_init', 'flarep_maybe_run_backfill');
     }
 
     if (!$credentialsComplete) {
         return;
     }
 
-    add_filter('ajax_query_attachments_args', 'fp_ajax_query_attachments_args');
+    add_filter('ajax_query_attachments_args', 'flarep_ajax_query_attachments_args');
 
-    add_filter('wp_prepare_attachment_for_js', 'fp_wp_prepare_attachment_for_js', 5, 3);
-    add_filter('wp_get_attachment_image', 'fp_wp_get_attachment_image', 15, 5);
-    add_filter('wp_get_attachment_image_src', 'fp_wp_get_attachment_image_src', 10, 4);
-    add_filter('wp_get_attachment_url', 'fp_wp_get_attachment_url', 5, 2);
-    add_filter('get_attached_file', 'fp_get_attached_file', 10, 2);
-    add_filter('get_sample_permalink_html', 'fp_get_sample_permalink_html', 10, 5);
+    add_filter('wp_prepare_attachment_for_js', 'flarep_wp_prepare_attachment_for_js', 5, 3);
+    add_filter('wp_get_attachment_image', 'flarep_wp_get_attachment_image', 15, 5);
+    add_filter('wp_get_attachment_image_src', 'flarep_wp_get_attachment_image_src', 10, 4);
+    add_filter('wp_get_attachment_url', 'flarep_wp_get_attachment_url', 5, 2);
+    add_filter('get_attached_file', 'flarep_get_attached_file', 10, 2);
+    add_filter('get_sample_permalink_html', 'flarep_get_sample_permalink_html', 10, 5);
 }
 
-function fp_get_sample_permalink_html(string $return, int $postId, string|null $newTitle, string|null $newSlug, WP_Post $post): string
+function flarep_get_sample_permalink_html(string $return, int $postId, string|null $newTitle, string|null $newSlug, WP_Post $post): string
 {
     if (Utils::isAdminPage('post.php')) {
         $cfId = AttachmentController::getCloudflareIdOfAttachment($postId);
@@ -196,7 +196,7 @@ function fp_get_sample_permalink_html(string $return, int $postId, string|null $
     return $return;
 }
 
-function fp_get_attached_file(string $file, int $attachmentId): string
+function flarep_get_attached_file(string $file, int $attachmentId): string
 {
     if (Utils::isAdminPage('post.php')) {
         $cfId = AttachmentController::getCloudflareIdOfAttachment($attachmentId);
@@ -208,7 +208,7 @@ function fp_get_attached_file(string $file, int $attachmentId): string
     return $file;
 }
 
-function fp_pre_update_option_save_api_token(mixed $newValue, mixed $oldValue): mixed
+function flarep_pre_update_option_save_api_token(mixed $newValue, mixed $oldValue): mixed
 {
     if (empty(trim($newValue))) {
         return $oldValue;
@@ -218,18 +218,18 @@ function fp_pre_update_option_save_api_token(mixed $newValue, mixed $oldValue): 
 }
 
 // add_option_{option} fires when the option is created for the very first time.
-function fp_on_api_token_added(string $option, string $value): void
+function flarep_on_api_token_added(string $option, string $value): void
 {
-    fp_maybe_auto_sync_on_first_save($value);
+    flarep_maybe_auto_sync_on_first_save($value);
 }
 
 // update_option_{option} fires when the option already exists and its value changes.
-function fp_on_api_token_updated(string $oldValue, string $newValue): void
+function flarep_on_api_token_updated(string $oldValue, string $newValue): void
 {
-    fp_maybe_auto_sync_on_first_save($newValue);
+    flarep_maybe_auto_sync_on_first_save($newValue);
 }
 
-function fp_maybe_auto_sync_on_first_save(string $newToken): void
+function flarep_maybe_auto_sync_on_first_save(string $newToken): void
 {
     if (empty($newToken)) {
         return;
@@ -256,7 +256,7 @@ function fp_maybe_auto_sync_on_first_save(string $newToken): void
     }
 }
 
-function fp_render_block($blockContent, $block)
+function flarep_render_block($blockContent, $block)
 {
     if ($block['blockName'] !== 'core/image') {
         return $blockContent;
@@ -299,7 +299,7 @@ function fp_render_block($blockContent, $block)
     return $blockContent;
 }
 
-function fp_rest_api_init(): void
+function flarep_rest_api_init(): void
 {
     // Restricted to manage_options; triggered by the "Sync Variants" button in settings.
     if(current_user_can('manage_options')) {
@@ -330,7 +330,7 @@ function fp_rest_api_init(): void
         }
     ));
 
-    register_rest_field('attachment', 'fp_cf_image_id', array(
+    register_rest_field('attachment', 'flarep_cf_image_id', array(
         'get_callback' => function ($object) {
             $imageId = $object['id'];
             return AttachmentController::getCloudflareIdOfAttachment($imageId);
@@ -343,11 +343,11 @@ function fp_rest_api_init(): void
         )
     ));
 
-    register_rest_field('attachment', 'fp_upload_error', array(
+    register_rest_field('attachment', 'flarep_upload_error', array(
         'get_callback' => function ($object) {
-            $error = get_post_meta($object['id'], '_fp_upload_error', true);
+            $error = get_post_meta($object['id'], '_flarep_upload_error', true);
             if ($error) {
-                delete_post_meta($object['id'], '_fp_upload_error');
+                delete_post_meta($object['id'], '_flarep_upload_error');
                 return $error;
             }
             return null;
@@ -361,22 +361,22 @@ function fp_rest_api_init(): void
     ));
 }
 
-function fp_wp_prepare_attachment_for_js(array $response, WP_Post $attachment): array
+function flarep_wp_prepare_attachment_for_js(array $response, WP_Post $attachment): array
 {
     if (AttachmentController::getCloudflareIdOfAttachment($attachment->ID)) {
         $response = AttachmentController::updateAjaxQueryResponse($response, $attachment);
     }
 
-    $error = get_post_meta($attachment->ID, '_fp_upload_error', true);
+    $error = get_post_meta($attachment->ID, '_flarep_upload_error', true);
     if ($error) {
-        delete_post_meta($attachment->ID, '_fp_upload_error');
-        $response['fp_upload_error'] = $error;
+        delete_post_meta($attachment->ID, '_flarep_upload_error');
+        $response['flarep_upload_error'] = $error;
     }
 
     return $response;
 }
 
-function fp_wp_get_attachment_image(string $html, int $attachmentId): string
+function flarep_wp_get_attachment_image(string $html, int $attachmentId): string
 {
     $cfId = AttachmentController::getCloudflareIdOfAttachment($attachmentId);
 
@@ -387,7 +387,7 @@ function fp_wp_get_attachment_image(string $html, int $attachmentId): string
     return $html;
 }
 
-function fp_wp_get_attachment_image_src(array|false $image, int $attachmentId): array|false
+function flarep_wp_get_attachment_image_src(array|false $image, int $attachmentId): array|false
 {
     $cfId = AttachmentController::getCloudflareIdOfAttachment($attachmentId);
 
@@ -408,7 +408,7 @@ function fp_wp_get_attachment_image_src(array|false $image, int $attachmentId): 
     return $image;
 }
 
-function fp_wp_get_attachment_url(string $attachmentUrl, int $attachmentId): string
+function flarep_wp_get_attachment_url(string $attachmentUrl, int $attachmentId): string
 {
     $cfId = AttachmentController::getCloudflareIdOfAttachment($attachmentId);
 
@@ -419,14 +419,14 @@ function fp_wp_get_attachment_url(string $attachmentUrl, int $attachmentId): str
     return $attachmentUrl;
 }
 
-function fp_add_attachment(int $attachmentId): void
+function flarep_add_attachment(int $attachmentId): void
 {
     AttachmentController::handleAddAttachment($attachmentId);
 }
 
-function fp_admin_upload_error_notice(): void
+function flarep_admin_upload_error_notice(): void
 {
-    $key = 'fp_upload_error_' . get_current_user_id();
+    $key = 'flarep_upload_error_' . get_current_user_id();
     if (get_transient($key)) {
         delete_transient($key);
         $message = __('Upload to Cloudflare failed. The image was saved locally. Check FlarePress logs for details.', 'flare-press');
@@ -434,19 +434,19 @@ function fp_admin_upload_error_notice(): void
     }
 }
 
-function fp_heartbeat_upload_error(array $response, array $data): array
+function flarep_heartbeat_upload_error(array $response, array $data): array
 {
-    $key = 'fp_upload_error_' . get_current_user_id();
+    $key = 'flarep_upload_error_' . get_current_user_id();
     if (get_transient($key)) {
         delete_transient($key);
-        $response['fp_upload_error'] = true;
+        $response['flarep_upload_error'] = true;
     }
     return $response;
 }
 
-function fp_ajax_migrate_analyze(): void
+function flarep_ajax_migrate_analyze(): void
 {
-    check_ajax_referer('fp_migrate', 'nonce');
+    check_ajax_referer('flarep_migrate', 'nonce');
     if (!current_user_can('manage_options')) {
         wp_send_json_error(null, 403);
         return;
@@ -458,9 +458,9 @@ function fp_ajax_migrate_analyze(): void
     wp_send_json_success(MigrationController::analyzeImages($scope, $selectedIds));
 }
 
-function fp_ajax_migrate_list(): void
+function flarep_ajax_migrate_list(): void
 {
-    check_ajax_referer('fp_migrate', 'nonce');
+    check_ajax_referer('flarep_migrate', 'nonce');
     if (!current_user_can('manage_options')) {
         wp_send_json_error(null, 403);
         return;
@@ -473,9 +473,9 @@ function fp_ajax_migrate_list(): void
     wp_send_json_success(MigrationController::listImages($scope, $page, $perPage));
 }
 
-function fp_ajax_migrate_start(): void
+function flarep_ajax_migrate_start(): void
 {
-    check_ajax_referer('fp_migrate', 'nonce');
+    check_ajax_referer('flarep_migrate', 'nonce');
     if (!current_user_can('manage_options')) {
         wp_send_json_error(null, 403);
         return;
@@ -500,16 +500,16 @@ function fp_ajax_migrate_start(): void
         'options'       => ['variant' => $variant, 'delete_from_cf' => $deleteFromCF],
     ];
 
-    set_transient('fp_migration_state', $state, DAY_IN_SECONDS);
+    set_transient('flarep_migration_state', $state, DAY_IN_SECONDS);
 
     wp_send_json_success($state);
 }
 
-function fp_ajax_migrate_process(): void
+function flarep_ajax_migrate_process(): void
 {
     ob_start();
 
-    check_ajax_referer('fp_migrate', 'nonce');
+    check_ajax_referer('flarep_migrate', 'nonce');
     if (!current_user_can('manage_options')) {
         ob_end_clean();
         wp_send_json_error(null, 403);
@@ -528,7 +528,7 @@ function fp_ajax_migrate_process(): void
 
     $result = MigrationController::processImage($id, $variant, $deleteFromCF);
 
-    $state = get_transient('fp_migration_state');
+    $state = get_transient('flarep_migration_state');
     if ($state) {
         $state['remaining'] = array_values(array_filter($state['remaining'], fn($i) => $i !== $id));
         if ($result['status'] === 'error') {
@@ -536,39 +536,39 @@ function fp_ajax_migrate_process(): void
         } else {
             $state['processed'][] = $id;
         }
-        set_transient('fp_migration_state', $state, DAY_IN_SECONDS);
+        set_transient('flarep_migration_state', $state, DAY_IN_SECONDS);
     }
 
     ob_end_clean();
     wp_send_json_success($result);
 }
 
-function fp_ajax_migrate_get_state(): void
+function flarep_ajax_migrate_get_state(): void
 {
-    check_ajax_referer('fp_migrate', 'nonce');
+    check_ajax_referer('flarep_migrate', 'nonce');
     if (!current_user_can('manage_options')) {
         wp_send_json_error(null, 403);
         return;
     }
 
-    wp_send_json_success(get_transient('fp_migration_state') ?: null);
+    wp_send_json_success(get_transient('flarep_migration_state') ?: null);
 }
 
-function fp_ajax_migrate_cancel(): void
+function flarep_ajax_migrate_cancel(): void
 {
-    check_ajax_referer('fp_migrate', 'nonce');
+    check_ajax_referer('flarep_migrate', 'nonce');
     if (!current_user_can('manage_options')) {
         wp_send_json_error(null, 403);
         return;
     }
 
-    delete_transient('fp_migration_state');
+    delete_transient('flarep_migration_state');
     wp_send_json_success();
 }
 
-function fp_ajax_test_connection(): void
+function flarep_ajax_test_connection(): void
 {
-    check_ajax_referer('fp_test_connection', 'nonce');
+    check_ajax_referer('flarep_test_connection', 'nonce');
 
     if (!current_user_can('manage_options')) {
         wp_send_json_error();
@@ -579,7 +579,7 @@ function fp_ajax_test_connection(): void
         wp_send_json_error(['message' => __('Account ID is required to test the connection.', 'flare-press')]);
         return;
     }
-    $testToken = isset($_POST['fp_test_token']) ? sanitize_text_field(wp_unslash($_POST['fp_test_token'])) : null;
+    $testToken = isset($_POST['flarep_test_token']) ? sanitize_text_field(wp_unslash($_POST['flarep_test_token'])) : null;
     try {
         CloudflareImagesApi::getVariants($testToken);
         wp_send_json_success();
@@ -589,13 +589,13 @@ function fp_ajax_test_connection(): void
     }
 }
 
-function fp_ajax_check_upload_error(): void
+function flarep_ajax_check_upload_error(): void
 {
     if (!current_user_can('upload_files')) {
         wp_send_json_error();
         return;
     }
-    $key = 'fp_upload_error_' . get_current_user_id();
+    $key = 'flarep_upload_error_' . get_current_user_id();
     if (get_transient($key)) {
         delete_transient($key);
         wp_send_json_success(true);
@@ -603,22 +603,22 @@ function fp_ajax_check_upload_error(): void
     wp_send_json_success(false);
 }
 
-function fp_ajax_dismiss_setup_notice(): void
+function flarep_ajax_dismiss_setup_notice(): void
 {
-    check_ajax_referer('fp_dismiss_setup_notice', 'nonce');
-    update_user_meta(get_current_user_id(), 'fp_setup_notice_dismissed', '1');
+    check_ajax_referer('flarep_dismiss_setup_notice', 'nonce');
+    update_user_meta(get_current_user_id(), 'flarep_setup_notice_dismissed', '1');
     wp_send_json_success();
 }
 
-function fp_restrict_manage_media_location(string $postType): void
+function flarep_restrict_manage_media_location(string $postType): void
 {
     if ($postType !== 'attachment') {
         return;
     }
 
-    $selected = sanitize_key(wp_unslash($_GET['fp_location'] ?? ''));
+    $selected = sanitize_key(wp_unslash($_GET['flarep_location'] ?? ''));
     ?>
-    <select name="fp_location">
+    <select name="flarep_location">
         <option value=""><?php echo esc_html(__('All locations', 'flare-press')); ?></option>
         <option value="cloudflare" <?php selected($selected, 'cloudflare'); ?>><?php echo esc_html(__('Uploaded to Cloudflare', 'flare-press')); ?></option>
         <option value="server" <?php selected($selected, 'server'); ?>><?php echo esc_html(__('This server', 'flare-press')); ?></option>
@@ -626,7 +626,7 @@ function fp_restrict_manage_media_location(string $postType): void
     <?php
 }
 
-function fp_pre_get_posts_location_filter(WP_Query $query): void
+function flarep_pre_get_posts_location_filter(WP_Query $query): void
 {
     global $pagenow;
 
@@ -634,7 +634,7 @@ function fp_pre_get_posts_location_filter(WP_Query $query): void
         return;
     }
 
-    $location = sanitize_key(wp_unslash($_GET['fp_location'] ?? ''));
+    $location = sanitize_key(wp_unslash($_GET['flarep_location'] ?? ''));
 
     if ($location === 'cloudflare') {
         $query->set('meta_query', [
@@ -657,9 +657,9 @@ function fp_pre_get_posts_location_filter(WP_Query $query): void
     }
 }
 
-function fp_ajax_query_attachments_args(array $query): array
+function flarep_ajax_query_attachments_args(array $query): array
 {
-    $location = sanitize_key($_REQUEST['query']['fp_location'] ?? '');
+    $location = sanitize_key($_REQUEST['query']['flarep_location'] ?? '');
 
     if ($location === 'cloudflare') {
         $query['meta_query'] = [
@@ -684,65 +684,65 @@ function fp_ajax_query_attachments_args(array $query): array
     return $query;
 }
 
-function fp_manage_media_columns(array $columns): array
+function flarep_manage_media_columns(array $columns): array
 {
     $columns[Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID] = __('Location', 'flare-press');
 
     return $columns;
 }
 
-function fp_manage_media_custom_column(string $columnName, int $attachmentId): void
+function flarep_manage_media_custom_column(string $columnName, int $attachmentId): void
 {
     OptionController::addLocationInfoToListViewRow($columnName, $attachmentId);
 }
 
 
-function fp_admin_print_footer_scripts(): void
+function flarep_admin_print_footer_scripts(): void
 {
     if (Utils::isAdminPage('upload.php') && (empty($_GET) || sanitize_key(wp_unslash($_GET['mode'] ?? '')) === 'grid')) {
-        wp_enqueue_script('fp-media-library-grid-script', FLARE_PRESS_URL . 'dist/main/fp-media-library-grid.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('fp-media-library-grid-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'locationFilterLabels' => ['all' => __('All locations', 'flare-press'), 'cloudflare' => __('Uploaded to Cloudflare', 'flare-press'), 'server' => __('This server', 'flare-press')]]);
-        wp_set_script_translations('fp-media-library-grid-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
+        wp_enqueue_script('flarep-media-library-grid-script', FLARE_PRESS_URL . 'dist/main/fp-media-library-grid.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
+        wp_localize_script('flarep-media-library-grid-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'locationFilterLabels' => ['all' => __('All locations', 'flare-press'), 'cloudflare' => __('Uploaded to Cloudflare', 'flare-press'), 'server' => __('This server', 'flare-press')]]);
+        wp_set_script_translations('flarep-media-library-grid-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
     if (Utils::isAdminPage('media-new.php')) {
-        wp_enqueue_script('fp-media-new-script', FLARE_PRESS_URL . 'dist/main/fp-media-new.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('fp-media-new-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG)]);
-        wp_set_script_translations('fp-media-new-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
+        wp_enqueue_script('flarep-media-new-script', FLARE_PRESS_URL . 'dist/main/fp-media-new.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
+        wp_localize_script('flarep-media-new-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG)]);
+        wp_set_script_translations('flarep-media-new-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
     if (Utils::isFpOptionsPage()) {
-        wp_enqueue_script('fp-options-script', FLARE_PRESS_URL . 'dist/main/fp-options.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('fp-options-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'testConnectionNonce' => wp_create_nonce('fp_test_connection'), 'restNonce' => wp_create_nonce('wp_rest'), 'restUrl' => rest_url('flare-press/v1/')]);
-        wp_set_script_translations('fp-options-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
+        wp_enqueue_script('flarep-options-script', FLARE_PRESS_URL . 'dist/main/fp-options.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
+        wp_localize_script('flarep-options-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'testConnectionNonce' => wp_create_nonce('flarep_test_connection'), 'restNonce' => wp_create_nonce('wp_rest'), 'restUrl' => rest_url('flare-press/v1/')]);
+        wp_set_script_translations('flarep-options-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
     if (Utils::isFpMigratePage()) {
-        wp_enqueue_script('fp-migrate-script', FLARE_PRESS_URL . 'dist/main/fp-migrate.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('fp-migrate-script', 'fpMigrateConfig', [
+        wp_enqueue_script('flarep-migrate-script', FLARE_PRESS_URL . 'dist/main/fp-migrate.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
+        wp_localize_script('flarep-migrate-script', 'fpMigrateConfig', [
             'ajaxUrl'        => admin_url('admin-ajax.php'),
-            'nonce'          => wp_create_nonce('fp_migrate'),
+            'nonce'          => wp_create_nonce('flarep_migrate'),
             'defaultVariant' => get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, ''),
             'variantOptions' => OptionController::getVariantOptions(),
             'migrateUrl'     => admin_url('admin.php?page=' . Constants::DASHBOARD_MIGRATE_PAGE_SLUG),
             'logsUrl'        => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG),
         ]);
-        wp_set_script_translations('fp-migrate-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
+        wp_set_script_translations('flarep-migrate-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
     if ((Utils::isPostEditPage() || Utils::isAdminPage('post-new.php') || Utils::isAdminPage('site-editor.php')) && !Utils::isMediaEditPage()) {
-        wp_enqueue_script('fp-post-script', FLARE_PRESS_URL . 'dist/main/fp-post.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('fp-post-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'defaultVariant' => get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, ''), 'variantOptions' => OptionController::getVariantOptions(), 'accountHash' => OptionController::getAccountHash(), 'restUrl' => rest_url('flare-press/v1/')]);
-        wp_set_script_translations('fp-post-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
+        wp_enqueue_script('flarep-post-script', FLARE_PRESS_URL . 'dist/main/fp-post.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
+        wp_localize_script('flarep-post-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'defaultVariant' => get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, ''), 'variantOptions' => OptionController::getVariantOptions(), 'accountHash' => OptionController::getAccountHash(), 'restUrl' => rest_url('flare-press/v1/')]);
+        wp_set_script_translations('flarep-post-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 }
 
-function fp_admin_enqueue_scripts(): void
+function flarep_admin_enqueue_scripts(): void
 {
     wp_enqueue_style('fp-main-style', FLARE_PRESS_URL . 'dist/css/fp-main.css', [], FLARE_PRESS_VERSION);
 }
 
-function fp_pre_delete_attachment(WP_Post|false|null $delete, WP_Post $post, bool $forceDelete): WP_Post|false|null
+function flarep_pre_delete_attachment(WP_Post|false|null $delete, WP_Post $post, bool $forceDelete): WP_Post|false|null
 {
     return AttachmentController::handleDeleteAttachment($delete, $post, $forceDelete);
 }

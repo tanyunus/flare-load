@@ -47,7 +47,7 @@ export interface AttachmentData {
     type?: string;
     subtype?: string;
     sizes?: any;
-    fp_cf_image_id?: string;
+    flarep_cf_image_id?: string;
     viewInitialized?: number;
     viewReady?: number;
     thumbnailLoaded?: number;
@@ -149,8 +149,8 @@ declare global {
     interface Window {
         wp?: WordPressGlobal;
         uploader?: PluploadUploader;
-        fp_upload_to_cf?: number;
-        fp_upload_to_cf_next?: boolean;
+        flarep_upload_to_cf?: number;
+        flarep_upload_to_cf_next?: boolean;
         fpConfig?: FpConfig;
         jQuery?: any;
         fetch: typeof fetch;

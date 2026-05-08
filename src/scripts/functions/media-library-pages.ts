@@ -4,7 +4,7 @@ export function createAndAppendSwitcher(uploadManager: UploadManager, append: HT
     const switcherElement = uploadManager.createSwitcherElement();
     append.after(switcherElement);
 
-    const checkbox = document.querySelector<HTMLInputElement>('#fp_upload_to_cf');
+    const checkbox = document.querySelector<HTMLInputElement>('#flarep_upload_to_cf');
     if (checkbox) {
         uploadManager.setSwitcherCheckbox(checkbox);
     }

@@ -12,11 +12,11 @@ function assertElement<T extends Element>(
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    const syncButton = document.querySelector<HTMLButtonElement>('#fp_variant_sync_button');
-    const spinner = document.querySelector<HTMLElement>('#fp_sync_variant_spinner');
-    const defaultVariantSelect = document.querySelector<HTMLSelectElement>('#fp_cf_default_variant');
-    const editApiTokenField = document.querySelector<HTMLButtonElement>('#fp_change_api_token_button');
-    const apiTokenField = document.querySelector<HTMLInputElement>('[data-field-name="fp_cf_api_token"]');
+    const syncButton = document.querySelector<HTMLButtonElement>('#flarep_variant_sync_button');
+    const spinner = document.querySelector<HTMLElement>('#flarep_sync_variant_spinner');
+    const defaultVariantSelect = document.querySelector<HTMLSelectElement>('#flarep_cf_default_variant');
+    const editApiTokenField = document.querySelector<HTMLButtonElement>('#flarep_change_api_token_button');
+    const apiTokenField = document.querySelector<HTMLInputElement>('[data-field-name="flarep_cf_api_token"]');
 
     if (syncButton) {
         syncButton.addEventListener('click', async () => {
@@ -24,8 +24,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    const testButton = document.querySelector<HTMLButtonElement>('#fp_test_connection_button');
-    const testResult = document.querySelector<HTMLElement>('#fp_test_connection_result');
+    const testButton = document.querySelector<HTMLButtonElement>('#flarep_test_connection_button');
+    const testResult = document.querySelector<HTMLElement>('#flarep_test_connection_result');
 
     if(editApiTokenField && apiTokenField) {
         editApiTokenField.addEventListener('click', function () {
@@ -48,12 +48,12 @@ document.addEventListener('DOMContentLoaded', function () {
             testResult.textContent = '';
 
             const body = new FormData();
-            body.append('action', 'fp_test_connection');
+            body.append('action', 'flarep_test_connection');
             body.append('nonce', (window as any).fpConfig?.testConnectionNonce ?? '');
 
-            const apiTokenInput = document.querySelector<HTMLInputElement>('[data-field-name="fp_cf_api_token"]');
+            const apiTokenInput = document.querySelector<HTMLInputElement>('[data-field-name="flarep_cf_api_token"]');
             if (apiTokenInput && !apiTokenInput.disabled && apiTokenInput.value) {
-                body.append('fp_test_token', apiTokenInput.value);
+                body.append('flarep_test_token', apiTokenInput.value);
             }
 
             try {

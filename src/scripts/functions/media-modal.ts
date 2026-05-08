@@ -1,7 +1,7 @@
 import UploadManager from "../modules/UploadManager";
 
 function addSwitcherToUploadView(mediaModal: HTMLElement, uploadManager: UploadManager): void {
-    if (mediaModal.querySelector('#fp_upload_to_cf')) {
+    if (mediaModal.querySelector('#flarep_upload_to_cf')) {
         return;
     }
 
@@ -14,7 +14,7 @@ function addSwitcherToUploadView(mediaModal: HTMLElement, uploadManager: UploadM
 
     selectFilesButton.after(switcherElement);
 
-    const checkbox = switcherElement.querySelector<HTMLInputElement>('#fp_upload_to_cf');
+    const checkbox = switcherElement.querySelector<HTMLInputElement>('#flarep_upload_to_cf');
     if (checkbox) {
         uploadManager.setSwitcherCheckbox(checkbox);
     }

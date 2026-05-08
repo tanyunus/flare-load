@@ -241,7 +241,7 @@ class OptionController
             [
                 'sanitize_callback' => function ($input) {
                     // Explicit remove action submitted via checkbox
-                    $action = sanitize_key(wp_unslash($_POST['fp_cf_signing_key_action'] ?? 'keep'));
+                    $action = sanitize_key(wp_unslash($_POST['flarep_cf_signing_key_action'] ?? 'keep'));
                     if ($action === 'remove') {
                         return '';
                     }
@@ -281,9 +281,9 @@ class OptionController
             class="regular-text"/>
         <?php if ($hasKey) { ?>
         <div style="margin-top:6px;">
-            <input type="hidden" name="fp_cf_signing_key_action" value="keep">
+            <input type="hidden" name="flarep_cf_signing_key_action" value="keep">
             <label>
-                <input type="checkbox" name="fp_cf_signing_key_action" value="remove">
+                <input type="checkbox" name="flarep_cf_signing_key_action" value="remove">
                 <?php esc_html_e('Remove signing key', 'flare-press'); ?>
             </label>
         </div>
@@ -332,12 +332,12 @@ class OptionController
                     </option>
                 <?php endforeach; ?>
             </select>
-            <button id="fp_variant_sync_button" type="button" role="button"
+            <button id="flarep_variant_sync_button" type="button" role="button"
                     class="fp-variant-sync-button button button-secondary">
                 <span class="dashicons dashicons-update-alt"></span>
                 <?php echo esc_html(__('Sync Variants', 'flare-press')); ?>
             </button>
-            <span id="fp_sync_variant_spinner" class="spinner"></span>
+            <span id="flarep_sync_variant_spinner" class="spinner"></span>
         </div>
         <p class="description"><?php echo wp_kses(__('Choose the largest variant without cropping as the default. <br/>This ensures the full image is clearly visible and recognizable.', 'flare-press'), ['br' => []]); ?></p>
         <?php
@@ -398,7 +398,7 @@ class OptionController
             <?php
             if (!empty($optionVal)) {
                 ?>
-                <button id="fp_change_api_token_button" class="button button-secondary fp-change-api-token-button"
+                <button id="flarep_change_api_token_button" class="button button-secondary fp-change-api-token-button"
                         type="button" role="button">
                     <span class="dashicons dashicons-edit"></span>
                 </button>
@@ -408,10 +408,10 @@ class OptionController
         </label>
         <?php if (!empty($optionVal)) { ?>
         <div class="fp-test-connection-wrap" style="margin-top:8px;">
-            <button id="fp_test_connection_button" class="button button-secondary" type="button">
+            <button id="flarep_test_connection_button" class="button button-secondary" type="button">
                 <?php echo esc_html(__('Test Connection', 'flare-press')); ?>
             </button>
-            <span id="fp_test_connection_result" style="margin-left:8px;"></span>
+            <span id="flarep_test_connection_result" style="margin-left:8px;"></span>
         </div>
         <?php } ?>
         <p class="description"><?php echo wp_kses(__('You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/api-tokens</i>', 'flare-press'), ['i' => [], 'b' => []]); ?></p>

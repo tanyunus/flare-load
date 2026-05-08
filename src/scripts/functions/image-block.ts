@@ -54,13 +54,13 @@ export function addSwitcherToImageBlock(uploadManager: UploadManager): void {
                     const cfButton = uploadManager.createCfUploadButton('components-button block-editor-media-placeholder__button block-editor-media-placeholder__upload-button is-next-40px-default-size is-secondary fp-switcher-for-block-placeholder');
 
                     cfButton.addEventListener('click', () => {
-                        (window as any).fp_upload_to_cf_next = true;
+                        (window as any).flarep_upload_to_cf_next = true;
                         uploadButton.click();
                     });
 
                     uploadButton.addEventListener('click', (e) => {
                         if (e.isTrusted) {
-                            (window as any).fp_upload_to_cf_next = false;
+                            (window as any).flarep_upload_to_cf_next = false;
                         }
                     });
 
@@ -120,13 +120,13 @@ function observeMainDocumentForDropdown(uploadManager: UploadManager): void {
                 cfButton.style.marginLeft = '0';
 
                 cfButton.addEventListener('click', () => {
-                    (window as any).fp_upload_to_cf_next = true;
+                    (window as any).flarep_upload_to_cf_next = true;
                     uploadButton.click();
                 });
 
                 uploadButton.addEventListener('click', (e) => {
                     if (e.isTrusted) {
-                        (window as any).fp_upload_to_cf_next = false;
+                        (window as any).flarep_upload_to_cf_next = false;
                     }
                 });
 

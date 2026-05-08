@@ -60,8 +60,8 @@ class AttachmentController
             }
         } catch (Exception $e) {
             Logger::log(0, $e->getMessage());
-            update_post_meta($attachmentId, '_fp_upload_error', $e->getMessage());
-            set_transient('fp_upload_error_' . get_current_user_id(), true, 120);
+            update_post_meta($attachmentId, '_flarep_upload_error', $e->getMessage());
+            set_transient('flarep_upload_error_' . get_current_user_id(), true, 120);
         }
     }
 
@@ -85,7 +85,7 @@ class AttachmentController
 
     /**
      * Returns true if the upload was flagged for Cloudflare by the frontend.
-     * JS injects fp_upload_to_cf into the multipart body before sending the media request.
+     * JS injects flarep_upload_to_cf into the multipart body before sending the media request.
      */
     private static function shouldUploadToCloudflare(): bool
     {
@@ -345,7 +345,7 @@ class AttachmentController
             return $baseUrl;
         }
 
-        $expiry = (string) (time() + (int) apply_filters('fp_signed_url_expiry', 604800));
+        $expiry = (string) (time() + (int) apply_filters('flarep_signed_url_expiry', 604800));
         $hmac   = hash_hmac('sha256', $expiry . $pathname, $keyBytes, true);
         $token  = rtrim(strtr(base64_encode($hmac), '+/', '-_'), '=');
 

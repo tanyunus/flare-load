@@ -40,6 +40,7 @@ function fp_activate(): void {
         ]);
     }
 
+    delete_user_meta(get_current_user_id(), 'fp_setup_notice_dismissed');
     fp_backfill_cf_post_meta();
 }
 
@@ -81,17 +82,39 @@ function fp_has_complete_credentials(): bool
 
 function fp_incomplete_setup_notice(): void
 {
-    if (Utils::isFpOptionsPage()) {
-        return;
-    }
-
     $url     = admin_url('admin.php?page=' . Constants::DASHBOARD_MENU_SLUG);
     $message = sprintf(
         /* translators: %s: link to FlarePress settings page */
         __('FlarePress is not fully configured. Please complete your <a href="%s">Cloudflare settings</a> to enable all features.', 'flare-press'),
         esc_url($url)
     );
-    echo '<div class="notice notice-warning is-dismissible"><p>' . wp_kses($message, ['a' => ['href' => []]]) . '</p></div>';
+
+    if (Utils::isFpOptionsPage() || Utils::isFpMigratePage()) {
+        echo '<div class="notice notice-warning"><p>' . wp_kses($message, ['a' => ['href' => []]]) . '</p></div>';
+        return;
+    }
+
+    if (get_user_meta(get_current_user_id(), 'fp_setup_notice_dismissed', true)) {
+        return;
+    }
+
+    $nonce = wp_create_nonce('fp_dismiss_setup_notice');
+    echo '<div class="notice notice-warning is-dismissible" id="fp-setup-notice"><p>' . wp_kses($message, ['a' => ['href' => []]]) . '</p></div>';
+    echo '<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var notice = document.getElementById("fp-setup-notice");
+        if (!notice) return;
+        notice.addEventListener("click", function(e) {
+            if (e.target.classList.contains("notice-dismiss")) {
+                fetch(' . wp_json_encode(admin_url('admin-ajax.php')) . ', {
+                    method: "POST",
+                    headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                    body: "action=fp_dismiss_setup_notice&nonce=' . esc_js($nonce) . '"
+                });
+            }
+        });
+    });
+    </script>';
 }
 
 function flarePressInit(): void
@@ -108,6 +131,7 @@ function flarePressInit(): void
 
         if (!$credentialsComplete) {
             add_action('admin_notices', 'fp_incomplete_setup_notice');
+            add_action('wp_ajax_fp_dismiss_setup_notice', 'fp_ajax_dismiss_setup_notice');
             return;
         }
 
@@ -577,6 +601,13 @@ function fp_ajax_check_upload_error(): void
         wp_send_json_success(true);
     }
     wp_send_json_success(false);
+}
+
+function fp_ajax_dismiss_setup_notice(): void
+{
+    check_ajax_referer('fp_dismiss_setup_notice', 'nonce');
+    update_user_meta(get_current_user_id(), 'fp_setup_notice_dismissed', '1');
+    wp_send_json_success();
 }
 
 function fp_restrict_manage_media_location(string $postType): void

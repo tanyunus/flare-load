@@ -13,5 +13,5 @@ tsconfig.json
 .idea/
 README.md
 flare-press.log
-assets/ASSETS.md
+assets/
 languages/.gitkeep

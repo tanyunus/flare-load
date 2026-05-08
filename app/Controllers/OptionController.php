@@ -48,7 +48,7 @@ class OptionController
                 Constants::DASHBOARD_MENU_SLUG,
                 [$this, 'fpAdminDashboardView'],
                 FLARE_PRESS_URL . 'dist/images/fp_dashboard_icon.svg',
-                5
+                80
         );
     }
 

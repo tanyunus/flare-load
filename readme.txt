@@ -68,6 +68,12 @@ It depends on your File Management setting. If **Delete local file after upload*
 2. Media library list view showing the Cloudflare location badge.
 3. Block editor with the "Upload to Cloudflare" button on image blocks.
 
+== Source Code ==
+
+The source code for this plugin, including all TypeScript/JavaScript source files and build tools, is publicly available on GitHub:
+
+https://github.com/tanyunus/flare-press
+
 == Third-party Services ==
 
 This plugin communicates with the **Cloudflare Images API** to upload, retrieve, and delete images. Requests are made when you upload an image to Cloudflare from the media library, delete a Cloudflare-hosted image, or sync your image variants from the plugin settings page.

@@ -12,6 +12,5 @@ tsconfig.json
 .htaccess
 .idea/
 README.md
-flare-press.log
 assets/
 languages/.gitkeep

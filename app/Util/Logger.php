@@ -33,6 +33,7 @@ class Logger
     private static function createLogFile(): void {
         $filePath = self::getLogFilePath();
         if (!file_exists($filePath)) {
+            wp_mkdir_p(dirname($filePath));
             file_put_contents($filePath, '');
         }
     }
@@ -85,7 +86,8 @@ class Logger
     }
 
     private static function getLogFilePath(): string {
-        return FLARE_PRESS_PATH . self::LOG_FILE;
+        $uploadDir = wp_upload_dir();
+        return $uploadDir['basedir'] . '/flare-press/' . self::LOG_FILE;
     }
 
     private static function getLevel(int $level): string {

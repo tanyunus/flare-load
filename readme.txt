@@ -74,6 +74,13 @@ The source code for this plugin, including all TypeScript/JavaScript source file
 
 https://github.com/tanyunus/flare-press
 
+To rebuild compiled assets from source:
+
+1. Install dependencies: npm install
+2. Build assets: node build.js
+
+Source files are located in the src/ directory of the repository. The build tool is esbuild for TypeScript/JavaScript and Sass for CSS.
+
 == Third-party Services ==
 
 This plugin communicates with the **Cloudflare Images API** to upload, retrieve, and delete images. Requests are made when you upload an image to Cloudflare from the media library, delete a Cloudflare-hosted image, or sync your image variants from the plugin settings page.

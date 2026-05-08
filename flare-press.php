@@ -2,7 +2,7 @@
 /*
 Plugin Name: FlarePress
 Description: WordPress plugin for uploading media directly to Cloudflare Images alongside the default uploader.
-Version:     1.0.1
+Version:     1.0.2
 Requires at least: 5.9
 Requires PHP:      8.0
 Author:      Yunus Tan
@@ -24,7 +24,7 @@ if (!defined('WPINC')) {
     die;
 }
 
-define('FLARE_PRESS_VERSION', '1.0.0');
+define('FLARE_PRESS_VERSION', '1.0.2');
 define('FLARE_PRESS_PATH', plugin_dir_path(__FILE__));
 define('FLARE_PRESS_URL', plugin_dir_url(__FILE__));
 

@@ -3,7 +3,7 @@ Contributors: tanyunus
 Tags: cloudflare, images, cdn, media, upload
 Requires at least: 5.9
 Tested up to: 6.9
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 Requires PHP: 8.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -92,6 +92,14 @@ Your Cloudflare Account ID, API Token, and uploaded image files are transmitted 
 * [Cloudflare Terms of Service](https://www.cloudflare.com/terms/)
 
 == Changelog ==
+
+= 1.0.2 =
+* Fix: rename function prefix from fp_ to flarep_ for WP.org naming compliance.
+* Fix: make incomplete setup notice dismissible with user meta persistence.
+* Fix: move log file from plugin directory to uploads/flare-press/ per WP.org guidelines.
+* Fix: lower admin menu position to 80.
+* Fix: exclude assets/ folder from release zip.
+* Docs: add source code link and build instructions to readme.
 
 = 1.0.1 =
 * Fix: thumbnail URLs in media library list view now display correctly instead of filesystem paths.

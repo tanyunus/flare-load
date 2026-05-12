@@ -3,7 +3,7 @@ Contributors: tanyunus
 Tags: cloudflare, images, cdn, media, upload
 Requires at least: 5.9
 Tested up to: 6.9
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 Requires PHP: 8.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -92,6 +92,13 @@ Your Cloudflare Account ID, API Token, and uploaded image files are transmitted 
 * [Cloudflare Terms of Service](https://www.cloudflare.com/terms/)
 
 == Changelog ==
+
+= 1.0.3 =
+* Fix: address all WP.org Plugin Check warnings (nonce verification, direct DB queries, error_log usage).
+* Fix: move wp_enqueue_script calls from admin_print_footer_scripts to admin_enqueue_scripts with defer strategy.
+* Fix: standardize all function/option/class prefixes to flarep_ for WP.org compliance.
+* Feat: detect open post editor sessions before migration and warn user with post list.
+* Feat: add Re-check button to editor lock warning for seamless flow.
 
 = 1.0.2 =
 * Fix: rename function prefix from fp_ to flarep_ for WP.org naming compliance.

@@ -134,9 +134,9 @@ class OptionController
     private function renderLogViewer(): void
     {
         ?>
-        <label>
+        <label class="flarep-log-viewer-label">
             <textarea
-                    class="fp-log-viewer-textarea"
+                    class="flarep-log-viewer-textarea"
                     id="<?php echo esc_attr(Constants::LOG_VIEWER_FIELD_NAME) ?>"
                     name="<?php echo esc_attr(Constants::LOG_VIEWER_FIELD_NAME) ?>"
                     rows="20"
@@ -323,7 +323,7 @@ class OptionController
         $options      = self::getVariantOptions();
 
         ?>
-        <div class="fp-sync-button-and-spinner">
+        <div class="flarep-sync-button-and-spinner">
             <select name="<?php echo esc_attr(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME) ?>"
                     id="<?php echo esc_attr(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME) ?>">
                 <?php foreach ($options as $opt) : ?>
@@ -333,7 +333,7 @@ class OptionController
                 <?php endforeach; ?>
             </select>
             <button id="flarep_variant_sync_button" type="button" role="button"
-                    class="fp-variant-sync-button button button-secondary">
+                    class="flarep-variant-sync-button button button-secondary">
                 <span class="dashicons dashicons-update-alt"></span>
                 <?php echo esc_html(__('Sync Variants', 'flare-press')); ?>
             </button>
@@ -383,7 +383,7 @@ class OptionController
     {
         $optionVal = trim(esc_attr(get_option(Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME)));
         ?>
-        <label class="fp-api-token-field-label">
+        <label class="flarep-api-token-field-label">
             <input
                     type="password"
                     value="<?php echo !empty($optionVal) ? '••••••••••••••••••••••' : '' ?>"
@@ -398,7 +398,7 @@ class OptionController
             <?php
             if (!empty($optionVal)) {
                 ?>
-                <button id="flarep_change_api_token_button" class="button button-secondary fp-change-api-token-button"
+                <button id="flarep_change_api_token_button" class="button button-secondary flarep-change-api-token-button"
                         type="button" role="button">
                     <span class="dashicons dashicons-edit"></span>
                 </button>
@@ -407,7 +407,7 @@ class OptionController
             ?>
         </label>
         <?php if (!empty($optionVal)) { ?>
-        <div class="fp-test-connection-wrap" style="margin-top:8px;">
+        <div class="flarep-test-connection-wrap" style="margin-top:8px;">
             <button id="flarep_test_connection_button" class="button button-secondary" type="button">
                 <?php echo esc_html(__('Test Connection', 'flare-press')); ?>
             </button>

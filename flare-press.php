@@ -170,7 +170,6 @@ function flarePressInit(): void
         add_action('admin_notices', 'flarep_admin_upload_error_notice');
         add_filter('heartbeat_received', 'flarep_heartbeat_upload_error', 10, 2);
         add_action('wp_ajax_flarep_check_upload_error', 'flarep_ajax_check_upload_error');
-        add_action('admin_print_footer_scripts', 'flarep_admin_print_footer_scripts');
         add_action('admin_init', 'flarep_maybe_run_backfill');
     }
 
@@ -715,28 +714,30 @@ function flarep_manage_media_custom_column(string $columnName, int $attachmentId
 }
 
 
-function flarep_admin_print_footer_scripts(): void
+function flarep_admin_enqueue_scripts(): void
 {
+    wp_enqueue_style('flarep-main-style', FLAREP_URL . 'dist/css/flarep-main.css', [], FLAREP_VERSION);
+
     if (Utils::isAdminPage('upload.php') && (empty($_GET) || sanitize_key(wp_unslash($_GET['mode'] ?? '')) === 'grid')) {
-        wp_enqueue_script('flarep-media-library-grid-script', FLAREP_URL . 'dist/main/flarep-media-library-grid.js', ['wp-i18n'], FLAREP_VERSION, true);
+        wp_enqueue_script('flarep-media-library-grid-script', FLAREP_URL . 'dist/main/flarep-media-library-grid.js', ['wp-i18n'], FLAREP_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
         wp_localize_script('flarep-media-library-grid-script', 'flarepConfig', ['pluginUrl' => FLAREP_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'locationFilterLabels' => ['all' => __('All locations', 'flare-press'), 'cloudflare' => __('Uploaded to Cloudflare', 'flare-press'), 'server' => __('This server', 'flare-press')]]);
         wp_set_script_translations('flarep-media-library-grid-script', 'flare-press', FLAREP_PATH . 'languages');
     }
 
     if (Utils::isAdminPage('media-new.php')) {
-        wp_enqueue_script('flarep-media-new-script', FLAREP_URL . 'dist/main/flarep-media-new.js', ['wp-i18n'], FLAREP_VERSION, true);
+        wp_enqueue_script('flarep-media-new-script', FLAREP_URL . 'dist/main/flarep-media-new.js', ['wp-i18n'], FLAREP_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
         wp_localize_script('flarep-media-new-script', 'flarepConfig', ['pluginUrl' => FLAREP_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG)]);
         wp_set_script_translations('flarep-media-new-script', 'flare-press', FLAREP_PATH . 'languages');
     }
 
     if (Utils::isFpOptionsPage()) {
-        wp_enqueue_script('flarep-options-script', FLAREP_URL . 'dist/main/flarep-options.js', ['wp-i18n'], FLAREP_VERSION, true);
+        wp_enqueue_script('flarep-options-script', FLAREP_URL . 'dist/main/flarep-options.js', ['wp-i18n'], FLAREP_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
         wp_localize_script('flarep-options-script', 'flarepConfig', ['pluginUrl' => FLAREP_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'testConnectionNonce' => wp_create_nonce('flarep_test_connection'), 'restNonce' => wp_create_nonce('wp_rest'), 'restUrl' => rest_url('flare-press/v1/')]);
         wp_set_script_translations('flarep-options-script', 'flare-press', FLAREP_PATH . 'languages');
     }
 
     if (Utils::isFpMigratePage()) {
-        wp_enqueue_script('flarep-migrate-script', FLAREP_URL . 'dist/main/flarep-migrate.js', ['wp-i18n'], FLAREP_VERSION, true);
+        wp_enqueue_script('flarep-migrate-script', FLAREP_URL . 'dist/main/flarep-migrate.js', ['wp-i18n'], FLAREP_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
         wp_localize_script('flarep-migrate-script', 'flarepMigrateConfig', [
             'ajaxUrl'        => admin_url('admin-ajax.php'),
             'nonce'          => wp_create_nonce('flarep_migrate'),
@@ -749,15 +750,10 @@ function flarep_admin_print_footer_scripts(): void
     }
 
     if ((Utils::isPostEditPage() || Utils::isAdminPage('post-new.php') || Utils::isAdminPage('site-editor.php')) && !Utils::isMediaEditPage()) {
-        wp_enqueue_script('flarep-post-script', FLAREP_URL . 'dist/main/flarep-post.js', ['wp-i18n'], FLAREP_VERSION, true);
+        wp_enqueue_script('flarep-post-script', FLAREP_URL . 'dist/main/flarep-post.js', ['wp-i18n'], FLAREP_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
         wp_localize_script('flarep-post-script', 'flarepConfig', ['pluginUrl' => FLAREP_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'defaultVariant' => get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, ''), 'variantOptions' => OptionController::getVariantOptions(), 'accountHash' => OptionController::getAccountHash(), 'restUrl' => rest_url('flare-press/v1/')]);
         wp_set_script_translations('flarep-post-script', 'flare-press', FLAREP_PATH . 'languages');
     }
-}
-
-function flarep_admin_enqueue_scripts(): void
-{
-    wp_enqueue_style('flarep-main-style', FLAREP_URL . 'dist/css/flarep-main.css', [], FLAREP_VERSION);
 }
 
 function flarep_pre_delete_attachment(WP_Post|false|null $delete, WP_Post $post, bool $forceDelete): WP_Post|false|null

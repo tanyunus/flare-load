@@ -10,8 +10,8 @@ defined('ABSPATH') || exit;
  *   - 2500 posts each with a standard local WordPress attachment
  *
  * Usage (from WordPress root):
- *   wp eval-file wp-content/plugins/flare-press/tools/fp-seed.php
- *   wp eval-file wp-content/plugins/flare-press/tools/fp-seed.php cleanup
+ *   wp eval-file wp-content/plugins/flare-press/tools/flarep-seed.php
+ *   wp eval-file wp-content/plugins/flare-press/tools/flarep-seed.php cleanup
  *
  * Cleanup deletes seeded WP posts/attachments, local files,
  * and the corresponding Cloudflare Images.
@@ -39,7 +39,7 @@ function flarep_seed_run(): void
     }
 
     $uploadDir = wp_upload_dir();
-    $seedDir   = $uploadDir['basedir'] . '/fp-seed';
+    $seedDir   = $uploadDir['basedir'] . '/flarep-seed';
 
     if (!wp_mkdir_p($seedDir)) {
         WP_CLI::error("Could not create seed directory: {$seedDir}");
@@ -54,7 +54,7 @@ function flarep_seed_run(): void
     $bar = WP_CLI\Utils\make_progress_bar('CF uploads', FLAREP_SEED_CF);
 
     for ($i = 1; $i <= FLAREP_SEED_CF; $i++) {
-        $filename = "fp-seed-cf-{$i}.jpg";
+        $filename = "flarep-seed-cf-{$i}.jpg";
 
         try {
             $result = \FlarePress\Api\CloudflareImagesApi::uploadImage($samplePath, $filename);
@@ -67,7 +67,7 @@ function flarep_seed_run(): void
 
         $cfId      = $result['result']['id'];
         $cfBaseUrl = "https://imagedelivery.net/{$accountHash}/{$cfId}";
-        $thumbPath = flarep_seed_make_thumb($samplePath, $seedDir, "fp-seed-cf-thumb-{$i}.jpg");
+        $thumbPath = flarep_seed_make_thumb($samplePath, $seedDir, "flarep-seed-cf-thumb-{$i}.jpg");
 
         $postId = flarep_seed_insert([
             'post_title'   => "FP Seed CF Post #{$i}",
@@ -143,15 +143,15 @@ function flarep_seed_run(): void
     WP_CLI::log('Phase 2/2 — Creating ' . FLAREP_SEED_LOCAL . ' local-upload posts…');
     $bar = WP_CLI\Utils\make_progress_bar('Local uploads', FLAREP_SEED_LOCAL);
 
-    $localDir = $uploadDir['basedir'] . '/fp-seed-local';
-    $localUrl = $uploadDir['baseurl'] . '/fp-seed-local';
+    $localDir = $uploadDir['basedir'] . '/flarep-seed-local';
+    $localUrl = $uploadDir['baseurl'] . '/flarep-seed-local';
 
     if (!wp_mkdir_p($localDir)) {
         WP_CLI::error("Could not create local seed directory: {$localDir}");
     }
 
     for ($i = 1; $i <= FLAREP_SEED_LOCAL; $i++) {
-        $filename = "fp-seed-local-{$i}.jpg";
+        $filename = "flarep-seed-local-{$i}.jpg";
         $filePath = $localDir . '/' . $filename;
         $fileUrl  = $localUrl . '/' . $filename;
 
@@ -195,7 +195,7 @@ function flarep_seed_run(): void
         wp_update_attachment_metadata($attachmentId, [
             'width'    => 100,
             'height'   => 100,
-            'file'     => 'fp-seed-local/' . $filename,
+            'file'     => 'flarep-seed-local/' . $filename,
             'filesize' => filesize($filePath),
             'sizes'    => [],
         ]);
@@ -257,7 +257,7 @@ function flarep_seed_cleanup(): void
     $bar->finish();
 
     $uploadDir = wp_upload_dir();
-    foreach (['fp-seed', 'fp-seed-local'] as $dir) {
+    foreach (['flarep-seed', 'flarep-seed-local'] as $dir) {
         $path = $uploadDir['basedir'] . '/' . $dir;
         if (is_dir($path)) {
             flarep_seed_rmdir($path);
@@ -306,7 +306,7 @@ function flarep_seed_make_thumb(string $src, string $dir, string $name): string|
  */
 function flarep_seed_sample_image(string $dir): string
 {
-    $path = $dir . '/fp-seed-sample.jpg';
+    $path = $dir . '/flarep-seed-sample.jpg';
     if (file_exists($path)) {
         return $path;
     }

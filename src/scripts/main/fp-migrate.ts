@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 
-declare const fpMigrateConfig: {
+declare const flarepMigrateConfig: {
     ajaxUrl: string;
     nonce: string;
     defaultVariant: string;
@@ -50,7 +50,7 @@ interface ProcessResult {
 
 class FpMigrateWizard {
     private root: HTMLElement;
-    private variant: string = fpMigrateConfig.defaultVariant;
+    private variant: string = flarepMigrateConfig.defaultVariant;
     private scope: Scope = 'all';
     private deleteFromCF: boolean = false;
     private selectedIds: number[] = [];
@@ -75,7 +75,7 @@ class FpMigrateWizard {
     private ajax<T>(action: string, data: Record<string, unknown> = {}): Promise<T> {
         const form = new FormData();
         form.append('action', action);
-        form.append('nonce', fpMigrateConfig.nonce);
+        form.append('nonce', flarepMigrateConfig.nonce);
         for (const [k, v] of Object.entries(data)) {
             if (Array.isArray(v)) {
                 (v as unknown[]).forEach(item => form.append(k + '[]', String(item)));
@@ -83,7 +83,7 @@ class FpMigrateWizard {
                 form.append(k, String(v ?? ''));
             }
         }
-        return fetch(fpMigrateConfig.ajaxUrl, { method: 'POST', body: form })
+        return fetch(flarepMigrateConfig.ajaxUrl, { method: 'POST', body: form })
             .then(r => r.json())
             .then(r => {
                 if (!r.success) throw new Error(r.data?.message || __('Request failed', 'flare-press'));
@@ -174,7 +174,7 @@ class FpMigrateWizard {
     }
 
     private renderConfig(): void {
-        const variants   = fpMigrateConfig.variantOptions;
+        const variants   = flarepMigrateConfig.variantOptions;
         const noVariants = variants.length === 0;
         const variantOpts = noVariants
             ? `<option value="">${__('No variants configured', 'flare-press')}</option>`
@@ -557,9 +557,9 @@ class FpMigrateWizard {
                 </div>
                 <p class="submit">
                     ${retryBtn}
-                    <a href="${fpMigrateConfig.logsUrl}" class="button">${__('View Log', 'flare-press')}</a>
+                    <a href="${flarepMigrateConfig.logsUrl}" class="button">${__('View Log', 'flare-press')}</a>
                     &nbsp;
-                    <a href="${fpMigrateConfig.migrateUrl}" class="button">${__('Run Again', 'flare-press')}</a>
+                    <a href="${flarepMigrateConfig.migrateUrl}" class="button">${__('Run Again', 'flare-press')}</a>
                 </p>
             </div>
         `);

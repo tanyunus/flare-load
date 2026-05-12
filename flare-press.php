@@ -719,25 +719,25 @@ function flarep_admin_print_footer_scripts(): void
 {
     if (Utils::isAdminPage('upload.php') && (empty($_GET) || sanitize_key(wp_unslash($_GET['mode'] ?? '')) === 'grid')) {
         wp_enqueue_script('flarep-media-library-grid-script', FLARE_PRESS_URL . 'dist/main/fp-media-library-grid.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('flarep-media-library-grid-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'locationFilterLabels' => ['all' => __('All locations', 'flare-press'), 'cloudflare' => __('Uploaded to Cloudflare', 'flare-press'), 'server' => __('This server', 'flare-press')]]);
+        wp_localize_script('flarep-media-library-grid-script', 'flarepConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'locationFilterLabels' => ['all' => __('All locations', 'flare-press'), 'cloudflare' => __('Uploaded to Cloudflare', 'flare-press'), 'server' => __('This server', 'flare-press')]]);
         wp_set_script_translations('flarep-media-library-grid-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
     if (Utils::isAdminPage('media-new.php')) {
         wp_enqueue_script('flarep-media-new-script', FLARE_PRESS_URL . 'dist/main/fp-media-new.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('flarep-media-new-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG)]);
+        wp_localize_script('flarep-media-new-script', 'flarepConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG)]);
         wp_set_script_translations('flarep-media-new-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
     if (Utils::isFpOptionsPage()) {
         wp_enqueue_script('flarep-options-script', FLARE_PRESS_URL . 'dist/main/fp-options.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('flarep-options-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'testConnectionNonce' => wp_create_nonce('flarep_test_connection'), 'restNonce' => wp_create_nonce('wp_rest'), 'restUrl' => rest_url('flare-press/v1/')]);
+        wp_localize_script('flarep-options-script', 'flarepConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'testConnectionNonce' => wp_create_nonce('flarep_test_connection'), 'restNonce' => wp_create_nonce('wp_rest'), 'restUrl' => rest_url('flare-press/v1/')]);
         wp_set_script_translations('flarep-options-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 
     if (Utils::isFpMigratePage()) {
         wp_enqueue_script('flarep-migrate-script', FLARE_PRESS_URL . 'dist/main/fp-migrate.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('flarep-migrate-script', 'fpMigrateConfig', [
+        wp_localize_script('flarep-migrate-script', 'flarepMigrateConfig', [
             'ajaxUrl'        => admin_url('admin-ajax.php'),
             'nonce'          => wp_create_nonce('flarep_migrate'),
             'defaultVariant' => get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, ''),
@@ -750,7 +750,7 @@ function flarep_admin_print_footer_scripts(): void
 
     if ((Utils::isPostEditPage() || Utils::isAdminPage('post-new.php') || Utils::isAdminPage('site-editor.php')) && !Utils::isMediaEditPage()) {
         wp_enqueue_script('flarep-post-script', FLARE_PRESS_URL . 'dist/main/fp-post.js', ['wp-i18n'], FLARE_PRESS_VERSION, true);
-        wp_localize_script('flarep-post-script', 'fpConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'defaultVariant' => get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, ''), 'variantOptions' => OptionController::getVariantOptions(), 'accountHash' => OptionController::getAccountHash(), 'restUrl' => rest_url('flare-press/v1/')]);
+        wp_localize_script('flarep-post-script', 'flarepConfig', ['pluginUrl' => FLARE_PRESS_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'defaultVariant' => get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, ''), 'variantOptions' => OptionController::getVariantOptions(), 'accountHash' => OptionController::getAccountHash(), 'restUrl' => rest_url('flare-press/v1/')]);
         wp_set_script_translations('flarep-post-script', 'flare-press', FLARE_PRESS_PATH . 'languages');
     }
 }

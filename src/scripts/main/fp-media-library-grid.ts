@@ -21,7 +21,7 @@ function registerLocationAjaxPrefilter(): void {
 function addLocationFilter(): void {
     if (!wp?.media?.view?.AttachmentsBrowser) return;
 
-    const labels          = (window as any).fpConfig?.locationFilterLabels ?? {};
+    const labels          = (window as any).flarepConfig?.locationFilterLabels ?? {};
     const allLabel        = (labels.all        as string) || __('All locations', 'flare-press');
     const cloudflareLabel = (labels.cloudflare as string) || __('Uploaded to Cloudflare', 'flare-press');
     const serverLabel     = (labels.server     as string) || __('This server', 'flare-press');

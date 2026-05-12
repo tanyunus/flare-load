@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const body = new FormData();
             body.append('action', 'flarep_test_connection');
-            body.append('nonce', (window as any).fpConfig?.testConnectionNonce ?? '');
+            body.append('nonce', (window as any).flarepConfig?.testConnectionNonce ?? '');
 
             const apiTokenInput = document.querySelector<HTMLInputElement>('[data-field-name="flarep_cf_api_token"]');
             if (apiTokenInput && !apiTokenInput.disabled && apiTokenInput.value) {
@@ -84,7 +84,7 @@ async function syncVariants(): Promise<VariantOption[] | false> {
         return false;
     }
 
-    const url = (window.fpConfig?.restUrl ?? '/wp-json/flare-press/v1/') + 'sync-variants';
+    const url = (window.flarepConfig?.restUrl ?? '/wp-json/flare-press/v1/') + 'sync-variants';
 
     try {
         const response = await fetch(url, {

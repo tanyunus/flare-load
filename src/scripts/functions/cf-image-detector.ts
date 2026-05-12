@@ -43,8 +43,8 @@ function processCfImageResponse(response: any): void {
 function markAttachmentElement(attachmentId: string | number): void {
     const element = document.querySelector<HTMLElement>(`li.attachment[data-id="${attachmentId}"]`);
 
-    if (element && !element.classList.contains('fp-cf-badge')) {
-        element.classList.add('fp-cf-badge');
+    if (element && !element.classList.contains('flarep-cf-badge')) {
+        element.classList.add('flarep-cf-badge');
     }
 }
 

@@ -10,7 +10,7 @@ function addSwitcherToUploadView(mediaModal: HTMLElement, uploadManager: UploadM
         return;
     }
 
-    const switcherElement = uploadManager.createSwitcherElement('fp-media-modal-switcher');
+    const switcherElement = uploadManager.createSwitcherElement('flarep-media-modal-switcher');
 
     selectFilesButton.after(switcherElement);
 

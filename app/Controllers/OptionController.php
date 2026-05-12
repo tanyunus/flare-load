@@ -47,7 +47,7 @@ class OptionController
                 'manage_options',
                 Constants::DASHBOARD_MENU_SLUG,
                 [$this, 'fpAdminDashboardView'],
-                FLARE_PRESS_URL . 'dist/images/fp_dashboard_icon.svg',
+                FLAREP_URL . 'dist/images/flarep_dashboard_icon.svg',
                 80
         );
     }
@@ -471,10 +471,10 @@ class OptionController
     {
         if ($columnName === Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID && AttachmentController::getCloudflareIdOfAttachment($attachmentId)) {
             echo '<span
-                data-fp-file-name="' . esc_attr(AttachmentController::getAttachmentFileName($attachmentId)) . '"
-                data-fp-url="' . esc_attr(get_the_guid($attachmentId)) . '"
+                data-flarep-file-name="' . esc_attr(AttachmentController::getAttachmentFileName($attachmentId)) . '"
+                data-flarep-url="' . esc_attr(get_the_guid($attachmentId)) . '"
                 >
-                <img title="' . esc_attr(__('Uploaded to Cloudflare', 'flare-press')) . '" alt="Cloudflare logo" height="18" src="' . esc_url(FLARE_PRESS_URL . 'dist/images/cf_logo.png') . '"></span>';
+                <img title="' . esc_attr(__('Uploaded to Cloudflare', 'flare-press')) . '" alt="Cloudflare logo" height="18" src="' . esc_url(FLAREP_URL . 'dist/images/cf_logo.png') . '"></span>';
         } else {
             echo esc_html(__('This server', 'flare-press'));
         }

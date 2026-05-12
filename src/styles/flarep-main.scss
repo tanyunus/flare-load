@@ -1,10 +1,10 @@
-.fp-upload-switcher {
+.flarep-upload-switcher {
   margin-left: 15px;
   cursor: pointer;
   user-select: none;
 }
 
-.fp-cf-upload-button {
+.flarep-cf-upload-button {
   display: inline-flex !important;
   align-items: center;
   gap: 8px;
@@ -15,7 +15,7 @@
   }
 }
 
-.fp-media-modal-switcher {
+.flarep-media-modal-switcher {
   display: block;
   margin-left: 0;
   margin-top: 24px;
@@ -23,9 +23,9 @@
 
 .media-frame {
   &.mode-grid {
-    .fp-cf-badge.attachment.details,
-    .fp-cf-badge.attachment,
-    .fp-cf-badge.selected.attachment {
+    .flarep-cf-badge.attachment.details,
+    .flarep-cf-badge.attachment,
+    .flarep-cf-badge.selected.attachment {
       &:focus {
         box-shadow: inset 0 0 0 2px #f78100;
       }
@@ -33,7 +33,7 @@
   }
 }
 
-.fp-cf-badge {
+.flarep-cf-badge {
   & > .attachment-preview::after {
     content: "";
     position: absolute;
@@ -57,46 +57,46 @@ body.media-new-php {
 }
 
 
-.fp-variant-sync-button {
+.flarep-variant-sync-button {
   display: flex !important;
   column-gap: 4px;
   align-items: center;
 }
 
-.fp-sync-button-and-spinner {
+.flarep-sync-button-and-spinner {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.fp-sync-button-and-spinner {
+.flarep-sync-button-and-spinner {
   & > .spinner {
     margin-top: 0;
   }
 }
 
-.fp-api-token-field-label {
+.flarep-api-token-field-label {
   display: flex;
   column-gap: 4px;
   align-items: center;
 }
 
-.fp-change-api-token-button {
+.flarep-change-api-token-button {
   height: 30px;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
 }
 
-.fp-switcher-for-block-placeholder {
+.flarep-switcher-for-block-placeholder {
   box-shadow-color: #f78100;
 }
 
-.fp-log-viewer-textarea {
+.flarep-log-viewer-textarea {
   width: 100%;
 }
 
-.fp-header {
+.flarep-header {
   margin-bottom: 50px;
   margin-top: 50px;
   display: flex;
@@ -114,36 +114,36 @@ body.media-new-php {
 
 // ── Migrate Wizard ────────────────────────────────────────────────────────────
 
-.fp-migrate-wizard {
+.flarep-migrate-wizard {
   max-width: 900px;
 }
 
-.fp-migrate-step-title {
+.flarep-migrate-step-title {
   font-size: 1.4em;
   margin-top: 0;
 }
 
-.fp-migrate-loading {
+.flarep-migrate-loading {
   color: #666;
   font-style: italic;
 }
 
-.fp-migrate-danger-note {
+.flarep-migrate-danger-note {
   color: #cc1818 !important;
 }
 
-.fp-migrate-resume-prompt {
+.flarep-migrate-resume-prompt {
   padding: 12px 16px;
 }
 
-.fp-migrate-cards {
+.flarep-migrate-cards {
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
   margin: 20px 0;
 }
 
-.fp-migrate-card {
+.flarep-migrate-card {
   background: #fff;
   border: 1px solid #ddd;
   border-top: 3px solid #ddd;
@@ -155,33 +155,33 @@ body.media-new-php {
   flex-direction: column;
   align-items: center;
 
-  &.fp-card-green { border-top-color: #46b450; }
-  &.fp-card-blue  { border-top-color: #00a0d2; }
-  &.fp-card-gray  { border-top-color: #999;    }
-  &.fp-card-red   { border-top-color: #dc3232; }
+  &.flarep-card-green { border-top-color: #46b450; }
+  &.flarep-card-blue  { border-top-color: #00a0d2; }
+  &.flarep-card-gray  { border-top-color: #999;    }
+  &.flarep-card-red   { border-top-color: #dc3232; }
 }
 
-.fp-migrate-card-num {
+.flarep-migrate-card-num {
   font-size: 2em;
   font-weight: 600;
   line-height: 1;
 }
 
-.fp-migrate-card-lbl {
+.flarep-migrate-card-lbl {
   font-size: 0.85em;
   color: #555;
   margin-top: 6px;
 }
 
-.fp-migrate-select-all-label {
+.flarep-migrate-select-all-label {
   display: inline-block;
   margin-bottom: 8px;
 }
 
-.fp-migrate-image-table {
+.flarep-migrate-image-table {
   margin-bottom: 16px;
 
-  .fp-migrate-thumb img {
+  .flarep-migrate-thumb img {
     width: 48px;
     height: 48px;
     object-fit: cover;
@@ -189,77 +189,77 @@ body.media-new-php {
     display: block;
   }
 
-  .fp-migrate-select-check {
+  .flarep-migrate-select-check {
     width: 32px;
     text-align: center;
   }
 }
 
-.fp-migrate-pagination {
+.flarep-migrate-pagination {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
 }
 
-.fp-page-info {
+.flarep-page-info {
   color: #646970;
   font-size: 13px;
 }
 
-.fp-muted {
+.flarep-muted {
   color: #a7aaad;
 }
 
-.fp-migrate-selected-count {
+.flarep-migrate-selected-count {
   color: #646970;
   font-size: 13px;
   margin-bottom: 0;
 }
 
-.fp-migrate-badge {
+.flarep-migrate-badge {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 3px;
   font-size: 0.8em;
   font-weight: 500;
 
-  &.fp-badge-download_needed { background: #edfaef; color: #1a6b1f; }
-  &.fp-badge-local_copy      { background: #e5f5fb; color: #006799; }
-  &.fp-badge-no_variant      { background: #f0f0f0; color: #666;    }
+  &.flarep-badge-download_needed { background: #edfaef; color: #1a6b1f; }
+  &.flarep-badge-local_copy      { background: #e5f5fb; color: #006799; }
+  &.flarep-badge-no_variant      { background: #f0f0f0; color: #666;    }
 }
 
-.fp-migrate-progress-wrap {
+.flarep-migrate-progress-wrap {
   margin: 20px 0;
 }
 
-.fp-migrate-progress-bar {
+.flarep-migrate-progress-bar {
   height: 16px;
   background: #e0e0e0;
   border-radius: 8px;
   overflow: hidden;
 }
 
-.fp-migrate-progress-fill {
+.flarep-migrate-progress-fill {
   height: 100%;
   background: #46b450;
   border-radius: 8px;
   transition: width 0.3s ease;
 }
 
-.fp-migrate-progress-label {
+.flarep-migrate-progress-label {
   margin-top: 6px;
   color: #555;
   font-size: 0.9em;
 }
 
-.fp-migrate-current-item {
+.flarep-migrate-current-item {
   color: #888;
   font-size: 0.85em;
   margin-top: 4px;
 }
 
-.fp-migrate-log {
+.flarep-migrate-log {
   max-height: 200px;
   overflow-y: auto;
   border: 1px solid #ddd;
@@ -268,12 +268,12 @@ body.media-new-php {
   border-radius: 3px;
   margin-top: 16px;
 
-  .fp-log-line {
+  .flarep-log-line {
     margin: 2px 0;
     font-size: 0.85em;
     font-family: monospace;
   }
 
-  .fp-log-success { color: #1a6b1f; }
-  .fp-log-error   { color: #cc1818; }
+  .flarep-log-success { color: #1a6b1f; }
+  .flarep-log-error   { color: #cc1818; }
 }

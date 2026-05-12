@@ -65,7 +65,7 @@ class Utils
     public static function renderTemplate(string $template, array $data = []): void
     {
         extract($data);
-        $file = FLARE_PRESS_PATH . 'app/Views/' . $template . '.php';
+        $file = FLAREP_PATH . 'app/Views/' . $template . '.php';
 
         if (file_exists($file)) {
             include $file;

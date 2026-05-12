@@ -95,5 +95,5 @@ class Constants
     public const LOG_SETTINGS_GROUP_NAME = 'flarep_log_field_group';
 
     // Other
-    public const FP_TRANSLATION_DOMAIN = 'flare-press';
+    public const FLAREP_TRANSLATION_DOMAIN = 'flare-press';
 }

@@ -34,7 +34,7 @@ function addLocationFilter(): void {
         const browser = this;
 
         const LocationFilter = wp.media.view.AttachmentFilters.extend({
-            id: 'fp-location-filter',
+            id: 'flarep-location-filter',
 
             createFilters() {
                 this.filters = {
@@ -53,7 +53,7 @@ function addLocationFilter(): void {
             },
         });
 
-        this.toolbar.set('fp-location-filter', new LocationFilter({
+        this.toolbar.set('flarep-location-filter', new LocationFilter({
             controller: this.controller,
             model:      this.collection.props,
             priority:   -75,

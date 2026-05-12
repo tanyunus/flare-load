@@ -51,12 +51,17 @@ class MigrationController
                 $parentId = $parent ? (int) $parent->ID : 0;
             }
 
+            if (!$parent) {
+                $parent   = self::findPostUsingAttachmentId($id);
+                $parentId = $parent ? (int) $parent->ID : 0;
+            }
+
             $result['images'][] = [
                 'id'           => $id,
                 'title'        => get_the_title($id) ?: self::getOriginalFilename($id),
                 'thumbnail'    => self::getThumbnailUrl($id),
                 'status'       => $status,
-                'parent_title' => $parent ? $parent->post_title : '',
+                'parent_title' => $parent ? ($parent->post_title ?: '#' . $parent->ID) : '',
             ];
         }
 
@@ -97,13 +102,18 @@ class MigrationController
                 $parentId = $parent ? (int) $parent->ID : 0;
             }
 
+            if (!$parent) {
+                $parent   = self::findPostUsingAttachmentId($id);
+                $parentId = $parent ? (int) $parent->ID : 0;
+            }
+
             $images[] = [
                 'id'           => $id,
                 'title'        => get_the_title($id) ?: self::getOriginalFilename($id),
                 'thumbnail'    => self::getThumbnailUrl($id),
                 'status'       => $status,
                 'parent_id'    => $parentId,
-                'parent_title' => $parent ? $parent->post_title : '',
+                'parent_title' => $parent ? ($parent->post_title ?: '#' . $parent->ID) : '',
                 'parent_url'   => $parentId ? (string) get_edit_post_link($parentId, 'raw') : '',
             ];
         }
@@ -320,6 +330,38 @@ class MigrationController
         return $row ? get_post((int) $row->ID) : null;
     }
 
+    /**
+     * Fallback: finds a post that references this attachment by its WordPress image class
+     * (wp-image-{id}) in post_content, or has it set as a featured image (_thumbnail_id).
+     * Catches cases where the image was inserted before the CF upload, so post_content
+     * holds the local URL rather than the CF delivery URL.
+     */
+    private static function findPostUsingAttachmentId(int $attachmentId): ?\WP_Post
+    {
+        global $wpdb;
+
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT p.ID FROM {$wpdb->posts} p
+                 WHERE (
+                     p.post_content LIKE %s
+                     OR EXISTS (
+                         SELECT 1 FROM {$wpdb->postmeta} pm
+                         WHERE pm.post_id = p.ID
+                           AND pm.meta_key = '_thumbnail_id'
+                           AND pm.meta_value = %s
+                     )
+                 )
+                 AND p.post_status NOT IN ('auto-draft', 'trash')
+                 LIMIT 1",
+                '%' . $wpdb->esc_like('wp-image-' . $attachmentId) . '%',
+                (string) $attachmentId
+            )
+        );
+
+        return $row ? get_post((int) $row->ID) : null;
+    }
+
     private static function resolveAttachmentIds(string $scope, array $selectedIds): array
     {
         if ($scope === 'selected') {
@@ -354,7 +396,10 @@ class MigrationController
                         return true;
                     }
                     $cfId = AttachmentController::getCloudflareIdOfAttachment($id);
-                    return $cfId && self::findPostUsingCfImage($cfId) !== null;
+                    if ($cfId && self::findPostUsingCfImage($cfId) !== null) {
+                        return true;
+                    }
+                    return self::findPostUsingAttachmentId($id) !== null;
                 }
             ));
         }

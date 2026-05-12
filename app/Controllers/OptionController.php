@@ -241,6 +241,7 @@ class OptionController
             [
                 'sanitize_callback' => function ($input) {
                     // Explicit remove action submitted via checkbox
+                    // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified by WordPress core via options.php before sanitize_callback is invoked.
                     $action = sanitize_key(wp_unslash($_POST['flarep_cf_signing_key_action'] ?? 'keep'));
                     if ($action === 'remove') {
                         return '';

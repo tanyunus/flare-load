@@ -267,6 +267,7 @@ class MigrationController
 
         $cfUrlPrefix = 'imagedelivery.net/' . $accountHash . '/' . $cfId . '/';
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- LIKE on post_content requires a direct query; result not cached as it changes per migration step.
         $posts = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT ID, post_content FROM {$wpdb->posts}
@@ -289,6 +290,7 @@ class MigrationController
             $newContent = preg_replace($pattern, $newUrl, $post->post_content);
 
             if ($newContent !== null && $newContent !== $post->post_content) {
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Bulk post_content URL replacement; wp_update_post() would fire unwanted hooks on each row.
                 $wpdb->update(
                     $wpdb->posts,
                     ['post_content' => $newContent],
@@ -317,6 +319,7 @@ class MigrationController
 
         $prefix = 'imagedelivery.net/' . $accountHash . '/' . $cfId . '/';
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- LIKE on post_content has no WP_Query equivalent; result is used immediately and not worth caching.
         $row = $wpdb->get_row(
             $wpdb->prepare(
                 "SELECT ID FROM {$wpdb->posts}
@@ -340,6 +343,7 @@ class MigrationController
     {
         global $wpdb;
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Subquery joining posts+postmeta cannot be expressed in WP_Query; result used immediately.
         $row = $wpdb->get_row(
             $wpdb->prepare(
                 "SELECT p.ID FROM {$wpdb->posts} p
@@ -375,6 +379,7 @@ class MigrationController
             'post_type'      => 'attachment',
             'posts_per_page' => -1,
             'fields'         => 'ids',
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Required to find CF attachments by meta key; no alternative.
             'meta_query'     => [
                 [
                     'key'     => Constants::UPLOADED_IMAGE_CF_ID_NAME,

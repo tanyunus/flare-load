@@ -16,6 +16,7 @@ class Logger
         $updateResult = self::updateLogFile($dateTime . $message);
 
         if(!$updateResult) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Fallback when plugin log file is not writable; no other reporting channel available.
             error_log('Unable to update log file.');
         }
     }

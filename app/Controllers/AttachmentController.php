@@ -89,6 +89,7 @@ class AttachmentController
      */
     private static function shouldUploadToCloudflare(): bool
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified by WordPress core media upload handler before this filter runs.
         return !empty(sanitize_key(wp_unslash($_POST[Constants::UPLOAD_TO_CF_INDICATOR] ?? '')));
     }
 
@@ -285,6 +286,7 @@ class AttachmentController
     {
         global $wpdb;
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- guid update; wp_update_post() fires revision/date hooks that must not run during attachment migration.
         if (!$wpdb->update($wpdb->posts, ['guid' => $newGuid], ['ID' => $attachmentId])) {
             throw new Exception("[ATTACHMENT] Unable to update attachment guid");
         }

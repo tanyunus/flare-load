@@ -57,6 +57,7 @@ function flarep_backfill_cf_post_meta(): void {
         'post_type'      => 'attachment',
         'posts_per_page' => -1,
         'fields'         => 'ids',
+        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Required to find attachments not yet having the CF meta key.
         'meta_query'     => [[
             'key'     => Constants::UPLOADED_IMAGE_CF_ID_NAME,
             'compare' => 'NOT EXISTS',
@@ -633,6 +634,7 @@ function flarep_restrict_manage_media_location(string $postType): void
         return;
     }
 
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading $_GET for filter dropdown state; no data is modified.
     $selected = sanitize_key(wp_unslash($_GET['flarep_location'] ?? ''));
     ?>
     <select name="flarep_location">
@@ -651,9 +653,11 @@ function flarep_pre_get_posts_location_filter(WP_Query $query): void
         return;
     }
 
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading $_GET for media library filter; no data is modified.
     $location = sanitize_key(wp_unslash($_GET['flarep_location'] ?? ''));
 
     if ($location === 'cloudflare') {
+        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Required to filter media library by CF meta key; no alternative without direct DB.
         $query->set('meta_query', [
             'relation' => 'AND',
             [
@@ -667,6 +671,7 @@ function flarep_pre_get_posts_location_filter(WP_Query $query): void
             ],
         ]);
     } elseif ($location === 'server') {
+        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
         $query->set('meta_query', [[
             'key'     => Constants::UPLOADED_IMAGE_CF_ID_NAME,
             'compare' => 'NOT EXISTS',
@@ -676,9 +681,11 @@ function flarep_pre_get_posts_location_filter(WP_Query $query): void
 
 function flarep_ajax_query_attachments_args(array $query): array
 {
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading AJAX query parameter for media filter; actual media queries are handled by WordPress core.
     $location = sanitize_key($_REQUEST['query']['flarep_location'] ?? '');
 
     if ($location === 'cloudflare') {
+        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Required to filter AJAX media query by CF meta key.
         $query['meta_query'] = [
             'relation' => 'AND',
             [
@@ -692,6 +699,7 @@ function flarep_ajax_query_attachments_args(array $query): array
             ],
         ];
     } elseif ($location === 'server') {
+        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
         $query['meta_query'] = [[
             'key'     => Constants::UPLOADED_IMAGE_CF_ID_NAME,
             'compare' => 'NOT EXISTS',
@@ -718,6 +726,7 @@ function flarep_admin_enqueue_scripts(): void
 {
     wp_enqueue_style('flarep-main-style', FLAREP_URL . 'dist/css/flarep-main.css', [], FLAREP_VERSION);
 
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading $_GET['mode'] for script routing only; no data is modified.
     if (Utils::isAdminPage('upload.php') && (empty($_GET) || sanitize_key(wp_unslash($_GET['mode'] ?? '')) === 'grid')) {
         wp_enqueue_script('flarep-media-library-grid-script', FLAREP_URL . 'dist/main/flarep-media-library-grid.js', ['wp-i18n'], FLAREP_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
         wp_localize_script('flarep-media-library-grid-script', 'flarepConfig', ['pluginUrl' => FLAREP_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'locationFilterLabels' => ['all' => __('All locations', 'flare-press'), 'cloudflare' => __('Uploaded to Cloudflare', 'flare-press'), 'server' => __('This server', 'flare-press')]]);

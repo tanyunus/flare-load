@@ -18,6 +18,7 @@ $flarep_cfIds = get_posts([
     'post_type'      => 'attachment',
     'posts_per_page' => -1,
     'fields'         => 'ids',
+    // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Required to find CF attachments during uninstall; no alternative.
     'meta_query'     => [
         [
             'key'     => Constants::UPLOADED_IMAGE_CF_ID_NAME,
@@ -40,6 +41,7 @@ foreach ($flarep_cfIds as $flarep_attachmentId) {
 
     if ($flarep_cfUrl) {
         // guid — canonical URL used by WordPress internally
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- guid update during uninstall; wp_update_post() fires hooks that depend on plugin being present.
         $wpdb->update($wpdb->posts, ['guid' => $flarep_cfUrl], ['ID' => $flarep_attachmentId], ['%s'], ['%d']);
 
         // _wp_attached_file — WordPress supports full HTTP URLs here;
@@ -85,6 +87,7 @@ delete_transient('flarep_backfill_v1_done');
 delete_transient('flarep_migration_state');
 
 // Per-user upload-error transients (pattern: flarep_upload_error_{user_id})
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Pattern-based transient deletion; delete_transient() requires exact keys which are unknown at uninstall time.
 $wpdb->query(
     "DELETE FROM {$wpdb->options}
      WHERE option_name LIKE '_transient_flarep_upload_error_%'

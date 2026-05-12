@@ -229,6 +229,7 @@ function flarep_seed_cleanup(): void
 {
     global $wpdb;
 
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Dev-only seed cleanup tool; direct query required to find all seeded posts by meta key.
     $ids = $wpdb->get_col(
         $wpdb->prepare(
             "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s",

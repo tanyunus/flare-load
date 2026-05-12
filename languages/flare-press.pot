@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-05-12T16:26:00+00:00\n"
+"POT-Creation-Date: 2026-05-12T17:19:55+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: FlarePress generate-pot.js\n"
 "X-Domain: flare-press\n"
@@ -285,6 +285,14 @@ msgstr ""
 
 #: src/scripts/main/flarep-migrate.ts
 msgid "This wizard downloads your Cloudflare Images back to your server and restores them as standard WordPress attachments."
+msgstr ""
+
+#: src/scripts/main/flarep-migrate.ts
+msgid "Before you start:"
+msgstr ""
+
+#: src/scripts/main/flarep-migrate.ts
+msgid "Close all post/page editor tabs in every browser window. If an editor containing a Cloudflare image is left open and the post is saved after migration completes, the Cloudflare image reference will be written back into that post."
 msgstr ""
 
 #: src/scripts/main/flarep-migrate.ts

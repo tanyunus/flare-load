@@ -13,4 +13,5 @@ tsconfig.json
 .idea/
 README.md
 assets/
+*.log
 languages/.gitkeep

@@ -595,7 +595,7 @@ function flarep_ajax_migrate_check_locks(): void
 
     global $wpdb;
 
-    $threshold = time() - 180;
+    $threshold = time() - 60;
 
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Real-time lock check; result must not be cached.
     $rows = $wpdb->get_results(

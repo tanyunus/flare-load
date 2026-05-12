@@ -259,16 +259,34 @@ class FlarepMigrateWizard {
                     <p><strong>${__('Open editor sessions detected', 'flare-press')}</strong></p>
                     <p>${__('The following posts are currently open in an editor. If they are saved after migration completes, Cloudflare image references may be written back.', 'flare-press')}</p>
                     <ul style="list-style:disc;margin-left:20px">${list}</ul>
-                    <p>${__('Please close these editor tabs before continuing.', 'flare-press')}</p>
+                    <p>${__('Please close these editor tabs, then click Re-check.', 'flare-press')}</p>
                     <p class="submit">
                         <button id="flarep-lock-back" class="button">${__('Go Back', 'flare-press')}</button>
                         &nbsp;
-                        <button id="flarep-lock-continue" class="button button-primary">${__('Continue Anyway', 'flare-press')}</button>
+                        <button id="flarep-lock-recheck" class="button button-primary">${__('Re-check', 'flare-press')}</button>
+                        &nbsp;
+                        <button id="flarep-lock-continue" class="button button-link">${__('Continue Anyway', 'flare-press')}</button>
                     </p>
                 </div>
             </div>
         `);
         this.on('#flarep-lock-back', 'click', () => this.renderConfig());
+        this.on('#flarep-lock-recheck', 'click', async () => {
+            let locked: Array<{ id: number; title: string }> = [];
+            try {
+                locked = await this.ajax<Array<{ id: number; title: string }>>('flarep_migrate_check_locks');
+            } catch { /* proceed if check fails */ }
+
+            if (locked.length > 0) {
+                this.renderLockedWarning(locked);
+            } else {
+                if (this.scope === 'selected') {
+                    this.renderSelectImages();
+                } else {
+                    this.renderAnalysis();
+                }
+            }
+        });
         this.on('#flarep-lock-continue', 'click', () => {
             if (this.scope === 'selected') {
                 this.renderSelectImages();

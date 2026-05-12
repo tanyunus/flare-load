@@ -154,10 +154,11 @@ function flarePressInit(): void
             return;
         }
 
-        add_action('wp_ajax_flarep_migrate_analyze',   'flarep_ajax_migrate_analyze');
-        add_action('wp_ajax_flarep_migrate_list',      'flarep_ajax_migrate_list');
-        add_action('wp_ajax_flarep_migrate_start',     'flarep_ajax_migrate_start');
-        add_action('wp_ajax_flarep_migrate_process',   'flarep_ajax_migrate_process');
+        add_action('wp_ajax_flarep_migrate_analyze',      'flarep_ajax_migrate_analyze');
+        add_action('wp_ajax_flarep_migrate_list',         'flarep_ajax_migrate_list');
+        add_action('wp_ajax_flarep_migrate_start',        'flarep_ajax_migrate_start');
+        add_action('wp_ajax_flarep_migrate_process',      'flarep_ajax_migrate_process');
+        add_action('wp_ajax_flarep_migrate_check_locks',  'flarep_ajax_migrate_check_locks');
         add_action('wp_ajax_flarep_migrate_get_state', 'flarep_ajax_migrate_get_state');
         add_action('wp_ajax_flarep_migrate_cancel',    'flarep_ajax_migrate_cancel');
         add_action('rest_api_init', 'flarep_rest_api_init');
@@ -582,6 +583,39 @@ function flarep_ajax_migrate_cancel(): void
 
     delete_transient('flarep_migration_state');
     wp_send_json_success();
+}
+
+function flarep_ajax_migrate_check_locks(): void
+{
+    check_ajax_referer('flarep_migrate', 'nonce');
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(null, 403);
+        return;
+    }
+
+    global $wpdb;
+
+    $threshold = time() - 180;
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Real-time lock check; result must not be cached.
+    $rows = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT p.ID, p.post_title
+             FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+             WHERE pm.meta_key = '_edit_lock'
+               AND CAST(SUBSTRING_INDEX(pm.meta_value, ':', 1) AS UNSIGNED) > %d
+               AND p.post_status NOT IN ('auto-draft', 'trash')",
+            $threshold
+        )
+    );
+
+    $locked = array_map(fn($r) => [
+        'id'    => (int) $r->ID,
+        'title' => $r->post_title !== '' ? $r->post_title : __('(no title)', 'flare-press'),
+    ], $rows);
+
+    wp_send_json_success($locked);
 }
 
 function flarep_ajax_test_connection(): void

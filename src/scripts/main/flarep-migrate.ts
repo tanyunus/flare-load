@@ -225,13 +225,51 @@ class FlarepMigrateWizard {
             </div>
         `);
 
-        this.on('#flarep-config-next', 'click', () => {
+        this.on('#flarep-config-next', 'click', async () => {
             const variantEl = this.root.querySelector<HTMLSelectElement>('#flarep-variant-select');
             const scopeEl   = this.root.querySelector<HTMLInputElement>('input[name="flarep-scope"]:checked');
             const deleteEl  = this.root.querySelector<HTMLInputElement>('#flarep-delete-cf');
             this.variant      = variantEl?.value ?? '';
             this.scope        = (scopeEl?.value ?? 'all') as Scope;
             this.deleteFromCF = deleteEl?.checked ?? false;
+
+            let locked: Array<{ id: number; title: string }> = [];
+            try {
+                locked = await this.ajax<Array<{ id: number; title: string }>>('flarep_migrate_check_locks');
+            } catch { /* proceed if check fails */ }
+
+            if (locked.length > 0) {
+                this.renderLockedWarning(locked);
+                return;
+            }
+
+            if (this.scope === 'selected') {
+                this.renderSelectImages();
+            } else {
+                this.renderAnalysis();
+            }
+        });
+    }
+
+    private renderLockedWarning(locked: Array<{ id: number; title: string }>): void {
+        const list = locked.map(p => `<li>${this.escHtml(p.title)}</li>`).join('');
+        this.render(`
+            <div class="flarep-migrate-wizard">
+                <div class="notice notice-warning inline">
+                    <p><strong>${__('Open editor sessions detected', 'flare-press')}</strong></p>
+                    <p>${__('The following posts are currently open in an editor. If they are saved after migration completes, Cloudflare image references may be written back.', 'flare-press')}</p>
+                    <ul style="list-style:disc;margin-left:20px">${list}</ul>
+                    <p>${__('Please close these editor tabs before continuing.', 'flare-press')}</p>
+                    <p class="submit">
+                        <button id="flarep-lock-back" class="button">${__('Go Back', 'flare-press')}</button>
+                        &nbsp;
+                        <button id="flarep-lock-continue" class="button button-primary">${__('Continue Anyway', 'flare-press')}</button>
+                    </p>
+                </div>
+            </div>
+        `);
+        this.on('#flarep-lock-back', 'click', () => this.renderConfig());
+        this.on('#flarep-lock-continue', 'click', () => {
             if (this.scope === 'selected') {
                 this.renderSelectImages();
             } else {

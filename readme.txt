@@ -26,7 +26,7 @@ FlareLoad integrates Cloudflare Images as a direct upload destination alongside 
 
 == Installation ==
 
-1. Upload the `flare-press` folder to the `/wp-content/plugins/` directory, or install it via the WordPress plugin screen.
+1. Upload the `flare-load` folder to the `/wp-content/plugins/` directory, or install it via the WordPress plugin screen.
 2. Activate the plugin through the **Plugins** screen in WordPress.
 3. Go to **FlareLoad** in the admin menu and enter your Cloudflare credentials.
 4. Click **Sync Variants** to import your Cloudflare image variants.
@@ -72,7 +72,7 @@ It depends on your File Management setting. If **Delete local file after upload*
 
 The source code for this plugin, including all TypeScript/JavaScript source files and build tools, is publicly available on GitHub:
 
-https://github.com/tanyunus/flare-press
+https://github.com/tanyunus/flare-load
 
 To rebuild compiled assets from source:
 
@@ -103,7 +103,7 @@ Your Cloudflare Account ID, API Token, and uploaded image files are transmitted 
 = 1.0.2 =
 * Fix: rename function prefix from fp_ to flarep_ for WP.org naming compliance.
 * Fix: make incomplete setup notice dismissible with user meta persistence.
-* Fix: move log file from plugin directory to uploads/flare-press/ per WP.org guidelines.
+* Fix: move log file from plugin directory to uploads/flare-load/ per WP.org guidelines.
 * Fix: lower admin menu position to 80.
 * Fix: exclude assets/ folder from release zip.
 * Docs: add source code link and build instructions to readme.

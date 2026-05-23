@@ -1,4 +1,4 @@
-/**
+﻿/**
  * POT file generator for FlarePress.
  *
  * Extracts translatable strings from:
@@ -12,8 +12,8 @@ const fs   = require('fs');
 const path = require('path');
 
 const ROOT      = path.resolve(__dirname, '..');
-const POT_PATH  = path.join(ROOT, 'languages', 'flare-press.pot');
-const DOMAIN    = 'flare-press';
+const POT_PATH  = path.join(ROOT, 'languages', 'flare-load.pot');
+const DOMAIN    = 'flare-load';
 const VERSION   = require(path.join(ROOT, 'package.json')).version;
 
 // ── 1. Extract PHP constants ──────────────────────────────────────────────────
@@ -43,8 +43,8 @@ function isUiConstant(name) {
 
 // ── 1b. Extract PHP __() calls from source files ──────────────────────────────
 
-const PHP_DIRS   = ['app', 'flare-press.php'];
-const PHP_I18N_RE = /__\(\s*'((?:[^'\\]|\\.)*)'\s*,\s*'flare-press'/g;
+const PHP_DIRS   = ['app', 'flare-load.php'];
+const PHP_I18N_RE = /__\(\s*'((?:[^'\\]|\\.)*)'\s*,\s*'flare-load'/g;
 
 function extractPhpStrings() {
     const entries = [];
@@ -95,7 +95,7 @@ function extractJsStrings(dir) {
             entries.push(...extractJsStrings(full));
         } else if (/\.(ts|tsx)$/.test(f.name)) {
             const src = fs.readFileSync(full, 'utf8');
-            const re  = /__\(\s*['"]([^'"]+)['"]\s*,\s*['"]flare-press['"]/g;
+            const re  = /__\(\s*['"]([^'"]+)['"]\s*,\s*['"]flare-load['"]/g;
             let m;
             while ((m = re.exec(src)) !== null) {
                 entries.push({
@@ -144,7 +144,7 @@ function buildPot(phpConstEntries, phpSrcEntries, jsEntries) {
 msgid ""
 msgstr ""
 "Project-Id-Version: FlarePress ${VERSION}\\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/flare-press\\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/flare-load\\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
 "Language-Team: LANGUAGE <LL@li.org>\\n"
 "MIME-Version: 1.0\\n"
@@ -156,17 +156,17 @@ msgstr ""
 "X-Domain: ${DOMAIN}\\n"
 
 #. Plugin Name of the plugin
-#: flare-press.php
+#: flare-load.php
 msgid "FlarePress"
 msgstr ""
 
 #. Description of the plugin
-#: flare-press.php
+#: flare-load.php
 msgid "WordPress plugin for uploading media directly to Cloudflare Images alongside the default uploader."
 msgstr ""
 
 #. Author of the plugin
-#: flare-press.php
+#: flare-load.php
 msgid "Yunus Tan"
 msgstr ""
 

@@ -1,4 +1,4 @@
-import { __ } from '@wordpress/i18n';
+﻿import { __ } from '@wordpress/i18n';
 
 declare const flarepMigrateConfig: {
     ajaxUrl: string;
@@ -86,7 +86,7 @@ class FlarepMigrateWizard {
         return fetch(flarepMigrateConfig.ajaxUrl, { method: 'POST', body: form })
             .then(r => r.json())
             .then(r => {
-                if (!r.success) throw new Error(r.data?.message || __('Request failed', 'flare-press'));
+                if (!r.success) throw new Error(r.data?.message || __('Request failed', 'flare-load'));
                 return r.data as T;
             });
     }
@@ -104,7 +104,7 @@ class FlarepMigrateWizard {
     }
 
     async init(): Promise<void> {
-        this.render(`<p class="flarep-migrate-loading">${__('Loading…', 'flare-press')}</p>`);
+        this.render(`<p class="flarep-migrate-loading">${__('Loading…', 'flare-load')}</p>`);
         try {
             const state = await this.ajax<MigrationState | null>('flarep_migrate_get_state');
             if (state && state.remaining.length > 0) {
@@ -127,34 +127,34 @@ class FlarepMigrateWizard {
         const failedCard = failed > 0
             ? `<div class="flarep-migrate-card flarep-card-red">
                    <span class="flarep-migrate-card-num">${failed}</span>
-                   <span class="flarep-migrate-card-lbl">${__('Failed', 'flare-press')}</span>
+                   <span class="flarep-migrate-card-lbl">${__('Failed', 'flare-load')}</span>
                </div>`
             : '';
 
         this.render(`
             <div class="flarep-migrate-wizard">
                 <div class="notice notice-warning inline flarep-migrate-resume-prompt">
-                    <p><strong>${__('Paused or interrupted migration found', 'flare-press')}</strong></p>
-                    <p>${__('A migration was previously started but did not complete. Each image is processed individually — only the remaining items below need to be migrated.', 'flare-press')}</p>
+                    <p><strong>${__('Paused or interrupted migration found', 'flare-load')}</strong></p>
+                    <p>${__('A migration was previously started but did not complete. Each image is processed individually — only the remaining items below need to be migrated.', 'flare-load')}</p>
                     <div class="flarep-migrate-cards">
                         <div class="flarep-migrate-card flarep-card-green">
                             <span class="flarep-migrate-card-num">${done}</span>
-                            <span class="flarep-migrate-card-lbl">${__('Completed', 'flare-press')}</span>
+                            <span class="flarep-migrate-card-lbl">${__('Completed', 'flare-load')}</span>
                         </div>
                         ${failedCard}
                         <div class="flarep-migrate-card flarep-card-blue">
                             <span class="flarep-migrate-card-num">${remaining}</span>
-                            <span class="flarep-migrate-card-lbl">${__('Remaining', 'flare-press')}</span>
+                            <span class="flarep-migrate-card-lbl">${__('Remaining', 'flare-load')}</span>
                         </div>
                         <div class="flarep-migrate-card">
                             <span class="flarep-migrate-card-num">${pct}%</span>
-                            <span class="flarep-migrate-card-lbl">${__('Progress', 'flare-press')}</span>
+                            <span class="flarep-migrate-card-lbl">${__('Progress', 'flare-load')}</span>
                         </div>
                     </div>
                     <p class="submit">
-                        <button id="flarep-resume-btn" class="button button-primary">${__('Continue Migration', 'flare-press')}</button>
+                        <button id="flarep-resume-btn" class="button button-primary">${__('Continue Migration', 'flare-load')}</button>
                         &nbsp;
-                        <button id="flarep-fresh-btn" class="button">${__('Start Fresh', 'flare-press')}</button>
+                        <button id="flarep-fresh-btn" class="button">${__('Start Fresh', 'flare-load')}</button>
                     </p>
                 </div>
             </div>
@@ -177,50 +177,50 @@ class FlarepMigrateWizard {
         const variants   = flarepMigrateConfig.variantOptions;
         const noVariants = variants.length === 0;
         const variantOpts = noVariants
-            ? `<option value="">${__('No variants configured', 'flare-press')}</option>`
+            ? `<option value="">${__('No variants configured', 'flare-load')}</option>`
             : variants.map(v =>
                 `<option value="${this.escHtml(v.name)}"${v.name === this.variant ? ' selected' : ''}>${this.escHtml(v.label)}</option>`
               ).join('');
 
         this.render(`
             <div class="flarep-migrate-wizard">
-                <h2 class="flarep-migrate-step-title">${__('Migrate to Local', 'flare-press')}</h2>
-                <p>${__('This wizard downloads your Cloudflare Images back to your server and restores them as standard WordPress attachments.', 'flare-press')}</p>
+                <h2 class="flarep-migrate-step-title">${__('Migrate to Local', 'flare-load')}</h2>
+                <p>${__('This wizard downloads your Cloudflare Images back to your server and restores them as standard WordPress attachments.', 'flare-load')}</p>
                 <div class="notice notice-warning inline">
-                    <p><strong>${__('Before you start:', 'flare-press')}</strong> ${__('Close all post/page editor tabs in every browser window. If an editor containing a Cloudflare image is left open and the post is saved after migration completes, the Cloudflare image reference will be written back into that post.', 'flare-press')}</p>
+                    <p><strong>${__('Before you start:', 'flare-load')}</strong> ${__('Close all post/page editor tabs in every browser window. If an editor containing a Cloudflare image is left open and the post is saved after migration completes, the Cloudflare image reference will be written back into that post.', 'flare-load')}</p>
                 </div>
-                ${noVariants ? `<div class="notice notice-warning inline"><p>${__('No variants found. Please sync your variants in FlarePress settings first.', 'flare-press')}</p></div>` : ''}
+                ${noVariants ? `<div class="notice notice-warning inline"><p>${__('No variants found. Please sync your variants in FlarePress settings first.', 'flare-load')}</p></div>` : ''}
                 <table class="form-table">
                     <tr>
-                        <th scope="row"><label for="flarep-variant-select">${__('Download Variant', 'flare-press')}</label></th>
+                        <th scope="row"><label for="flarep-variant-select">${__('Download Variant', 'flare-load')}</label></th>
                         <td>
                             <select id="flarep-variant-select" class="regular-text"${noVariants ? ' disabled' : ''}>${variantOpts}</select>
-                            <p class="description">${__('The Cloudflare Images variant to download as the main image.', 'flare-press')}</p>
+                            <p class="description">${__('The Cloudflare Images variant to download as the main image.', 'flare-load')}</p>
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row">${__('Images to Migrate', 'flare-press')}</th>
+                        <th scope="row">${__('Images to Migrate', 'flare-load')}</th>
                         <td>
                             <fieldset>
-                                <label><input type="radio" name="flarep-scope" value="all"${this.scope === 'all' ? ' checked' : ''}> ${__('All Cloudflare images', 'flare-press')}</label><br>
-                                <label><input type="radio" name="flarep-scope" value="posts"${this.scope === 'posts' ? ' checked' : ''}> ${__('Images attached to posts/pages', 'flare-press')}</label><br>
-                                <label><input type="radio" name="flarep-scope" value="selected"${this.scope === 'selected' ? ' checked' : ''}> ${__('Select images manually', 'flare-press')}</label>
+                                <label><input type="radio" name="flarep-scope" value="all"${this.scope === 'all' ? ' checked' : ''}> ${__('All Cloudflare images', 'flare-load')}</label><br>
+                                <label><input type="radio" name="flarep-scope" value="posts"${this.scope === 'posts' ? ' checked' : ''}> ${__('Images attached to posts/pages', 'flare-load')}</label><br>
+                                <label><input type="radio" name="flarep-scope" value="selected"${this.scope === 'selected' ? ' checked' : ''}> ${__('Select images manually', 'flare-load')}</label>
                             </fieldset>
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row">${__('After Migration', 'flare-press')}</th>
+                        <th scope="row">${__('After Migration', 'flare-load')}</th>
                         <td>
                             <label>
                                 <input type="checkbox" id="flarep-delete-cf"${this.deleteFromCF ? ' checked' : ''}>
-                                ${__('Delete images from Cloudflare after successful migration', 'flare-press')}
+                                ${__('Delete images from Cloudflare after successful migration', 'flare-load')}
                             </label>
-                            <p class="description flarep-migrate-danger-note">${__('Warning: This is irreversible. Deleted Cloudflare images cannot be recovered.', 'flare-press')}</p>
+                            <p class="description flarep-migrate-danger-note">${__('Warning: This is irreversible. Deleted Cloudflare images cannot be recovered.', 'flare-load')}</p>
                         </td>
                     </tr>
                 </table>
                 <p class="submit">
-                    <button id="flarep-config-next" class="button button-primary"${noVariants ? ' disabled' : ''}>${__('Continue', 'flare-press')}</button>
+                    <button id="flarep-config-next" class="button button-primary"${noVariants ? ' disabled' : ''}>${__('Continue', 'flare-load')}</button>
                 </p>
             </div>
         `);
@@ -256,16 +256,16 @@ class FlarepMigrateWizard {
         this.render(`
             <div class="flarep-migrate-wizard">
                 <div class="notice notice-warning inline">
-                    <p><strong>${__('Open editor sessions detected', 'flare-press')}</strong></p>
-                    <p>${__('The following posts are currently open in an editor. If they are saved after migration completes, Cloudflare image references may be written back.', 'flare-press')}</p>
+                    <p><strong>${__('Open editor sessions detected', 'flare-load')}</strong></p>
+                    <p>${__('The following posts are currently open in an editor. If they are saved after migration completes, Cloudflare image references may be written back.', 'flare-load')}</p>
                     <ul style="list-style:disc;margin-left:20px">${list}</ul>
-                    <p>${__('Please close these editor tabs, then click Re-check.', 'flare-press')}</p>
+                    <p>${__('Please close these editor tabs, then click Re-check.', 'flare-load')}</p>
                     <p class="submit">
-                        <button id="flarep-lock-back" class="button">${__('Go Back', 'flare-press')}</button>
+                        <button id="flarep-lock-back" class="button">${__('Go Back', 'flare-load')}</button>
                         &nbsp;
-                        <button id="flarep-lock-recheck" class="button button-primary">${__('Re-check', 'flare-press')}</button>
+                        <button id="flarep-lock-recheck" class="button button-primary">${__('Re-check', 'flare-load')}</button>
                         &nbsp;
-                        <button id="flarep-lock-continue" class="button button-link">${__('Continue Anyway', 'flare-press')}</button>
+                        <button id="flarep-lock-continue" class="button button-link">${__('Continue Anyway', 'flare-load')}</button>
                     </p>
                 </div>
             </div>
@@ -306,7 +306,7 @@ class FlarepMigrateWizard {
                 per_page: this.pageSize,
             });
         } catch {
-            this.render(`<div class="flarep-migrate-wizard"><div class="notice notice-error inline"><p>${__('Failed to load images. Please try again.', 'flare-press')}</p></div></div>`);
+            this.render(`<div class="flarep-migrate-wizard"><div class="notice notice-error inline"><p>${__('Failed to load images. Please try again.', 'flare-load')}</p></div></div>`);
             return;
         }
         this.currentPage = result.page;
@@ -319,9 +319,9 @@ class FlarepMigrateWizard {
         const images     = result?.images      ?? [];
 
         const rows = result === null
-            ? `<tr><td colspan="5"><span class="flarep-migrate-loading">${__('Loading…', 'flare-press')}</span></td></tr>`
+            ? `<tr><td colspan="5"><span class="flarep-migrate-loading">${__('Loading…', 'flare-load')}</span></td></tr>`
             : images.length === 0
-                ? `<tr><td colspan="5">${__('No Cloudflare images found.', 'flare-press')}</td></tr>`
+                ? `<tr><td colspan="5">${__('No Cloudflare images found.', 'flare-load')}</td></tr>`
                 : images.map(img => {
                     const parentCell = img.parent_title
                         ? `<a href="${this.escHtml(img.parent_url)}" target="_blank" rel="noopener">${this.escHtml(this.truncate(img.parent_title, 40))}</a>`
@@ -338,34 +338,34 @@ class FlarepMigrateWizard {
 
         const pagination = totalPages > 1 ? `
             <div class="flarep-migrate-pagination">
-                <button class="button flarep-page-btn" data-page="${page - 1}"${page <= 1 ? ' disabled' : ''}>&laquo; ${__('Previous', 'flare-press')}</button>
-                <span class="flarep-page-info">${__('Page', 'flare-press')} ${page} / ${totalPages} &nbsp;(${total} ${__('total', 'flare-press')})</span>
-                <button class="button flarep-page-btn" data-page="${page + 1}"${page >= totalPages ? ' disabled' : ''}>${__('Next', 'flare-press')} &raquo;</button>
+                <button class="button flarep-page-btn" data-page="${page - 1}"${page <= 1 ? ' disabled' : ''}>&laquo; ${__('Previous', 'flare-load')}</button>
+                <span class="flarep-page-info">${__('Page', 'flare-load')} ${page} / ${totalPages} &nbsp;(${total} ${__('total', 'flare-load')})</span>
+                <button class="button flarep-page-btn" data-page="${page + 1}"${page >= totalPages ? ' disabled' : ''}>${__('Next', 'flare-load')} &raquo;</button>
             </div>
         ` : '';
 
         this.render(`
             <div class="flarep-migrate-wizard">
-                <h2 class="flarep-migrate-step-title">${__('Select Images', 'flare-press')}</h2>
-                <p>${__('Choose which images to migrate. Images with no variant configured will be skipped.', 'flare-press')}</p>
-                <label class="flarep-migrate-select-all-label"><input type="checkbox" id="flarep-select-all"> ${__('Select all on this page', 'flare-press')}</label>
+                <h2 class="flarep-migrate-step-title">${__('Select Images', 'flare-load')}</h2>
+                <p>${__('Choose which images to migrate. Images with no variant configured will be skipped.', 'flare-load')}</p>
+                <label class="flarep-migrate-select-all-label"><input type="checkbox" id="flarep-select-all"> ${__('Select all on this page', 'flare-load')}</label>
                 <table class="widefat flarep-migrate-image-table">
                     <thead>
                         <tr>
                             <th style="width:32px"></th>
-                            <th style="width:60px">${__('Thumbnail', 'flare-press')}</th>
-                            <th>${__('Title', 'flare-press')}</th>
-                            <th>${__('Attached to', 'flare-press')}</th>
-                            <th style="width:140px">${__('Status', 'flare-press')}</th>
+                            <th style="width:60px">${__('Thumbnail', 'flare-load')}</th>
+                            <th>${__('Title', 'flare-load')}</th>
+                            <th>${__('Attached to', 'flare-load')}</th>
+                            <th style="width:140px">${__('Status', 'flare-load')}</th>
                         </tr>
                     </thead>
                     <tbody>${rows}</tbody>
                 </table>
                 ${pagination}
-                <p class="flarep-migrate-selected-count">${__('Selected', 'flare-press')}: <strong id="flarep-selected-count">${this.selectedIds.length}</strong></p>
+                <p class="flarep-migrate-selected-count">${__('Selected', 'flare-load')}: <strong id="flarep-selected-count">${this.selectedIds.length}</strong></p>
                 <p class="submit">
-                    <button id="flarep-select-back" class="button">${__('Back', 'flare-press')}</button>
-                    <button id="flarep-select-next" class="button button-primary">${__('Continue', 'flare-press')}</button>
+                    <button id="flarep-select-back" class="button">${__('Back', 'flare-load')}</button>
+                    <button id="flarep-select-next" class="button button-primary">${__('Continue', 'flare-load')}</button>
                 </p>
             </div>
         `);
@@ -415,7 +415,7 @@ class FlarepMigrateWizard {
     }
 
     private async renderAnalysis(): Promise<void> {
-        this.render(`<div class="flarep-migrate-wizard"><p class="flarep-migrate-loading">${__('Analyzing…', 'flare-press')}</p></div>`);
+        this.render(`<div class="flarep-migrate-wizard"><p class="flarep-migrate-loading">${__('Analyzing…', 'flare-load')}</p></div>`);
         let result: AnalysisResult;
         try {
             result = await this.ajax<AnalysisResult>('flarep_migrate_analyze', {
@@ -423,7 +423,7 @@ class FlarepMigrateWizard {
                 ids:   this.selectedIds,
             });
         } catch {
-            this.render(`<div class="flarep-migrate-wizard"><div class="notice notice-error inline"><p>${__('Analysis failed. Please try again.', 'flare-press')}</p></div></div>`);
+            this.render(`<div class="flarep-migrate-wizard"><div class="notice notice-error inline"><p>${__('Analysis failed. Please try again.', 'flare-load')}</p></div></div>`);
             return;
         }
 
@@ -431,29 +431,29 @@ class FlarepMigrateWizard {
 
         this.render(`
             <div class="flarep-migrate-wizard">
-                <h2 class="flarep-migrate-step-title">${__('Analysis Results', 'flare-press')}</h2>
+                <h2 class="flarep-migrate-step-title">${__('Analysis Results', 'flare-load')}</h2>
                 <div class="flarep-migrate-cards">
                     <div class="flarep-migrate-card">
                         <span class="flarep-migrate-card-num">${result.total}</span>
-                        <span class="flarep-migrate-card-lbl">${__('Total', 'flare-press')}</span>
+                        <span class="flarep-migrate-card-lbl">${__('Total', 'flare-load')}</span>
                     </div>
                     <div class="flarep-migrate-card flarep-card-green">
                         <span class="flarep-migrate-card-num">${result.download_needed}</span>
-                        <span class="flarep-migrate-card-lbl">${__('Ready to migrate', 'flare-press')}</span>
+                        <span class="flarep-migrate-card-lbl">${__('Ready to migrate', 'flare-load')}</span>
                     </div>
                     <div class="flarep-migrate-card flarep-card-blue">
                         <span class="flarep-migrate-card-num">${result.local_copy}</span>
-                        <span class="flarep-migrate-card-lbl">${__('Already have local copy', 'flare-press')}</span>
+                        <span class="flarep-migrate-card-lbl">${__('Already have local copy', 'flare-load')}</span>
                     </div>
                     <div class="flarep-migrate-card flarep-card-gray">
                         <span class="flarep-migrate-card-num">${result.no_variant}</span>
-                        <span class="flarep-migrate-card-lbl">${__('No variant — will skip', 'flare-press')}</span>
+                        <span class="flarep-migrate-card-lbl">${__('No variant — will skip', 'flare-load')}</span>
                     </div>
                 </div>
-                ${migratable === 0 ? `<div class="notice notice-warning inline"><p>${__('Nothing to migrate.', 'flare-press')}</p></div>` : ''}
+                ${migratable === 0 ? `<div class="notice notice-warning inline"><p>${__('Nothing to migrate.', 'flare-load')}</p></div>` : ''}
                 <p class="submit">
-                    <button id="flarep-analysis-back" class="button">${__('Back', 'flare-press')}</button>
-                    ${migratable > 0 ? `<button id="flarep-start-btn" class="button button-primary">${__('Start Migration', 'flare-press')}</button>` : ''}
+                    <button id="flarep-analysis-back" class="button">${__('Back', 'flare-load')}</button>
+                    ${migratable > 0 ? `<button id="flarep-start-btn" class="button button-primary">${__('Start Migration', 'flare-load')}</button>` : ''}
                 </p>
             </div>
         `);
@@ -501,7 +501,7 @@ class FlarepMigrateWizard {
 
         this.render(`
             <div class="flarep-migrate-wizard">
-                <h2 class="flarep-migrate-step-title">${__('Migrating…', 'flare-press')}</h2>
+                <h2 class="flarep-migrate-step-title">${__('Migrating…', 'flare-load')}</h2>
                 <div class="flarep-migrate-progress-wrap">
                     <div class="flarep-migrate-progress-bar">
                         <div class="flarep-migrate-progress-fill" style="width:${pct}%"></div>
@@ -510,7 +510,7 @@ class FlarepMigrateWizard {
                     <p id="flarep-progress-current" class="flarep-migrate-current-item">&nbsp;</p>
                 </div>
                 <p class="submit">
-                    <button id="flarep-pause-btn" class="button">${__('Pause', 'flare-press')}</button>
+                    <button id="flarep-pause-btn" class="button">${__('Pause', 'flare-load')}</button>
                 </p>
                 <div id="flarep-progress-log" class="flarep-migrate-log"></div>
             </div>
@@ -520,8 +520,8 @@ class FlarepMigrateWizard {
             this.paused = !this.paused;
             const btn = this.root.querySelector<HTMLButtonElement>('#flarep-pause-btn');
             if (btn) btn.textContent = this.paused
-                ? __('Resume', 'flare-press')
-                : __('Pause', 'flare-press');
+                ? __('Resume', 'flare-load')
+                : __('Pause', 'flare-load');
             if (!this.paused) this.runMigrationLoop();
         });
     }
@@ -555,7 +555,7 @@ class FlarepMigrateWizard {
                 const id = this.progressQueue[0];
 
                 const currentEl = this.root.querySelector('#flarep-progress-current');
-                if (currentEl) currentEl.textContent = `${__('Processing', 'flare-press')} #${id}…`;
+                if (currentEl) currentEl.textContent = `${__('Processing', 'flare-load')} #${id}…`;
 
                 try {
                     const result = await this.ajax<ProcessResult>('flarep_migrate_process', {
@@ -568,7 +568,7 @@ class FlarepMigrateWizard {
                     if (result.status === 'error' || result.status === 'skip') {
                         this.counts.failed++;
                         this.failedIds.push(id);
-                        this.appendLog(`#${id}: ${result.reason ?? __('error', 'flare-press')}`, 'error');
+                        this.appendLog(`#${id}: ${result.reason ?? __('error', 'flare-load')}`, 'error');
                     } else {
                         this.counts.processed++;
                         this.appendLog(`#${id}`, 'success');
@@ -597,28 +597,28 @@ class FlarepMigrateWizard {
         const hasFailures = this.failedIds.length > 0;
         const retryBtn = hasFailures
             ? `<button id="flarep-retry-btn" class="button button-primary">
-                   ${__('Retry Failed', 'flare-press')} (${this.failedIds.length})
+                   ${__('Retry Failed', 'flare-load')} (${this.failedIds.length})
                </button>&nbsp;`
             : '';
 
         this.render(`
             <div class="flarep-migrate-wizard">
-                <h2 class="flarep-migrate-step-title">${__('Migration Complete', 'flare-press')}</h2>
+                <h2 class="flarep-migrate-step-title">${__('Migration Complete', 'flare-load')}</h2>
                 <div class="flarep-migrate-cards">
                     <div class="flarep-migrate-card flarep-card-green">
                         <span class="flarep-migrate-card-num">${this.counts.processed}</span>
-                        <span class="flarep-migrate-card-lbl">${__('Migrated successfully', 'flare-press')}</span>
+                        <span class="flarep-migrate-card-lbl">${__('Migrated successfully', 'flare-load')}</span>
                     </div>
                     <div class="flarep-migrate-card${hasFailures ? ' flarep-card-red' : ''}">
                         <span class="flarep-migrate-card-num">${this.counts.failed}</span>
-                        <span class="flarep-migrate-card-lbl">${__('Failed', 'flare-press')}</span>
+                        <span class="flarep-migrate-card-lbl">${__('Failed', 'flare-load')}</span>
                     </div>
                 </div>
                 <p class="submit">
                     ${retryBtn}
-                    <a href="${flarepMigrateConfig.logsUrl}" class="button">${__('View Log', 'flare-press')}</a>
+                    <a href="${flarepMigrateConfig.logsUrl}" class="button">${__('View Log', 'flare-load')}</a>
                     &nbsp;
-                    <a href="${flarepMigrateConfig.migrateUrl}" class="button">${__('Run Again', 'flare-press')}</a>
+                    <a href="${flarepMigrateConfig.migrateUrl}" class="button">${__('Run Again', 'flare-load')}</a>
                 </p>
             </div>
         `);
@@ -636,9 +636,9 @@ class FlarepMigrateWizard {
 
     private statusLabel(status: AnalysisImage['status']): string {
         switch (status) {
-            case 'download_needed': return __('Ready', 'flare-press');
-            case 'local_copy':      return __('Has local copy', 'flare-press');
-            case 'no_variant':      return __('No variant', 'flare-press');
+            case 'download_needed': return __('Ready', 'flare-load');
+            case 'local_copy':      return __('Has local copy', 'flare-load');
+            case 'no_variant':      return __('No variant', 'flare-load');
         }
     }
 }

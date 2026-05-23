@@ -8,7 +8,7 @@ Requires PHP:      8.0
 Author:      Yunus Tan
 Author URI:  https://github.com/tanyunus/
 License:     GPL-3.0+
-Text Domain: flare-press
+Text Domain: flare-load
 */
 
 use FlareLoad\Api\CloudflareImagesApi;
@@ -86,7 +86,7 @@ function flarep_incomplete_setup_notice(): void
     $url     = admin_url('admin.php?page=' . Constants::DASHBOARD_MENU_SLUG);
     $message = sprintf(
         /* translators: %s: link to FlareLoad settings page */
-        __('FlareLoad is not fully configured. Please complete your <a href="%s">Cloudflare settings</a> to enable all features.', 'flare-press'),
+        __('FlareLoad is not fully configured. Please complete your <a href="%s">Cloudflare settings</a> to enable all features.', 'flare-load'),
         esc_url($url)
     );
 
@@ -322,7 +322,7 @@ function flarep_rest_api_init(): void
 {
     // Restricted to manage_options; triggered by the "Sync Variants" button in settings.
     if(current_user_can('manage_options')) {
-        register_rest_route('flare-press/v1', '/sync-variants', array(
+        register_rest_route('flare-load/v1', '/sync-variants', array(
             'methods' => 'POST',
             'callback' => [OptionRestApi::class, 'syncVariants'],
             'permission_callback' => function () {
@@ -332,7 +332,7 @@ function flarep_rest_api_init(): void
     }
 
     // Used by post editor blocks that insert CF images.
-    register_rest_route('flare-press/v1', '/get-variant-names', array(
+    register_rest_route('flare-load/v1', '/get-variant-names', array(
         'methods' => 'GET',
         'callback' => [OptionRestApi::class, 'getVariantNames'],
         'permission_callback' => function () {
@@ -341,7 +341,7 @@ function flarep_rest_api_init(): void
     ));
 
     // Used by the post editor to build CF image URLs client-side.
-    register_rest_route('flare-press/v1', '/get-account-hash', array(
+    register_rest_route('flare-load/v1', '/get-account-hash', array(
         'methods' => 'GET',
         'callback' => [OptionRestApi::class, 'getAccountHash'],
         'permission_callback' => function () {
@@ -448,7 +448,7 @@ function flarep_admin_upload_error_notice(): void
     $key = 'flarep_upload_error_' . get_current_user_id();
     if (get_transient($key)) {
         delete_transient($key);
-        $message = __('Upload to Cloudflare failed. The image was saved locally. Check FlareLoad logs for details.', 'flare-press');
+        $message = __('Upload to Cloudflare failed. The image was saved locally. Check FlareLoad logs for details.', 'flare-load');
         echo '<div class="notice notice-error is-dismissible"><p>' . esc_html($message) . '</p></div>';
     }
 }
@@ -541,7 +541,7 @@ function flarep_ajax_migrate_process(): void
 
     if (!$id || empty($variant)) {
         ob_end_clean();
-        wp_send_json_error(['message' => __('Missing parameters.', 'flare-press')]);
+        wp_send_json_error(['message' => __('Missing parameters.', 'flare-load')]);
         return;
     }
 
@@ -612,7 +612,7 @@ function flarep_ajax_migrate_check_locks(): void
 
     $locked = array_map(fn($r) => [
         'id'    => (int) $r->ID,
-        'title' => $r->post_title !== '' ? $r->post_title : __('(no title)', 'flare-press'),
+        'title' => $r->post_title !== '' ? $r->post_title : __('(no title)', 'flare-load'),
     ], $rows);
 
     wp_send_json_success($locked);
@@ -628,7 +628,7 @@ function flarep_ajax_test_connection(): void
     }
     $accountId = get_option(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME);
     if (empty($accountId)) {
-        wp_send_json_error(['message' => __('Account ID is required to test the connection.', 'flare-press')]);
+        wp_send_json_error(['message' => __('Account ID is required to test the connection.', 'flare-load')]);
         return;
     }
     $testToken = isset($_POST['flarep_test_token']) ? sanitize_text_field(wp_unslash($_POST['flarep_test_token'])) : null;
@@ -672,9 +672,9 @@ function flarep_restrict_manage_media_location(string $postType): void
     $selected = sanitize_key(wp_unslash($_GET['flarep_location'] ?? ''));
     ?>
     <select name="flarep_location">
-        <option value=""><?php echo esc_html(__('All locations', 'flare-press')); ?></option>
-        <option value="cloudflare" <?php selected($selected, 'cloudflare'); ?>><?php echo esc_html(__('Uploaded to Cloudflare', 'flare-press')); ?></option>
-        <option value="server" <?php selected($selected, 'server'); ?>><?php echo esc_html(__('This server', 'flare-press')); ?></option>
+        <option value=""><?php echo esc_html(__('All locations', 'flare-load')); ?></option>
+        <option value="cloudflare" <?php selected($selected, 'cloudflare'); ?>><?php echo esc_html(__('Uploaded to Cloudflare', 'flare-load')); ?></option>
+        <option value="server" <?php selected($selected, 'server'); ?>><?php echo esc_html(__('This server', 'flare-load')); ?></option>
     </select>
     <?php
 }
@@ -745,7 +745,7 @@ function flarep_ajax_query_attachments_args(array $query): array
 
 function flarep_manage_media_columns(array $columns): array
 {
-    $columns[Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID] = __('Location', 'flare-press');
+    $columns[Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID] = __('Location', 'flare-load');
 
     return $columns;
 }
@@ -763,20 +763,20 @@ function flarep_admin_enqueue_scripts(): void
     // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading $_GET['mode'] for script routing only; no data is modified.
     if (Utils::isAdminPage('upload.php') && (empty($_GET) || sanitize_key(wp_unslash($_GET['mode'] ?? '')) === 'grid')) {
         wp_enqueue_script('flarep-media-library-grid-script', FLAREP_URL . 'dist/main/flarep-media-library-grid.js', ['wp-i18n'], FLAREP_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
-        wp_localize_script('flarep-media-library-grid-script', 'flarepConfig', ['pluginUrl' => FLAREP_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'locationFilterLabels' => ['all' => __('All locations', 'flare-press'), 'cloudflare' => __('Uploaded to Cloudflare', 'flare-press'), 'server' => __('This server', 'flare-press')]]);
-        wp_set_script_translations('flarep-media-library-grid-script', 'flare-press', FLAREP_PATH . 'languages');
+        wp_localize_script('flarep-media-library-grid-script', 'flarepConfig', ['pluginUrl' => FLAREP_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'locationFilterLabels' => ['all' => __('All locations', 'flare-load'), 'cloudflare' => __('Uploaded to Cloudflare', 'flare-load'), 'server' => __('This server', 'flare-load')]]);
+        wp_set_script_translations('flarep-media-library-grid-script', 'flare-load', FLAREP_PATH . 'languages');
     }
 
     if (Utils::isAdminPage('media-new.php')) {
         wp_enqueue_script('flarep-media-new-script', FLAREP_URL . 'dist/main/flarep-media-new.js', ['wp-i18n'], FLAREP_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
         wp_localize_script('flarep-media-new-script', 'flarepConfig', ['pluginUrl' => FLAREP_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG)]);
-        wp_set_script_translations('flarep-media-new-script', 'flare-press', FLAREP_PATH . 'languages');
+        wp_set_script_translations('flarep-media-new-script', 'flare-load', FLAREP_PATH . 'languages');
     }
 
     if (Utils::isFpOptionsPage()) {
         wp_enqueue_script('flarep-options-script', FLAREP_URL . 'dist/main/flarep-options.js', ['wp-i18n'], FLAREP_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
-        wp_localize_script('flarep-options-script', 'flarepConfig', ['pluginUrl' => FLAREP_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'testConnectionNonce' => wp_create_nonce('flarep_test_connection'), 'restNonce' => wp_create_nonce('wp_rest'), 'restUrl' => rest_url('flare-press/v1/')]);
-        wp_set_script_translations('flarep-options-script', 'flare-press', FLAREP_PATH . 'languages');
+        wp_localize_script('flarep-options-script', 'flarepConfig', ['pluginUrl' => FLAREP_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'testConnectionNonce' => wp_create_nonce('flarep_test_connection'), 'restNonce' => wp_create_nonce('wp_rest'), 'restUrl' => rest_url('flare-load/v1/')]);
+        wp_set_script_translations('flarep-options-script', 'flare-load', FLAREP_PATH . 'languages');
     }
 
     if (Utils::isFpMigratePage()) {
@@ -789,13 +789,13 @@ function flarep_admin_enqueue_scripts(): void
             'migrateUrl'     => admin_url('admin.php?page=' . Constants::DASHBOARD_MIGRATE_PAGE_SLUG),
             'logsUrl'        => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG),
         ]);
-        wp_set_script_translations('flarep-migrate-script', 'flare-press', FLAREP_PATH . 'languages');
+        wp_set_script_translations('flarep-migrate-script', 'flare-load', FLAREP_PATH . 'languages');
     }
 
     if ((Utils::isPostEditPage() || Utils::isAdminPage('post-new.php') || Utils::isAdminPage('site-editor.php')) && !Utils::isMediaEditPage()) {
         wp_enqueue_script('flarep-post-script', FLAREP_URL . 'dist/main/flarep-post.js', ['wp-i18n'], FLAREP_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
-        wp_localize_script('flarep-post-script', 'flarepConfig', ['pluginUrl' => FLAREP_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'defaultVariant' => get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, ''), 'variantOptions' => OptionController::getVariantOptions(), 'accountHash' => OptionController::getAccountHash(), 'restUrl' => rest_url('flare-press/v1/')]);
-        wp_set_script_translations('flarep-post-script', 'flare-press', FLAREP_PATH . 'languages');
+        wp_localize_script('flarep-post-script', 'flarepConfig', ['pluginUrl' => FLAREP_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'defaultVariant' => get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, ''), 'variantOptions' => OptionController::getVariantOptions(), 'accountHash' => OptionController::getAccountHash(), 'restUrl' => rest_url('flare-load/v1/')]);
+        wp_set_script_translations('flarep-post-script', 'flare-load', FLAREP_PATH . 'languages');
     }
 }
 

@@ -1,4 +1,4 @@
-import {addFilter} from '@wordpress/hooks';
+﻿import {addFilter} from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import {createHigherOrderComponent} from '@wordpress/compose';
 import {InspectorControls} from '@wordpress/block-editor';
@@ -60,7 +60,7 @@ function addCustomAttribute(settings: BlockSettings, name: string): BlockSetting
 
 addFilter(
     'blocks.registerBlockType',
-    'flare-press/add-custom-attribute',
+    'flare-load/add-custom-attribute',
     addCustomAttribute
 );
 
@@ -112,12 +112,12 @@ function ImageVariantPanel({
         <>
             <BlockEdit {...props} />
             <InspectorControls>
-                <PanelBody title={__('Cloudflare Variants', 'flare-press')} initialOpen={true}>
+                <PanelBody title={__('Cloudflare Variants', 'flare-load')} initialOpen={true}>
                     <SelectControl
-                        label={__('Choose a variant', 'flare-press')}
+                        label={__('Choose a variant', 'flare-load')}
                         value={attributes.cloudflareVariant || ''}
                         options={[
-                            {label: __('Select a variant...', 'flare-press'), value: ''},
+                            {label: __('Select a variant...', 'flare-load'), value: ''},
                             ...options
                         ]}
                         onChange={(value: string) => {
@@ -193,12 +193,12 @@ function GalleryVariantPanel({
         <>
             <BlockEdit {...props} />
             <InspectorControls>
-                <PanelBody title={__('Cloudflare Variants', 'flare-press')} initialOpen={true}>
+                <PanelBody title={__('Cloudflare Variants', 'flare-load')} initialOpen={true}>
                     <SelectControl
-                        label={__('Apply variant to all images', 'flare-press')}
+                        label={__('Apply variant to all images', 'flare-load')}
                         value={''}
                         options={[
-                            {label: __('Select a variant...', 'flare-press'), value: ''},
+                            {label: __('Select a variant...', 'flare-load'), value: ''},
                             ...options
                         ]}
                         onChange={applyVariantToAll}
@@ -257,12 +257,12 @@ function MediaTextVariantPanel({
         <>
             <BlockEdit {...props} />
             <InspectorControls>
-                <PanelBody title={__('Cloudflare Variants', 'flare-press')} initialOpen={true}>
+                <PanelBody title={__('Cloudflare Variants', 'flare-load')} initialOpen={true}>
                     <SelectControl
-                        label={__('Choose a variant', 'flare-press')}
+                        label={__('Choose a variant', 'flare-load')}
                         value={attributes.cloudflareVariant || ''}
                         options={[
-                            {label: __('Select a variant...', 'flare-press'), value: ''},
+                            {label: __('Select a variant...', 'flare-load'), value: ''},
                             ...options
                         ]}
                         onChange={(value: string) => {
@@ -299,7 +299,7 @@ const withCustomControl = createHigherOrderComponent(
 
 addFilter(
     'editor.BlockEdit',
-    'flare-press/with-custom-control',
+    'flare-load/with-custom-control',
     withCustomControl
 );
 
@@ -315,7 +315,7 @@ async function getVariantNames(): Promise<VariantOption[] | false> {
         return false;
     }
 
-    const url = (window.flarepConfig?.restUrl ?? '/wp-json/flare-press/v1/') + 'get-variant-names';
+    const url = (window.flarepConfig?.restUrl ?? '/wp-json/flare-load/v1/') + 'get-variant-names';
 
     try {
         const response = await fetch(url, {

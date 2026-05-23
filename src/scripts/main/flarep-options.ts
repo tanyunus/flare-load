@@ -1,4 +1,4 @@
-import {SyncVariantsResponse, VariantOption} from "../types/types";
+﻿import {SyncVariantsResponse, VariantOption} from "../types/types";
 import RestApi from "../modules/RestApi";
 import { __ } from '@wordpress/i18n';
 
@@ -62,14 +62,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (data.success) {
                     testResult.style.color = '#46b450';
-                    testResult.textContent = __('Connection successful.', 'flare-press');
+                    testResult.textContent = __('Connection successful.', 'flare-load');
                 } else {
                     testResult.style.color = '#dc3232';
-                    testResult.textContent = __('Connection failed. Please check your API token.', 'flare-press');
+                    testResult.textContent = __('Connection failed. Please check your API token.', 'flare-load');
                 }
             } catch {
                 testResult.style.color = '#dc3232';
-                testResult.textContent = __('Connection failed. Please check your API token.', 'flare-press');
+                testResult.textContent = __('Connection failed. Please check your API token.', 'flare-load');
             } finally {
                 testButton.disabled = false;
             }
@@ -84,7 +84,7 @@ async function syncVariants(): Promise<VariantOption[] | false> {
         return false;
     }
 
-    const url = (window.flarepConfig?.restUrl ?? '/wp-json/flare-press/v1/') + 'sync-variants';
+    const url = (window.flarepConfig?.restUrl ?? '/wp-json/flare-load/v1/') + 'sync-variants';
 
     try {
         const response = await fetch(url, {

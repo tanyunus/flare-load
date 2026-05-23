@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace FlareLoad\Util;
 
@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
 
 class Logger
 {
-    const LOG_FILE = 'flare-press.log';
+    const LOG_FILE = 'flare-load.log';
 
     /** 0=Error 1=Warning 2=Notice 3=Info 4=Debug */
     public static function log(int $level, string $message, array $context = []): void {
@@ -88,7 +88,7 @@ class Logger
 
     private static function getLogFilePath(): string {
         $uploadDir = wp_upload_dir();
-        return $uploadDir['basedir'] . '/flare-press/' . self::LOG_FILE;
+        return $uploadDir['basedir'] . '/flare-load/' . self::LOG_FILE;
     }
 
     private static function getLevel(int $level): string {

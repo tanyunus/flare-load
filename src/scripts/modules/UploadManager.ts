@@ -1,4 +1,4 @@
-import { __ } from '@wordpress/i18n';
+﻿import { __ } from '@wordpress/i18n';
 
 export default class UploadManager {
     private switcherCheckbox: HTMLInputElement | null = null;
@@ -127,7 +127,7 @@ export default class UploadManager {
         checkbox.name = 'flarep_upload_to_cf';
 
         label.appendChild(checkbox);
-        label.appendChild(document.createTextNode(' ' + __('Upload to Cloudflare', 'flare-press')));
+        label.appendChild(document.createTextNode(' ' + __('Upload to Cloudflare', 'flare-load')));
 
         return label;
     }
@@ -136,7 +136,7 @@ export default class UploadManager {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'flarep-cf-upload-button ' + additionalClassName;
-        button.appendChild(document.createTextNode(__('Upload to Cloudflare', 'flare-press')));
+        button.appendChild(document.createTextNode(__('Upload to Cloudflare', 'flare-load')));
         button.style.boxShadow = 'inset 0 0 0 1px #f78100, 0 0 0 currentColor';
         button.style.color = '#f78100';
         return button;
@@ -187,12 +187,12 @@ export default class UploadManager {
 
     private buildErrorMessage(count: number): string {
         const logsUrl = (window as any).flarepConfig?.logsUrl ?? '';
-        const logsLink = logsUrl ? ` <a href="${logsUrl}" target="_blank" rel="noopener noreferrer">${__('Check FlarePress logs for details.', 'flare-press')}</a>` : '';
+        const logsLink = logsUrl ? ` <a href="${logsUrl}" target="_blank" rel="noopener noreferrer">${__('Check FlarePress logs for details.', 'flare-load')}</a>` : '';
 
         if (count === 1) {
-            return __('Upload to Cloudflare failed. The image was saved locally.', 'flare-press') + logsLink;
+            return __('Upload to Cloudflare failed. The image was saved locally.', 'flare-load') + logsLink;
         }
-        return count + ' ' + __('uploads to Cloudflare failed. The images were saved locally.', 'flare-press') + logsLink;
+        return count + ' ' + __('uploads to Cloudflare failed. The images were saved locally.', 'flare-load') + logsLink;
     }
 
     public showUploadError(): void {

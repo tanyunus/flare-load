@@ -10,8 +10,8 @@ defined('ABSPATH') || exit;
  *   - 2500 posts each with a standard local WordPress attachment
  *
  * Usage (from WordPress root):
- *   wp eval-file wp-content/plugins/flare-press/tools/flarep-seed.php
- *   wp eval-file wp-content/plugins/flare-press/tools/flarep-seed.php cleanup
+ *   wp eval-file wp-content/plugins/flare-load/tools/flarep-seed.php
+ *   wp eval-file wp-content/plugins/flare-load/tools/flarep-seed.php cleanup
  *
  * Cleanup deletes seeded WP posts/attachments, local files,
  * and the corresponding Cloudflare Images.

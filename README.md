@@ -1,2 +1,2 @@
-# flare-press
+﻿# flare-load
 WordPress plugin for uploading media directly to Cloudflare Images alongside the default uploader.

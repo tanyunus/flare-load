@@ -23,9 +23,9 @@ class Constants
     public const DASHBOARD_VIEW = 'dashboard';
     public const LOG_VIEW = 'logs';
     public const MIGRATE_VIEW = 'migrate';
-    public const DASHBOARD_MENU_SLUG = 'flare-press-settings';
-    public const DASHBOARD_LOG_PAGE_SLUG = 'flare-press-logs';
-    public const DASHBOARD_MIGRATE_PAGE_SLUG = 'flare-press-migrate';
+    public const DASHBOARD_MENU_SLUG = 'flare-load-settings';
+    public const DASHBOARD_LOG_PAGE_SLUG = 'flare-load-logs';
+    public const DASHBOARD_MIGRATE_PAGE_SLUG = 'flare-load-migrate';
     public const DASHBOARD_MENU_TITLE = 'FlareLoad';
     public const LOG_MENU_TITLE = 'Logs';
     public const MIGRATE_MENU_TITLE = 'Migrate to Local';
@@ -95,5 +95,5 @@ class Constants
     public const LOG_SETTINGS_GROUP_NAME = 'flarep_log_field_group';
 
     // Other
-    public const FLAREP_TRANSLATION_DOMAIN = 'flare-press';
+    public const FLAREP_TRANSLATION_DOMAIN = 'flare-load';
 }

@@ -1,9 +1,9 @@
-<?php defined('ABSPATH') || exit; ?>
+﻿<?php defined('ABSPATH') || exit; ?>
 <div class="wrap">
     <?php include 'header.php'?>
     <div class="flarep-log-viewer-content">
         <?php
-        do_settings_sections('flare-press-logs');
+        do_settings_sections('flare-load-logs');
         ?>
     </div>
 </div>

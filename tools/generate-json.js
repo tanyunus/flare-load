@@ -1,4 +1,4 @@
-/**
+﻿/**
  * JS translation JSON generator for FlarePress.
  *
  * WordPress loads JS translations from JSON files named:
@@ -16,9 +16,9 @@ const crypto = require('crypto');
 
 const ROOT        = path.resolve(__dirname, '..');
 const LANG_DIR    = path.join(ROOT, 'languages');
-const DOMAIN      = 'flare-press';
+const DOMAIN      = 'flare-load';
 // Plugin slug path relative to wp-content/ — always the same on WordPress.org
-const PLUGIN_BASE = 'plugins/flare-press/';
+const PLUGIN_BASE = 'plugins/flare-load/';
 
 // ── Which compiled JS handles contain which source strings ───────────────────
 // key   = relative path of compiled JS from plugin root
@@ -97,7 +97,7 @@ function buildJed(entries, locale, pluralForms) {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
-const poFiles = fs.readdirSync(LANG_DIR).filter(f => f.match(/^flare-press-[a-z]{2}_[A-Z]{2}\.po$/));
+const poFiles = fs.readdirSync(LANG_DIR).filter(f => f.match(/^flare-load-[a-z]{2}_[A-Z]{2}\.po$/));
 
 for (const poFile of poFiles) {
     const locale = poFile.replace(`${DOMAIN}-`, '').replace('.po', ''); // e.g. tr_TR
@@ -119,7 +119,7 @@ for (const poFile of poFiles) {
         if (entries.length === 0) continue;
 
         const jed  = buildJed(entries, locale, pf);
-        const rel  = PLUGIN_BASE + bundlePath;           // e.g. plugins/flare-press/includes/dist/...
+        const rel  = PLUGIN_BASE + bundlePath;           // e.g. plugins/flare-load/includes/dist/...
         const hash = crypto.createHash('md5').update(rel).digest('hex');
         const out  = path.join(LANG_DIR, `${DOMAIN}-${locale}-${hash}.json`);
 

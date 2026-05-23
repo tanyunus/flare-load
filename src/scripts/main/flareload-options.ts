@@ -27,7 +27,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const testButton = document.querySelector<HTMLButtonElement>('#flareload_test_connection_button');
     const testResult = document.querySelector<HTMLElement>('#flareload_test_connection_result');
 
-    if(editApiTokenField && apiTokenField) {
+    if (apiTokenField) {
+        apiTokenField.addEventListener('input', function () {
+            if (testButton) testButton.disabled = apiTokenField.value.trim() === '';
+        });
+    }
+
+    if (editApiTokenField && apiTokenField) {
         editApiTokenField.addEventListener('click', function () {
             editApiTokenField.remove();
             apiTokenField.disabled = false;
@@ -35,10 +41,6 @@ document.addEventListener('DOMContentLoaded', function () {
             apiTokenField.value = '';
             apiTokenField.required = true;
             if (testButton) testButton.disabled = true;
-        });
-
-        apiTokenField.addEventListener('input', function () {
-            if (testButton) testButton.disabled = apiTokenField.value.trim() === '';
         });
     }
 

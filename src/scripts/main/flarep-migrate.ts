@@ -1,6 +1,6 @@
 ﻿import { __ } from '@wordpress/i18n';
 
-declare const flarepMigrateConfig: {
+declare const flareloadMigrateConfig: {
     ajaxUrl: string;
     nonce: string;
     defaultVariant: string;
@@ -50,7 +50,7 @@ interface ProcessResult {
 
 class FlarepMigrateWizard {
     private root: HTMLElement;
-    private variant: string = flarepMigrateConfig.defaultVariant;
+    private variant: string = flareloadMigrateConfig.defaultVariant;
     private scope: Scope = 'all';
     private deleteFromCF: boolean = false;
     private selectedIds: number[] = [];
@@ -75,7 +75,7 @@ class FlarepMigrateWizard {
     private ajax<T>(action: string, data: Record<string, unknown> = {}): Promise<T> {
         const form = new FormData();
         form.append('action', action);
-        form.append('nonce', flarepMigrateConfig.nonce);
+        form.append('nonce', flareloadMigrateConfig.nonce);
         for (const [k, v] of Object.entries(data)) {
             if (Array.isArray(v)) {
                 (v as unknown[]).forEach(item => form.append(k + '[]', String(item)));
@@ -83,7 +83,7 @@ class FlarepMigrateWizard {
                 form.append(k, String(v ?? ''));
             }
         }
-        return fetch(flarepMigrateConfig.ajaxUrl, { method: 'POST', body: form })
+        return fetch(flareloadMigrateConfig.ajaxUrl, { method: 'POST', body: form })
             .then(r => r.json())
             .then(r => {
                 if (!r.success) throw new Error(r.data?.message || __('Request failed', 'flare-load'));
@@ -174,7 +174,7 @@ class FlarepMigrateWizard {
     }
 
     private renderConfig(): void {
-        const variants   = flarepMigrateConfig.variantOptions;
+        const variants   = flareloadMigrateConfig.variantOptions;
         const noVariants = variants.length === 0;
         const variantOpts = noVariants
             ? `<option value="">${__('No variants configured', 'flare-load')}</option>`
@@ -616,9 +616,9 @@ class FlarepMigrateWizard {
                 </div>
                 <p class="submit">
                     ${retryBtn}
-                    <a href="${flarepMigrateConfig.logsUrl}" class="button">${__('View Log', 'flare-load')}</a>
+                    <a href="${flareloadMigrateConfig.logsUrl}" class="button">${__('View Log', 'flare-load')}</a>
                     &nbsp;
-                    <a href="${flarepMigrateConfig.migrateUrl}" class="button">${__('Run Again', 'flare-load')}</a>
+                    <a href="${flareloadMigrateConfig.migrateUrl}" class="button">${__('Run Again', 'flare-load')}</a>
                 </p>
             </div>
         `);

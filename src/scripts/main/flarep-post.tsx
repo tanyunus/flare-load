@@ -12,7 +12,7 @@ import {GetVariantNamesResponse, VariantOption} from "../types/types";
 import React from "react";
 
 function getCfImageIdFromUrl(url: string): string | null {
-    const accountHash = (window as any).flarepConfig?.accountHash;
+    const accountHash = (window as any).flareloadConfig?.accountHash;
     if (!accountHash || !url) return null;
     const prefix = `https://imagedelivery.net/${accountHash}/`;
     if (!url.startsWith(prefix)) return null;
@@ -72,10 +72,10 @@ function ImageVariantPanel({
     props: ExtendedBlockEditProps<ImageBlockAttributes>;
 }) {
     const {attributes, setAttributes} = props;
-    const configVariants = (window as any).flarepConfig?.variantOptions;
+    const configVariants = (window as any).flareloadConfig?.variantOptions;
     const initialVariants: VariantOption[] = Array.isArray(configVariants) ? configVariants : [];
-    const defaultVariant: string = (window as any).flarepConfig?.defaultVariant ?? '';
-    const accountHash: string = (window as any).flarepConfig?.accountHash ?? '';
+    const defaultVariant: string = (window as any).flareloadConfig?.defaultVariant ?? '';
+    const accountHash: string = (window as any).flareloadConfig?.accountHash ?? '';
     const [variants, setVariants] = useState<VariantOption[]>(initialVariants);
     const autoApplied = useRef(false);
 
@@ -139,9 +139,9 @@ function GalleryVariantPanel({
     props: ExtendedBlockEditProps<any>;
 }) {
     const {clientId} = props;
-    const configVariants = (window as any).flarepConfig?.variantOptions;
+    const configVariants = (window as any).flareloadConfig?.variantOptions;
     const initialVariants: VariantOption[] = Array.isArray(configVariants) ? configVariants : [];
-    const defaultVariant = (window as any).flarepConfig?.defaultVariant ?? '';
+    const defaultVariant = (window as any).flareloadConfig?.defaultVariant ?? '';
     const [variants, setVariants] = useState<VariantOption[]>(initialVariants);
     const autoApplied = useRef(false);
 
@@ -217,10 +217,10 @@ function MediaTextVariantPanel({
     props: ExtendedBlockEditProps<any>;
 }) {
     const {attributes, setAttributes} = props;
-    const configVariants = (window as any).flarepConfig?.variantOptions;
+    const configVariants = (window as any).flareloadConfig?.variantOptions;
     const initialVariants: VariantOption[] = Array.isArray(configVariants) ? configVariants : [];
-    const defaultVariant: string = (window as any).flarepConfig?.defaultVariant ?? '';
-    const accountHash: string = (window as any).flarepConfig?.accountHash ?? '';
+    const defaultVariant: string = (window as any).flareloadConfig?.defaultVariant ?? '';
+    const accountHash: string = (window as any).flareloadConfig?.accountHash ?? '';
     const [variants, setVariants] = useState<VariantOption[]>(initialVariants);
     const autoApplied = useRef(false);
 
@@ -304,7 +304,7 @@ addFilter(
 );
 
 async function getVariantNames(): Promise<VariantOption[] | false> {
-    const fromConfig = (window as any).flarepConfig?.variantOptions;
+    const fromConfig = (window as any).flareloadConfig?.variantOptions;
     if (Array.isArray(fromConfig) && fromConfig.length > 0) {
         return fromConfig;
     }
@@ -315,7 +315,7 @@ async function getVariantNames(): Promise<VariantOption[] | false> {
         return false;
     }
 
-    const url = (window.flarepConfig?.restUrl ?? '/wp-json/flare-load/v1/') + 'get-variant-names';
+    const url = (window.flareloadConfig?.restUrl ?? '/wp-json/flare-load/v1/') + 'get-variant-names';
 
     try {
         const response = await fetch(url, {

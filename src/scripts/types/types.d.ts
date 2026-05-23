@@ -151,7 +151,7 @@ declare global {
         uploader?: PluploadUploader;
         flareload_upload_to_cf?: number;
         flareload_upload_to_cf_next?: boolean;
-        flarepConfig?: FpConfig;
+        flareloadConfig?: FpConfig;
         jQuery?: any;
         fetch: typeof fetch;
     }

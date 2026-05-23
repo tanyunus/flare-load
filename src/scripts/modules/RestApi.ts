@@ -1,5 +1,5 @@
-export default class RestApi {
+﻿export default class RestApi {
     public static getWpNonce(): string | undefined {
-        return window.flarepConfig?.restNonce;
+        return window.flareloadConfig?.restNonce;
     }
 }

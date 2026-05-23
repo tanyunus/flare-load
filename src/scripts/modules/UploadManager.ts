@@ -186,7 +186,7 @@ export default class UploadManager {
     }
 
     private buildErrorMessage(count: number): string {
-        const logsUrl = (window as any).flarepConfig?.logsUrl ?? '';
+        const logsUrl = (window as any).flareloadConfig?.logsUrl ?? '';
         const logsLink = logsUrl ? ` <a href="${logsUrl}" target="_blank" rel="noopener noreferrer">${__('Check FlarePress logs for details.', 'flare-load')}</a>` : '';
 
         if (count === 1) {

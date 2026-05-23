@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const body = new FormData();
             body.append('action', 'flareload_test_connection');
-            body.append('nonce', (window as any).flarepConfig?.testConnectionNonce ?? '');
+            body.append('nonce', (window as any).flareloadConfig?.testConnectionNonce ?? '');
 
             const apiTokenInput = document.querySelector<HTMLInputElement>('[data-field-name="flareload_cf_api_token"]');
             if (apiTokenInput && !apiTokenInput.disabled && apiTokenInput.value) {
@@ -84,7 +84,7 @@ async function syncVariants(): Promise<VariantOption[] | false> {
         return false;
     }
 
-    const url = (window.flarepConfig?.restUrl ?? '/wp-json/flare-load/v1/') + 'sync-variants';
+    const url = (window.flareloadConfig?.restUrl ?? '/wp-json/flare-load/v1/') + 'sync-variants';
 
     try {
         const response = await fetch(url, {

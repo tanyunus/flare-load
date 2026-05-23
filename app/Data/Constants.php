@@ -88,7 +88,6 @@ class Constants
 
     // UI strings — header
     public const UI_HEADER_TAGLINE = 'DIRECT<br>CLOUDFLARE IMAGES<br>INTEGRATION';
-    public const UI_HEADER_WEBSITE_LINK_TITLE = 'FlareLoad plugin website';
     public const UI_HEADER_GITHUB_LINK_TITLE = 'FlareLoad developer Github profile';
 
     // Internal IDs

@@ -1,6 +1,6 @@
 <?php
 
-namespace FlarePress\Util;
+namespace FlareLoad\Util;
 
 defined('ABSPATH') || exit;
 

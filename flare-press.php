@@ -11,14 +11,14 @@ License:     GPL-3.0+
 Text Domain: flare-press
 */
 
-use FlarePress\Api\CloudflareImagesApi;
-use FlarePress\Controllers\AttachmentController;
-use FlarePress\Controllers\MigrationController;
-use FlarePress\Controllers\OptionController;
-use FlarePress\Data\Constants;
-use FlarePress\Util\Logger;
-use FlarePress\Util\Utils;
-use FlarePress\RestApi\OptionRestApi;
+use FlareLoad\Api\CloudflareImagesApi;
+use FlareLoad\Controllers\AttachmentController;
+use FlareLoad\Controllers\MigrationController;
+use FlareLoad\Controllers\OptionController;
+use FlareLoad\Data\Constants;
+use FlareLoad\Util\Logger;
+use FlareLoad\Util\Utils;
+use FlareLoad\RestApi\OptionRestApi;
 
 if (!defined('WPINC')) {
     die;

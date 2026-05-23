@@ -1,14 +1,14 @@
 <?php
 
-namespace FlarePress\Controllers;
+namespace FlareLoad\Controllers;
 
 defined('ABSPATH') || exit;
 
 use Exception;
-use FlarePress\Api\CloudflareImagesApi;
-use FlarePress\Data\Constants;
-use FlarePress\Util\Logger;
-use FlarePress\Util\Utils;
+use FlareLoad\Api\CloudflareImagesApi;
+use FlareLoad\Data\Constants;
+use FlareLoad\Util\Logger;
+use FlareLoad\Util\Utils;
 
 class OptionController
 {

@@ -4,7 +4,7 @@ defined('ABSPATH') || exit;
 
 spl_autoload_register(function ($class) {
     $prefixes = [
-        'FlarePress\\' => __DIR__ . '/app/',
+        'FlareLoad\\' => __DIR__ . '/app/',
     ];
 
     foreach ($prefixes as $prefix => $baseDir) {

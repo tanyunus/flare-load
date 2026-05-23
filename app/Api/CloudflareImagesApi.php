@@ -1,11 +1,11 @@
 <?php
 
-namespace FlarePress\Api;
+namespace FlareLoad\Api;
 
 defined('ABSPATH') || exit;
 
 use Exception;
-use FlarePress\Data\Constants;
+use FlareLoad\Data\Constants;
 
 class CloudflareImagesApi
 {

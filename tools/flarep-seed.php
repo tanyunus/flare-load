@@ -57,7 +57,7 @@ function flarep_seed_run(): void
         $filename = "flarep-seed-cf-{$i}.jpg";
 
         try {
-            $result = \FlarePress\Api\CloudflareImagesApi::uploadImage($samplePath, $filename);
+            $result = \FlareLoad\Api\CloudflareImagesApi::uploadImage($samplePath, $filename);
         } catch (\Exception $e) {
             WP_CLI::warning("CF upload #{$i} failed: " . $e->getMessage());
             $bar->tick();
@@ -290,7 +290,7 @@ function flarep_seed_insert(array $postarr)
 function flarep_seed_cf_delete(string $cfId): void
 {
     try {
-        \FlarePress\Api\CloudflareImagesApi::deleteImage($cfId);
+        \FlareLoad\Api\CloudflareImagesApi::deleteImage($cfId);
     } catch (\Exception $_) {}
 }
 

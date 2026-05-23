@@ -1,13 +1,13 @@
 <?php
 
-namespace FlarePress\Controllers;
+namespace FlareLoad\Controllers;
 
 defined('ABSPATH') || exit;
 
 use Exception;
-use FlarePress\Api\CloudflareImagesApi;
-use FlarePress\Data\Constants;
-use FlarePress\Util\Logger;
+use FlareLoad\Api\CloudflareImagesApi;
+use FlareLoad\Data\Constants;
+use FlareLoad\Util\Logger;
 
 class MigrationController
 {

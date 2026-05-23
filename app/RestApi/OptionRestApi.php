@@ -1,10 +1,10 @@
 <?php
 
-namespace FlarePress\RestApi;
+namespace FlareLoad\RestApi;
 
 defined('ABSPATH') || exit;
 
-use FlarePress\Controllers\OptionController;
+use FlareLoad\Controllers\OptionController;
 use WP_REST_Request;
 use WP_REST_Response;
 

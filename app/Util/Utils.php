@@ -1,10 +1,10 @@
 <?php
 
-namespace FlarePress\Util;
+namespace FlareLoad\Util;
 
 defined('ABSPATH') || exit;
 
-use FlarePress\Data\Constants;
+use FlareLoad\Data\Constants;
 
 class Utils
 {

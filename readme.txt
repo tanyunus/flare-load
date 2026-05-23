@@ -3,7 +3,7 @@ Contributors: tanyunus
 Tags: cloudflare, images, cdn, media, upload
 Requires at least: 5.9
 Tested up to: 6.9
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 Requires PHP: 8.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -92,6 +92,9 @@ Your Cloudflare Account ID, API Token, and uploaded image files are transmitted 
 * [Cloudflare Terms of Service](https://www.cloudflare.com/terms/)
 
 == Changelog ==
+
+= 1.0.4 =
+* Rename: plugin renamed from FlarePress to FlareLoad.
 
 = 1.0.3 =
 * Fix: address all WP.org Plugin Check warnings (nonce verification, direct DB queries, error_log usage).

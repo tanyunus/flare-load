@@ -2,7 +2,7 @@
 /*
 Plugin Name: FlareLoad
 Description: WordPress plugin for uploading media directly to Cloudflare Images alongside the default uploader.
-Version:     1.0.3
+Version:     1.0.4
 Requires at least: 5.9
 Requires PHP:      8.0
 Author:      Yunus Tan
@@ -24,7 +24,7 @@ if (!defined('WPINC')) {
     die;
 }
 
-define('FLARELOAD_VERSION', '1.0.3');
+define('FLARELOAD_VERSION', '1.0.4');
 define('FLARELOAD_PATH', plugin_dir_path(__FILE__));
 define('FLARELOAD_URL', plugin_dir_url(__FILE__));
 

@@ -82,6 +82,7 @@ class Constants
     public const UI_CF_ACCOUNT_HASH_DESCRIPTION = 'You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/images/hosted</i>';
     public const UI_CF_API_TOKEN_DESCRIPTION = 'You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/api-tokens</i>';
     public const UI_DEFAULT_VARIANT_DESCRIPTION = 'Choose the largest variant without cropping as the default. <br/>This ensures the full image is clearly visible and recognizable.';
+    public const UI_EDIT_BUTTON_LABEL = 'Edit';
     public const UI_KEEP_FILES_AFTER_UPLOAD_DESCRIPTION = 'Enable this setting if you prefer to keep a local copy of the uploaded media. The copy of the file will be kept on default upload folder';
     public const UI_KEEP_ON_CF_AFTER_DELETE_DESCRIPTION = 'FlareLoad deletes the copy of the attachment from Cloudflare during the deletion process.<br/>Enable this setting if you prefer to keep the file on Cloudflare.';
 

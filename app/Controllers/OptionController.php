@@ -401,7 +401,7 @@ class OptionController
                 ?>
                 <button id="flareload_change_api_token_button" class="button button-secondary flareload-change-api-token-button"
                         type="button" role="button">
-                    <span class="dashicons dashicons-edit"></span>
+                    <?php echo esc_html(__('Edit', 'flare-load')); ?>
                 </button>
                 <?php
             }

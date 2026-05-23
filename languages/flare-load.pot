@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-05-23T16:53:51+00:00\n"
+"POT-Creation-Date: 2026-05-23T17:06:12+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: FlareLoad generate-pot.js\n"
 "X-Domain: flare-load\n"
@@ -175,6 +175,11 @@ msgstr ""
 #: app/Data/Constants.php
 #: app/Controllers/OptionController.php
 msgid "Choose the largest variant without cropping as the default. <br/>This ensures the full image is clearly visible and recognizable."
+msgstr ""
+
+#: app/Data/Constants.php
+#: app/Controllers/OptionController.php
+msgid "Edit"
 msgstr ""
 
 #: app/Data/Constants.php

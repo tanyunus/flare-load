@@ -2,7 +2,7 @@
 Contributors: tanyunus
 Tags: cloudflare, images, cdn, media, upload
 Requires at least: 5.9
-Tested up to: 6.9
+Tested up to: 7.0
 Stable tag: 1.0.4
 Requires PHP: 8.0
 License: GPLv3 or later

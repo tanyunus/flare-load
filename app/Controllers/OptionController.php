@@ -406,14 +406,12 @@ class OptionController
                 <?php
             }
             ?>
-        </label>
-        <div class="flareload-test-connection-wrap" style="margin-top:8px;">
             <button id="flareload_test_connection_button" class="button button-secondary" type="button"
                     <?php echo empty($optionVal) ? 'disabled' : '' ?>>
                 <?php echo esc_html(__('Test Connection', 'flare-load')); ?>
             </button>
             <span id="flareload_test_connection_result" style="margin-left:8px;"></span>
-        </div>
+        </label>
         <p class="description"><?php echo wp_kses(__('You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/api-tokens</i>', 'flare-load'), ['i' => [], 'b' => []]); ?></p>
         <?php
     }

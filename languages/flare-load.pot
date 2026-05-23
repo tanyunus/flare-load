@@ -2,30 +2,30 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: FlarePress 1.0.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/flare-press\n"
+"Project-Id-Version: FlareLoad 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/flare-load\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-05-12T17:19:55+00:00\n"
+"POT-Creation-Date: 2026-05-23T15:54:56+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: FlarePress generate-pot.js\n"
-"X-Domain: flare-press\n"
+"X-Generator: FlareLoad generate-pot.js\n"
+"X-Domain: flare-load\n"
 
 #. Plugin Name of the plugin
-#: flare-press.php
-msgid "FlarePress"
+#: flare-load.php
+msgid "FlareLoad"
 msgstr ""
 
 #. Description of the plugin
-#: flare-press.php
+#: flare-load.php
 msgid "WordPress plugin for uploading media directly to Cloudflare Images alongside the default uploader."
 msgstr ""
 
 #. Author of the plugin
-#: flare-press.php
+#: flare-load.php
 msgid "Yunus Tan"
 msgstr ""
 
@@ -36,12 +36,12 @@ msgstr ""
 
 #: app/Data/Constants.php
 #: app/Controllers/OptionController.php
-msgid "FlarePress Settings"
+msgid "FlareLoad Settings"
 msgstr ""
 
 #: app/Data/Constants.php
 #: app/Controllers/OptionController.php
-msgid "FlarePress Logs"
+msgid "FlareLoad Logs"
 msgstr ""
 
 #: app/Data/Constants.php
@@ -66,26 +66,26 @@ msgstr ""
 
 #: app/Data/Constants.php
 #: app/Controllers/OptionController.php
-#: flare-press.php
-#: src/scripts/main/flarep-media-library-grid.ts
+#: flare-load.php
+#: src/scripts/main/flareload-media-library-grid.ts
 msgid "Uploaded to Cloudflare"
 msgstr ""
 
 #: app/Data/Constants.php
-#: flare-press.php
-#: src/scripts/main/flarep-media-library-grid.ts
+#: flare-load.php
+#: src/scripts/main/flareload-media-library-grid.ts
 msgid "All locations"
 msgstr ""
 
 #: app/Data/Constants.php
 #: app/Controllers/OptionController.php
-#: flare-press.php
-#: src/scripts/main/flarep-media-library-grid.ts
+#: flare-load.php
+#: src/scripts/main/flareload-media-library-grid.ts
 msgid "This server"
 msgstr ""
 
 #: app/Data/Constants.php
-#: flare-press.php
+#: flare-load.php
 msgid "Location"
 msgstr ""
 
@@ -144,12 +144,12 @@ msgid "Test Connection"
 msgstr ""
 
 #: app/Data/Constants.php
-#: src/scripts/main/flarep-options.ts
+#: src/scripts/main/flareload-options.ts
 msgid "Connection successful."
 msgstr ""
 
 #: app/Data/Constants.php
-#: src/scripts/main/flarep-options.ts
+#: src/scripts/main/flareload-options.ts
 msgid "Connection failed. Please check your API token."
 msgstr ""
 
@@ -184,7 +184,7 @@ msgstr ""
 
 #: app/Data/Constants.php
 #: app/Controllers/OptionController.php
-msgid "FlarePress deletes the copy of the attachment from Cloudflare during the deletion process.<br/>Enable this setting if you prefer to keep the file on Cloudflare."
+msgid "FlareLoad deletes the copy of the attachment from Cloudflare during the deletion process.<br/>Enable this setting if you prefer to keep the file on Cloudflare."
 msgstr ""
 
 #: app/Data/Constants.php
@@ -194,16 +194,16 @@ msgstr ""
 
 #: app/Data/Constants.php
 #: app/Views/header.php
-msgid "FlarePress plugin website"
+msgid "FlareLoad plugin website"
 msgstr ""
 
 #: app/Data/Constants.php
 #: app/Views/header.php
-msgid "FlarePress developer Github profile"
+msgid "FlareLoad developer Github profile"
 msgstr ""
 
 #: app/Controllers/OptionController.php
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Migrate to Local"
 msgstr ""
 
@@ -223,283 +223,311 @@ msgstr ""
 msgid "Error while getting account hash."
 msgstr ""
 
-#: flare-press.php
-msgid "FlarePress is not fully configured. Please complete your <a href=\"%s\">Cloudflare settings</a> to enable all features."
+#: flare-load.php
+msgid "FlareLoad is not fully configured. Please complete your <a href=\"%s\">Cloudflare settings</a> to enable all features."
 msgstr ""
 
-#: flare-press.php
-msgid "Upload to Cloudflare failed. The image was saved locally. Check FlarePress logs for details."
+#: flare-load.php
+msgid "Upload to Cloudflare failed. The image was saved locally. Check FlareLoad logs for details."
 msgstr ""
 
-#: flare-press.php
+#: flare-load.php
 msgid "Missing parameters."
 msgstr ""
 
-#: flare-press.php
+#: flare-load.php
+msgid "(no title)"
+msgstr ""
+
+#: flare-load.php
 msgid "Account ID is required to test the connection."
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Request failed"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Loading…"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Failed"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Paused or interrupted migration found"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "A migration was previously started but did not complete. Each image is processed individually — only the remaining items below need to be migrated."
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Completed"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Remaining"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Progress"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Continue Migration"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Start Fresh"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "No variants configured"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "This wizard downloads your Cloudflare Images back to your server and restores them as standard WordPress attachments."
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Before you start:"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Close all post/page editor tabs in every browser window. If an editor containing a Cloudflare image is left open and the post is saved after migration completes, the Cloudflare image reference will be written back into that post."
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
-msgid "No variants found. Please sync your variants in FlarePress settings first."
+#: src/scripts/main/flareload-migrate.ts
+msgid "No variants found. Please sync your variants in FlareLoad settings first."
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Download Variant"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "The Cloudflare Images variant to download as the main image."
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Images to Migrate"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "All Cloudflare images"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Images attached to posts/pages"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Select images manually"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "After Migration"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Delete images from Cloudflare after successful migration"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Warning: This is irreversible. Deleted Cloudflare images cannot be recovered."
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Continue"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
+msgid "Open editor sessions detected"
+msgstr ""
+
+#: src/scripts/main/flareload-migrate.ts
+msgid "The following posts are currently open in an editor. If they are saved after migration completes, Cloudflare image references may be written back."
+msgstr ""
+
+#: src/scripts/main/flareload-migrate.ts
+msgid "Please close these editor tabs, then click Re-check."
+msgstr ""
+
+#: src/scripts/main/flareload-migrate.ts
+msgid "Go Back"
+msgstr ""
+
+#: src/scripts/main/flareload-migrate.ts
+msgid "Re-check"
+msgstr ""
+
+#: src/scripts/main/flareload-migrate.ts
+msgid "Continue Anyway"
+msgstr ""
+
+#: src/scripts/main/flareload-migrate.ts
 msgid "Failed to load images. Please try again."
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "No Cloudflare images found."
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Previous"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Page"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "total"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Next"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Select Images"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Choose which images to migrate. Images with no variant configured will be skipped."
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Select all on this page"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Thumbnail"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Title"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Attached to"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Status"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Selected"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Back"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Analyzing…"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Analysis failed. Please try again."
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Analysis Results"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Total"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Ready to migrate"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Already have local copy"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "No variant — will skip"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Nothing to migrate."
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Start Migration"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Migrating…"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Pause"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Resume"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Processing"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "error"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Retry Failed"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Migration Complete"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Migrated successfully"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "View Log"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Run Again"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Ready"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "Has local copy"
 msgstr ""
 
-#: src/scripts/main/flarep-migrate.ts
+#: src/scripts/main/flareload-migrate.ts
 msgid "No variant"
 msgstr ""
 
-#: src/scripts/main/flarep-post.tsx
+#: src/scripts/main/flareload-post.tsx
 msgid "Cloudflare Variants"
 msgstr ""
 
-#: src/scripts/main/flarep-post.tsx
+#: src/scripts/main/flareload-post.tsx
 msgid "Choose a variant"
 msgstr ""
 
-#: src/scripts/main/flarep-post.tsx
+#: src/scripts/main/flareload-post.tsx
 msgid "Select a variant..."
 msgstr ""
 
-#: src/scripts/main/flarep-post.tsx
+#: src/scripts/main/flareload-post.tsx
 msgid "Apply variant to all images"
 msgstr ""
 
@@ -508,7 +536,7 @@ msgid "Upload to Cloudflare"
 msgstr ""
 
 #: src/scripts/modules/UploadManager.ts
-msgid "Check FlarePress logs for details."
+msgid "Check FlareLoad logs for details."
 msgstr ""
 
 #: src/scripts/modules/UploadManager.ts

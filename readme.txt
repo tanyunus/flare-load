@@ -22,6 +22,7 @@ FlareLoad integrates Cloudflare Images as a direct upload destination alongside 
 * Cloudflare image variant support with per-image variant selection in the block editor
 * Visual indicator in the media library list view for Cloudflare-hosted images
 * Sync variants from your Cloudflare account with a single click
+* Migrate Cloudflare-hosted images back to local storage with an interactive wizard
 * Activity log viewer for debugging
 
 == Installation ==

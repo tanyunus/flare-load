@@ -33,23 +33,23 @@ require_once FLARELOAD_PATH . 'autoload.php';
 register_activation_hook(__FILE__, 'FLARELOAD_activate');
 
 function FLARELOAD_activate(): void {
-    if (!get_option('FLARELOAD_upload_settings')) {
-        update_option('FLARELOAD_upload_settings', [
+    if (!get_option('flareload_upload_settings')) {
+        update_option('flareload_upload_settings', [
             Constants::DASHBOARD_KEEP_AFTER_UPLOAD_FIELD_NAME       => false,
             Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME => false,
         ]);
     }
 
-    delete_user_meta(get_current_user_id(), 'FLARELOAD_setup_notice_dismissed');
+    delete_user_meta(get_current_user_id(), 'flareload_setup_notice_dismissed');
     FLARELOAD_backfill_cf_post_meta();
 }
 
 function FLARELOAD_maybe_run_backfill(): void {
-    if (get_transient('FLARELOAD_backfill_v1_done')) {
+    if (get_transient('flareload_backfill_v1_done')) {
         return;
     }
     FLARELOAD_backfill_cf_post_meta();
-    set_transient('FLARELOAD_backfill_v1_done', true, WEEK_IN_SECONDS);
+    set_transient('flareload_backfill_v1_done', true, WEEK_IN_SECONDS);
 }
 
 function FLARELOAD_backfill_cf_post_meta(): void {
@@ -95,7 +95,7 @@ function FLARELOAD_incomplete_setup_notice(): void
         return;
     }
 
-    if (get_user_meta(get_current_user_id(), 'FLARELOAD_setup_notice_dismissed', true)) {
+    if (get_user_meta(get_current_user_id(), 'flareload_setup_notice_dismissed', true)) {
         return;
     }
 
@@ -108,11 +108,11 @@ function FLARELOAD_enqueue_dismiss_notice_script(): void
         return;
     }
 
-    if (get_user_meta(get_current_user_id(), 'FLARELOAD_setup_notice_dismissed', true)) {
+    if (get_user_meta(get_current_user_id(), 'flareload_setup_notice_dismissed', true)) {
         return;
     }
 
-    $nonce    = wp_create_nonce('FLARELOAD_dismiss_setup_notice');
+    $nonce    = wp_create_nonce('flareload_dismiss_setup_notice');
     $ajax_url = wp_json_encode(admin_url('admin-ajax.php'));
     $nonce_js = esc_js($nonce);
 
@@ -127,7 +127,7 @@ function FLARELOAD_enqueue_dismiss_notice_script(): void
         '      fetch(' . $ajax_url . ', {' .
         '        method: "POST",' .
         '        headers: {"Content-Type": "application/x-www-form-urlencoded"},' .
-        '        body: "action=FLARELOAD_dismiss_setup_notice&nonce=' . $nonce_js . '"' .
+        '        body: "action=flareload_dismiss_setup_notice&nonce=' . $nonce_js . '"' .
         '      });' .
         '    }' .
         '  });' .
@@ -142,7 +142,7 @@ function FlareLoadInit(): void
     if (is_user_logged_in()) {
         add_action('admin_menu', fn() => new OptionController($credentialsComplete));
         add_action('admin_enqueue_scripts', 'FLARELOAD_admin_enqueue_scripts');
-        add_action('wp_ajax_FLARELOAD_test_connection', 'FLARELOAD_ajax_test_connection');
+        add_action('wp_ajax_flareload_test_connection', 'FLARELOAD_ajax_test_connection');
         add_filter('pre_update_option_' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'FLARELOAD_pre_update_option_save_api_token', 10, 2);
         add_action('add_option_'    . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'FLARELOAD_on_api_token_added',   10, 2);
         add_action('update_option_' . Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME, 'FLARELOAD_on_api_token_updated', 10, 2);
@@ -150,17 +150,17 @@ function FlareLoadInit(): void
         if (!$credentialsComplete) {
             add_action('admin_notices', 'FLARELOAD_incomplete_setup_notice');
             add_action('admin_enqueue_scripts', 'FLARELOAD_enqueue_dismiss_notice_script');
-            add_action('wp_ajax_FLARELOAD_dismiss_setup_notice', 'FLARELOAD_ajax_dismiss_setup_notice');
+            add_action('wp_ajax_flareload_dismiss_setup_notice', 'FLARELOAD_ajax_dismiss_setup_notice');
             return;
         }
 
-        add_action('wp_ajax_FLARELOAD_migrate_analyze',      'FLARELOAD_ajax_migrate_analyze');
-        add_action('wp_ajax_FLARELOAD_migrate_list',         'FLARELOAD_ajax_migrate_list');
-        add_action('wp_ajax_FLARELOAD_migrate_start',        'FLARELOAD_ajax_migrate_start');
-        add_action('wp_ajax_FLARELOAD_migrate_process',      'FLARELOAD_ajax_migrate_process');
-        add_action('wp_ajax_FLARELOAD_migrate_check_locks',  'FLARELOAD_ajax_migrate_check_locks');
-        add_action('wp_ajax_FLARELOAD_migrate_get_state', 'FLARELOAD_ajax_migrate_get_state');
-        add_action('wp_ajax_FLARELOAD_migrate_cancel',    'FLARELOAD_ajax_migrate_cancel');
+        add_action('wp_ajax_flareload_migrate_analyze',      'FLARELOAD_ajax_migrate_analyze');
+        add_action('wp_ajax_flareload_migrate_list',         'FLARELOAD_ajax_migrate_list');
+        add_action('wp_ajax_flareload_migrate_start',        'FLARELOAD_ajax_migrate_start');
+        add_action('wp_ajax_flareload_migrate_process',      'FLARELOAD_ajax_migrate_process');
+        add_action('wp_ajax_flareload_migrate_check_locks',  'FLARELOAD_ajax_migrate_check_locks');
+        add_action('wp_ajax_flareload_migrate_get_state', 'FLARELOAD_ajax_migrate_get_state');
+        add_action('wp_ajax_flareload_migrate_cancel',    'FLARELOAD_ajax_migrate_cancel');
         add_action('rest_api_init', 'FLARELOAD_rest_api_init');
         add_filter('render_block', 'FLARELOAD_render_block', 10, 2);
         add_filter('manage_media_columns', 'FLARELOAD_manage_media_columns');
@@ -171,7 +171,7 @@ function FlareLoadInit(): void
         add_action('add_attachment', 'FLARELOAD_add_attachment', 1, 3);
         add_action('admin_notices', 'FLARELOAD_admin_upload_error_notice');
         add_filter('heartbeat_received', 'FLARELOAD_heartbeat_upload_error', 10, 2);
-        add_action('wp_ajax_FLARELOAD_check_upload_error', 'FLARELOAD_ajax_check_upload_error');
+        add_action('wp_ajax_flareload_check_upload_error', 'FLARELOAD_ajax_check_upload_error');
         add_action('admin_init', 'FLARELOAD_maybe_run_backfill');
     }
 
@@ -349,7 +349,7 @@ function FLARELOAD_rest_api_init(): void
         }
     ));
 
-    register_rest_field('attachment', 'FLARELOAD_cf_image_id', array(
+    register_rest_field('attachment', 'flareload_cf_image_id', array(
         'get_callback' => function ($object) {
             $imageId = $object['id'];
             return AttachmentController::getCloudflareIdOfAttachment($imageId);
@@ -362,11 +362,11 @@ function FLARELOAD_rest_api_init(): void
         )
     ));
 
-    register_rest_field('attachment', 'FLARELOAD_upload_error', array(
+    register_rest_field('attachment', 'flareload_upload_error', array(
         'get_callback' => function ($object) {
-            $error = get_post_meta($object['id'], '_FLARELOAD_upload_error', true);
+            $error = get_post_meta($object['id'], '_flareload_upload_error', true);
             if ($error) {
-                delete_post_meta($object['id'], '_FLARELOAD_upload_error');
+                delete_post_meta($object['id'], '_flareload_upload_error');
                 return $error;
             }
             return null;
@@ -386,10 +386,10 @@ function FLARELOAD_wp_prepare_attachment_for_js(array $response, WP_Post $attach
         $response = AttachmentController::updateAjaxQueryResponse($response, $attachment);
     }
 
-    $error = get_post_meta($attachment->ID, '_FLARELOAD_upload_error', true);
+    $error = get_post_meta($attachment->ID, '_flareload_upload_error', true);
     if ($error) {
-        delete_post_meta($attachment->ID, '_FLARELOAD_upload_error');
-        $response['FLARELOAD_upload_error'] = $error;
+        delete_post_meta($attachment->ID, '_flareload_upload_error');
+        $response['flareload_upload_error'] = $error;
     }
 
     return $response;
@@ -445,7 +445,7 @@ function FLARELOAD_add_attachment(int $attachmentId): void
 
 function FLARELOAD_admin_upload_error_notice(): void
 {
-    $key = 'FLARELOAD_upload_error_' . get_current_user_id();
+    $key = 'flareload_upload_error_' . get_current_user_id();
     if (get_transient($key)) {
         delete_transient($key);
         $message = __('Upload to Cloudflare failed. The image was saved locally. Check FlareLoad logs for details.', 'flare-load');
@@ -455,17 +455,17 @@ function FLARELOAD_admin_upload_error_notice(): void
 
 function FLARELOAD_heartbeat_upload_error(array $response, array $data): array
 {
-    $key = 'FLARELOAD_upload_error_' . get_current_user_id();
+    $key = 'flareload_upload_error_' . get_current_user_id();
     if (get_transient($key)) {
         delete_transient($key);
-        $response['FLARELOAD_upload_error'] = true;
+        $response['flareload_upload_error'] = true;
     }
     return $response;
 }
 
 function FLARELOAD_ajax_migrate_analyze(): void
 {
-    check_ajax_referer('FLARELOAD_migrate', 'nonce');
+    check_ajax_referer('flareload_migrate', 'nonce');
     if (!current_user_can('manage_options')) {
         wp_send_json_error(null, 403);
         return;
@@ -479,7 +479,7 @@ function FLARELOAD_ajax_migrate_analyze(): void
 
 function FLARELOAD_ajax_migrate_list(): void
 {
-    check_ajax_referer('FLARELOAD_migrate', 'nonce');
+    check_ajax_referer('flareload_migrate', 'nonce');
     if (!current_user_can('manage_options')) {
         wp_send_json_error(null, 403);
         return;
@@ -494,7 +494,7 @@ function FLARELOAD_ajax_migrate_list(): void
 
 function FLARELOAD_ajax_migrate_start(): void
 {
-    check_ajax_referer('FLARELOAD_migrate', 'nonce');
+    check_ajax_referer('flareload_migrate', 'nonce');
     if (!current_user_can('manage_options')) {
         wp_send_json_error(null, 403);
         return;
@@ -519,7 +519,7 @@ function FLARELOAD_ajax_migrate_start(): void
         'options'       => ['variant' => $variant, 'delete_from_cf' => $deleteFromCF],
     ];
 
-    set_transient('FLARELOAD_migration_state', $state, DAY_IN_SECONDS);
+    set_transient('flareload_migration_state', $state, DAY_IN_SECONDS);
 
     wp_send_json_success($state);
 }
@@ -528,7 +528,7 @@ function FLARELOAD_ajax_migrate_process(): void
 {
     ob_start();
 
-    check_ajax_referer('FLARELOAD_migrate', 'nonce');
+    check_ajax_referer('flareload_migrate', 'nonce');
     if (!current_user_can('manage_options')) {
         ob_end_clean();
         wp_send_json_error(null, 403);
@@ -547,7 +547,7 @@ function FLARELOAD_ajax_migrate_process(): void
 
     $result = MigrationController::processImage($id, $variant, $deleteFromCF);
 
-    $state = get_transient('FLARELOAD_migration_state');
+    $state = get_transient('flareload_migration_state');
     if ($state) {
         $state['remaining'] = array_values(array_filter($state['remaining'], fn($i) => $i !== $id));
         if ($result['status'] === 'error') {
@@ -555,7 +555,7 @@ function FLARELOAD_ajax_migrate_process(): void
         } else {
             $state['processed'][] = $id;
         }
-        set_transient('FLARELOAD_migration_state', $state, DAY_IN_SECONDS);
+        set_transient('flareload_migration_state', $state, DAY_IN_SECONDS);
     }
 
     ob_end_clean();
@@ -564,30 +564,30 @@ function FLARELOAD_ajax_migrate_process(): void
 
 function FLARELOAD_ajax_migrate_get_state(): void
 {
-    check_ajax_referer('FLARELOAD_migrate', 'nonce');
+    check_ajax_referer('flareload_migrate', 'nonce');
     if (!current_user_can('manage_options')) {
         wp_send_json_error(null, 403);
         return;
     }
 
-    wp_send_json_success(get_transient('FLARELOAD_migration_state') ?: null);
+    wp_send_json_success(get_transient('flareload_migration_state') ?: null);
 }
 
 function FLARELOAD_ajax_migrate_cancel(): void
 {
-    check_ajax_referer('FLARELOAD_migrate', 'nonce');
+    check_ajax_referer('flareload_migrate', 'nonce');
     if (!current_user_can('manage_options')) {
         wp_send_json_error(null, 403);
         return;
     }
 
-    delete_transient('FLARELOAD_migration_state');
+    delete_transient('flareload_migration_state');
     wp_send_json_success();
 }
 
 function FLARELOAD_ajax_migrate_check_locks(): void
 {
-    check_ajax_referer('FLARELOAD_migrate', 'nonce');
+    check_ajax_referer('flareload_migrate', 'nonce');
     if (!current_user_can('manage_options')) {
         wp_send_json_error(null, 403);
         return;
@@ -620,7 +620,7 @@ function FLARELOAD_ajax_migrate_check_locks(): void
 
 function FLARELOAD_ajax_test_connection(): void
 {
-    check_ajax_referer('FLARELOAD_test_connection', 'nonce');
+    check_ajax_referer('flareload_test_connection', 'nonce');
 
     if (!current_user_can('manage_options')) {
         wp_send_json_error();
@@ -631,7 +631,7 @@ function FLARELOAD_ajax_test_connection(): void
         wp_send_json_error(['message' => __('Account ID is required to test the connection.', 'flare-load')]);
         return;
     }
-    $testToken = isset($_POST['FLARELOAD_test_token']) ? sanitize_text_field(wp_unslash($_POST['FLARELOAD_test_token'])) : null;
+    $testToken = isset($_POST['flareload_test_token']) ? sanitize_text_field(wp_unslash($_POST['flareload_test_token'])) : null;
     try {
         CloudflareImagesApi::getVariants($testToken);
         wp_send_json_success();
@@ -647,7 +647,7 @@ function FLARELOAD_ajax_check_upload_error(): void
         wp_send_json_error();
         return;
     }
-    $key = 'FLARELOAD_upload_error_' . get_current_user_id();
+    $key = 'flareload_upload_error_' . get_current_user_id();
     if (get_transient($key)) {
         delete_transient($key);
         wp_send_json_success(true);
@@ -657,8 +657,8 @@ function FLARELOAD_ajax_check_upload_error(): void
 
 function FLARELOAD_ajax_dismiss_setup_notice(): void
 {
-    check_ajax_referer('FLARELOAD_dismiss_setup_notice', 'nonce');
-    update_user_meta(get_current_user_id(), 'FLARELOAD_setup_notice_dismissed', '1');
+    check_ajax_referer('flareload_dismiss_setup_notice', 'nonce');
+    update_user_meta(get_current_user_id(), 'flareload_setup_notice_dismissed', '1');
     wp_send_json_success();
 }
 
@@ -669,9 +669,9 @@ function FLARELOAD_restrict_manage_media_location(string $postType): void
     }
 
     // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading $_GET for filter dropdown state; no data is modified.
-    $selected = sanitize_key(wp_unslash($_GET['FLARELOAD_location'] ?? ''));
+    $selected = sanitize_key(wp_unslash($_GET['flareload_location'] ?? ''));
     ?>
-    <select name="FLARELOAD_location">
+    <select name="flareload_location">
         <option value=""><?php echo esc_html(__('All locations', 'flare-load')); ?></option>
         <option value="cloudflare" <?php selected($selected, 'cloudflare'); ?>><?php echo esc_html(__('Uploaded to Cloudflare', 'flare-load')); ?></option>
         <option value="server" <?php selected($selected, 'server'); ?>><?php echo esc_html(__('This server', 'flare-load')); ?></option>
@@ -688,7 +688,7 @@ function FLARELOAD_pre_get_posts_location_filter(WP_Query $query): void
     }
 
     // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading $_GET for media library filter; no data is modified.
-    $location = sanitize_key(wp_unslash($_GET['FLARELOAD_location'] ?? ''));
+    $location = sanitize_key(wp_unslash($_GET['flareload_location'] ?? ''));
 
     if ($location === 'cloudflare') {
         // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Required to filter media library by CF meta key; no alternative without direct DB.
@@ -716,7 +716,7 @@ function FLARELOAD_pre_get_posts_location_filter(WP_Query $query): void
 function FLARELOAD_ajax_query_attachments_args(array $query): array
 {
     // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading AJAX query parameter for media filter; actual media queries are handled by WordPress core.
-    $location = sanitize_key($_REQUEST['query']['FLARELOAD_location'] ?? '');
+    $location = sanitize_key($_REQUEST['query']['flareload_location'] ?? '');
 
     if ($location === 'cloudflare') {
         // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Required to filter AJAX media query by CF meta key.
@@ -775,7 +775,7 @@ function FLARELOAD_admin_enqueue_scripts(): void
 
     if (Utils::isFpOptionsPage()) {
         wp_enqueue_script('flareload-options-script', FLARELOAD_URL . 'dist/main/flareload-options.js', ['wp-i18n'], FLARELOAD_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
-        wp_localize_script('flareload-options-script', 'flareloadConfig', ['pluginUrl' => FLARELOAD_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'testConnectionNonce' => wp_create_nonce('FLARELOAD_test_connection'), 'restNonce' => wp_create_nonce('wp_rest'), 'restUrl' => rest_url('flare-load/v1/')]);
+        wp_localize_script('flareload-options-script', 'flareloadConfig', ['pluginUrl' => FLARELOAD_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'testConnectionNonce' => wp_create_nonce('flareload_test_connection'), 'restNonce' => wp_create_nonce('wp_rest'), 'restUrl' => rest_url('flare-load/v1/')]);
         wp_set_script_translations('flareload-options-script', 'flare-load', FLARELOAD_PATH . 'languages');
     }
 
@@ -783,7 +783,7 @@ function FLARELOAD_admin_enqueue_scripts(): void
         wp_enqueue_script('flareload-migrate-script', FLARELOAD_URL . 'dist/main/flareload-migrate.js', ['wp-i18n'], FLARELOAD_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
         wp_localize_script('flareload-migrate-script', 'flareloadMigrateConfig', [
             'ajaxUrl'        => admin_url('admin-ajax.php'),
-            'nonce'          => wp_create_nonce('FLARELOAD_migrate'),
+            'nonce'          => wp_create_nonce('flareload_migrate'),
             'defaultVariant' => get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, ''),
             'variantOptions' => OptionController::getVariantOptions(),
             'migrateUrl'     => admin_url('admin.php?page=' . Constants::DASHBOARD_MIGRATE_PAGE_SLUG),

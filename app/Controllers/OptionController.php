@@ -47,7 +47,7 @@ class OptionController
                 'manage_options',
                 Constants::DASHBOARD_MENU_SLUG,
                 [$this, 'fpAdminDashboardView'],
-                FLARELOAD_URL . 'dist/images/FLARELOAD_dashboard_icon.svg',
+                FLARELOAD_URL . 'dist/images/flareload_dashboard_icon.svg',
                 80
         );
     }
@@ -242,7 +242,7 @@ class OptionController
                 'sanitize_callback' => function ($input) {
                     // Explicit remove action submitted via checkbox
                     // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified by WordPress core via options.php before sanitize_callback is invoked.
-                    $action = sanitize_key(wp_unslash($_POST['FLARELOAD_cf_signing_key_action'] ?? 'keep'));
+                    $action = sanitize_key(wp_unslash($_POST['flareload_cf_signing_key_action'] ?? 'keep'));
                     if ($action === 'remove') {
                         return '';
                     }
@@ -282,9 +282,9 @@ class OptionController
             class="regular-text"/>
         <?php if ($hasKey) { ?>
         <div style="margin-top:6px;">
-            <input type="hidden" name="FLARELOAD_cf_signing_key_action" value="keep">
+            <input type="hidden" name="flareload_cf_signing_key_action" value="keep">
             <label>
-                <input type="checkbox" name="FLARELOAD_cf_signing_key_action" value="remove">
+                <input type="checkbox" name="flareload_cf_signing_key_action" value="remove">
                 <?php esc_html_e('Remove signing key', 'flare-load'); ?>
             </label>
         </div>
@@ -333,12 +333,12 @@ class OptionController
                     </option>
                 <?php endforeach; ?>
             </select>
-            <button id="FLARELOAD_variant_sync_button" type="button" role="button"
+            <button id="flareload_variant_sync_button" type="button" role="button"
                     class="flareload-variant-sync-button button button-secondary">
-                <span class="dashicons dashicons-update-alt"></span>
+            
                 <?php echo esc_html(__('Sync Variants', 'flare-load')); ?>
             </button>
-            <span id="FLARELOAD_sync_variant_spinner" class="spinner"></span>
+            <span id="flareload_sync_variant_spinner" class="spinner"></span>
         </div>
         <p class="description"><?php echo wp_kses(__('Choose the largest variant without cropping as the default. <br/>This ensures the full image is clearly visible and recognizable.', 'flare-load'), ['br' => []]); ?></p>
         <?php
@@ -399,7 +399,7 @@ class OptionController
             <?php
             if (!empty($optionVal)) {
                 ?>
-                <button id="FLARELOAD_change_api_token_button" class="button button-secondary flareload-change-api-token-button"
+                <button id="flareload_change_api_token_button" class="button button-secondary flareload-change-api-token-button"
                         type="button" role="button">
                     <span class="dashicons dashicons-edit"></span>
                 </button>
@@ -409,10 +409,10 @@ class OptionController
         </label>
         <?php if (!empty($optionVal)) { ?>
         <div class="flareload-test-connection-wrap" style="margin-top:8px;">
-            <button id="FLARELOAD_test_connection_button" class="button button-secondary" type="button">
+            <button id="flareload_test_connection_button" class="button button-secondary" type="button">
                 <?php echo esc_html(__('Test Connection', 'flare-load')); ?>
             </button>
-            <span id="FLARELOAD_test_connection_result" style="margin-left:8px;"></span>
+            <span id="flareload_test_connection_result" style="margin-left:8px;"></span>
         </div>
         <?php } ?>
         <p class="description"><?php echo wp_kses(__('You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/api-tokens</i>', 'flare-load'), ['i' => [], 'b' => []]); ?></p>

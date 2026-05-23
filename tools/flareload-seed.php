@@ -20,7 +20,7 @@ defined('ABSPATH') || exit;
 // ── Config ────────────────────────────────────────────────────────────────────
 const FLARELOAD_SEED_CF          = 2500;
 const FLARELOAD_SEED_LOCAL       = 2500;
-const FLARELOAD_SEED_META        = '_FLARELOAD_seed';
+const FLARELOAD_SEED_META        = '_flareload_seed';
 const FLARELOAD_SEED_CF_DELAY_US = 250000; // 250 ms between CF uploads ≈ 4 req/s
 
 // ── Dispatch ──────────────────────────────────────────────────────────────────
@@ -30,9 +30,9 @@ $mode === 'cleanup' ? FLARELOAD_seed_cleanup() : FLARELOAD_seed_run();
 // ── Seed ──────────────────────────────────────────────────────────────────────
 function FLARELOAD_seed_run(): void
 {
-    $accountHash = get_option('FLARELOAD_cf_account_hash', '');
-    $accountId   = get_option('FLARELOAD_cf_account_id', '');
-    $apiToken    = get_option('FLARELOAD_cf_api_token', '');
+    $accountHash = get_option('flareload_cf_account_hash', '');
+    $accountId   = get_option('flareload_cf_account_id', '');
+    $apiToken    = get_option('flareload_cf_api_token', '');
 
     if (!$accountHash || !$accountId || !$apiToken) {
         WP_CLI::error('Missing Cloudflare credentials. Configure the FlareLoad plugin settings first.');
@@ -105,16 +105,16 @@ function FLARELOAD_seed_run(): void
         }
 
         update_post_meta($attachmentId, FLARELOAD_SEED_META, 1);
-        update_post_meta($attachmentId, 'FLARELOAD_cf_image_id', $cfId);
+        update_post_meta($attachmentId, 'flareload_cf_image_id', $cfId);
         update_attached_file($attachmentId, $cfId);
 
         wp_update_attachment_metadata($attachmentId, [
             'file'            => '',
             'width'           => 100,
             'height'          => 100,
-            'FLARELOAD_cf_image_id'  => $cfId,
-            'FLARELOAD_cf_file_name' => $filename,
-            'FLARELOAD_cf_thumbnail' => $thumbPath ? ['path' => $thumbPath, 'width' => 100, 'height' => 100] : false,
+            'flareload_cf_image_id'  => $cfId,
+            'flareload_cf_file_name' => $filename,
+            'flareload_cf_thumbnail' => $thumbPath ? ['path' => $thumbPath, 'width' => 100, 'height' => 100] : false,
             'filesize'        => filesize($samplePath),
             'sizes'           => [],
         ]);
@@ -246,7 +246,7 @@ function FLARELOAD_seed_cleanup(): void
     $bar = WP_CLI\Utils\make_progress_bar('Cleanup', count($ids));
 
     foreach ($ids as $id) {
-        $cfId = get_post_meta((int) $id, 'FLARELOAD_cf_image_id', true);
+        $cfId = get_post_meta((int) $id, 'flareload_cf_image_id', true);
         if ($cfId) {
             FLARELOAD_seed_cf_delete($cfId);
             usleep(50000); // 50 ms rate limiting for CF deletes

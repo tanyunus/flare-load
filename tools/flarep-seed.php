@@ -18,21 +18,21 @@ defined('ABSPATH') || exit;
  */
 
 // ── Config ────────────────────────────────────────────────────────────────────
-const FLAREP_SEED_CF          = 2500;
-const FLAREP_SEED_LOCAL       = 2500;
-const FLAREP_SEED_META        = '_flarep_seed';
-const FLAREP_SEED_CF_DELAY_US = 250000; // 250 ms between CF uploads ≈ 4 req/s
+const FLARELOAD_SEED_CF          = 2500;
+const FLARELOAD_SEED_LOCAL       = 2500;
+const FLARELOAD_SEED_META        = '_FLARELOAD_seed';
+const FLARELOAD_SEED_CF_DELAY_US = 250000; // 250 ms between CF uploads ≈ 4 req/s
 
 // ── Dispatch ──────────────────────────────────────────────────────────────────
 $mode = in_array('cleanup', array_slice($GLOBALS['argv'] ?? [], 1)) ? 'cleanup' : 'seed';
-$mode === 'cleanup' ? flarep_seed_cleanup() : flarep_seed_run();
+$mode === 'cleanup' ? FLARELOAD_seed_cleanup() : FLARELOAD_seed_run();
 
 // ── Seed ──────────────────────────────────────────────────────────────────────
-function flarep_seed_run(): void
+function FLARELOAD_seed_run(): void
 {
-    $accountHash = get_option('flarep_cf_account_hash', '');
-    $accountId   = get_option('flarep_cf_account_id', '');
-    $apiToken    = get_option('flarep_cf_api_token', '');
+    $accountHash = get_option('FLARELOAD_cf_account_hash', '');
+    $accountId   = get_option('FLARELOAD_cf_account_id', '');
+    $apiToken    = get_option('FLARELOAD_cf_api_token', '');
 
     if (!$accountHash || !$accountId || !$apiToken) {
         WP_CLI::error('Missing Cloudflare credentials. Configure the FlareLoad plugin settings first.');
@@ -45,15 +45,15 @@ function flarep_seed_run(): void
         WP_CLI::error("Could not create seed directory: {$seedDir}");
     }
 
-    $samplePath = flarep_seed_sample_image($seedDir);
+    $samplePath = FLARELOAD_seed_sample_image($seedDir);
     WP_CLI::log("Sample image : {$samplePath}");
     WP_CLI::log("Account hash : {$accountHash}");
 
     // ── Phase 1: Cloudflare uploads ───────────────────────────────────────────
-    WP_CLI::log('Phase 1/2 — Uploading ' . FLAREP_SEED_CF . ' images to Cloudflare (~' . round(FLAREP_SEED_CF * FLAREP_SEED_CF_DELAY_US / 1e6 / 60, 0) . ' min)…');
-    $bar = WP_CLI\Utils\make_progress_bar('CF uploads', FLAREP_SEED_CF);
+    WP_CLI::log('Phase 1/2 — Uploading ' . FLARELOAD_SEED_CF . ' images to Cloudflare (~' . round(FLARELOAD_SEED_CF * FLARELOAD_SEED_CF_DELAY_US / 1e6 / 60, 0) . ' min)…');
+    $bar = WP_CLI\Utils\make_progress_bar('CF uploads', FLARELOAD_SEED_CF);
 
-    for ($i = 1; $i <= FLAREP_SEED_CF; $i++) {
+    for ($i = 1; $i <= FLARELOAD_SEED_CF; $i++) {
         $filename = "flarep-seed-cf-{$i}.jpg";
 
         try {
@@ -61,15 +61,15 @@ function flarep_seed_run(): void
         } catch (\Exception $e) {
             WP_CLI::warning("CF upload #{$i} failed: " . $e->getMessage());
             $bar->tick();
-            usleep(FLAREP_SEED_CF_DELAY_US);
+            usleep(FLARELOAD_SEED_CF_DELAY_US);
             continue;
         }
 
         $cfId      = $result['result']['id'];
         $cfBaseUrl = "https://imagedelivery.net/{$accountHash}/{$cfId}";
-        $thumbPath = flarep_seed_make_thumb($samplePath, $seedDir, "flarep-seed-cf-thumb-{$i}.jpg");
+        $thumbPath = FLARELOAD_seed_make_thumb($samplePath, $seedDir, "flarep-seed-cf-thumb-{$i}.jpg");
 
-        $postId = flarep_seed_insert([
+        $postId = FLARELOAD_seed_insert([
             'post_title'   => "FP Seed CF Post #{$i}",
             'post_status'  => 'publish',
             'post_type'    => 'post',
@@ -78,15 +78,15 @@ function flarep_seed_run(): void
 
         if (is_wp_error($postId)) {
             WP_CLI::warning("Post #{$i} (CF) failed: " . $postId->get_error_message());
-            flarep_seed_cf_delete($cfId);
+            FLARELOAD_seed_cf_delete($cfId);
             $bar->tick();
-            usleep(FLAREP_SEED_CF_DELAY_US);
+            usleep(FLARELOAD_SEED_CF_DELAY_US);
             continue;
         }
 
-        update_post_meta($postId, FLAREP_SEED_META, 1);
+        update_post_meta($postId, FLARELOAD_SEED_META, 1);
 
-        $attachmentId = flarep_seed_insert([
+        $attachmentId = FLARELOAD_seed_insert([
             'post_title'     => "FP Seed CF Image #{$i}",
             'post_status'    => 'inherit',
             'post_type'      => 'attachment',
@@ -98,23 +98,23 @@ function flarep_seed_run(): void
         if (is_wp_error($attachmentId)) {
             WP_CLI::warning("Attachment #{$i} (CF) failed: " . $attachmentId->get_error_message());
             wp_delete_post($postId, true);
-            flarep_seed_cf_delete($cfId);
+            FLARELOAD_seed_cf_delete($cfId);
             $bar->tick();
-            usleep(FLAREP_SEED_CF_DELAY_US);
+            usleep(FLARELOAD_SEED_CF_DELAY_US);
             continue;
         }
 
-        update_post_meta($attachmentId, FLAREP_SEED_META, 1);
-        update_post_meta($attachmentId, 'flarep_cf_image_id', $cfId);
+        update_post_meta($attachmentId, FLARELOAD_SEED_META, 1);
+        update_post_meta($attachmentId, 'FLARELOAD_cf_image_id', $cfId);
         update_attached_file($attachmentId, $cfId);
 
         wp_update_attachment_metadata($attachmentId, [
             'file'            => '',
             'width'           => 100,
             'height'          => 100,
-            'flarep_cf_image_id'  => $cfId,
-            'flarep_cf_file_name' => $filename,
-            'flarep_cf_thumbnail' => $thumbPath ? ['path' => $thumbPath, 'width' => 100, 'height' => 100] : false,
+            'FLARELOAD_cf_image_id'  => $cfId,
+            'FLARELOAD_cf_file_name' => $filename,
+            'FLARELOAD_cf_thumbnail' => $thumbPath ? ['path' => $thumbPath, 'width' => 100, 'height' => 100] : false,
             'filesize'        => filesize($samplePath),
             'sizes'           => [],
         ]);
@@ -129,7 +129,7 @@ function flarep_seed_run(): void
         wp_update_post(['ID' => $postId, 'post_content' => $blockContent]);
 
         $bar->tick();
-        usleep(FLAREP_SEED_CF_DELAY_US);
+        usleep(FLARELOAD_SEED_CF_DELAY_US);
 
         if ($i % 250 === 0) {
             wp_cache_flush();
@@ -137,11 +137,11 @@ function flarep_seed_run(): void
     }
 
     $bar->finish();
-    WP_CLI::success('Phase 1 complete — ' . FLAREP_SEED_CF . ' CF posts created.');
+    WP_CLI::success('Phase 1 complete — ' . FLARELOAD_SEED_CF . ' CF posts created.');
 
     // ── Phase 2: Local uploads ────────────────────────────────────────────────
-    WP_CLI::log('Phase 2/2 — Creating ' . FLAREP_SEED_LOCAL . ' local-upload posts…');
-    $bar = WP_CLI\Utils\make_progress_bar('Local uploads', FLAREP_SEED_LOCAL);
+    WP_CLI::log('Phase 2/2 — Creating ' . FLARELOAD_SEED_LOCAL . ' local-upload posts…');
+    $bar = WP_CLI\Utils\make_progress_bar('Local uploads', FLARELOAD_SEED_LOCAL);
 
     $localDir = $uploadDir['basedir'] . '/flarep-seed-local';
     $localUrl = $uploadDir['baseurl'] . '/flarep-seed-local';
@@ -150,14 +150,14 @@ function flarep_seed_run(): void
         WP_CLI::error("Could not create local seed directory: {$localDir}");
     }
 
-    for ($i = 1; $i <= FLAREP_SEED_LOCAL; $i++) {
+    for ($i = 1; $i <= FLARELOAD_SEED_LOCAL; $i++) {
         $filename = "flarep-seed-local-{$i}.jpg";
         $filePath = $localDir . '/' . $filename;
         $fileUrl  = $localUrl . '/' . $filename;
 
         copy($samplePath, $filePath);
 
-        $postId = flarep_seed_insert([
+        $postId = FLARELOAD_seed_insert([
             'post_title'   => "FP Seed Local Post #{$i}",
             'post_status'  => 'publish',
             'post_type'    => 'post',
@@ -171,7 +171,7 @@ function flarep_seed_run(): void
             continue;
         }
 
-        update_post_meta($postId, FLAREP_SEED_META, 1);
+        update_post_meta($postId, FLARELOAD_SEED_META, 1);
 
         $attachmentId = wp_insert_attachment([
             'post_title'     => "FP Seed Local Image #{$i}",
@@ -190,7 +190,7 @@ function flarep_seed_run(): void
             continue;
         }
 
-        update_post_meta($attachmentId, FLAREP_SEED_META, 1);
+        update_post_meta($attachmentId, FLARELOAD_SEED_META, 1);
 
         wp_update_attachment_metadata($attachmentId, [
             'width'    => 100,
@@ -219,13 +219,13 @@ function flarep_seed_run(): void
 
     $bar->finish();
     WP_CLI::success(
-        'Seeding complete — ' . FLAREP_SEED_CF . ' CF posts + ' . FLAREP_SEED_LOCAL . ' local posts = ' .
-        (FLAREP_SEED_CF + FLAREP_SEED_LOCAL) . ' total.'
+        'Seeding complete — ' . FLARELOAD_SEED_CF . ' CF posts + ' . FLARELOAD_SEED_LOCAL . ' local posts = ' .
+        (FLARELOAD_SEED_CF + FLARELOAD_SEED_LOCAL) . ' total.'
     );
 }
 
 // ── Cleanup ───────────────────────────────────────────────────────────────────
-function flarep_seed_cleanup(): void
+function FLARELOAD_seed_cleanup(): void
 {
     global $wpdb;
 
@@ -233,7 +233,7 @@ function flarep_seed_cleanup(): void
     $ids = $wpdb->get_col(
         $wpdb->prepare(
             "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s",
-            FLAREP_SEED_META
+            FLARELOAD_SEED_META
         )
     );
 
@@ -246,9 +246,9 @@ function flarep_seed_cleanup(): void
     $bar = WP_CLI\Utils\make_progress_bar('Cleanup', count($ids));
 
     foreach ($ids as $id) {
-        $cfId = get_post_meta((int) $id, 'flarep_cf_image_id', true);
+        $cfId = get_post_meta((int) $id, 'FLARELOAD_cf_image_id', true);
         if ($cfId) {
-            flarep_seed_cf_delete($cfId);
+            FLARELOAD_seed_cf_delete($cfId);
             usleep(50000); // 50 ms rate limiting for CF deletes
         }
         wp_delete_post((int) $id, true);
@@ -261,7 +261,7 @@ function flarep_seed_cleanup(): void
     foreach (['flarep-seed', 'flarep-seed-local'] as $dir) {
         $path = $uploadDir['basedir'] . '/' . $dir;
         if (is_dir($path)) {
-            flarep_seed_rmdir($path);
+            FLARELOAD_seed_rmdir($path);
             WP_CLI::log("Removed: {$path}");
         }
     }
@@ -272,7 +272,7 @@ function flarep_seed_cleanup(): void
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 /** wp_insert_post with exponential-backoff retry for transient SQLite errors. */
-function flarep_seed_insert(array $postarr)
+function FLARELOAD_seed_insert(array $postarr)
 {
     $delays = [50000, 150000, 400000, 1000000];
     $result = wp_insert_post($postarr, true);
@@ -287,7 +287,7 @@ function flarep_seed_insert(array $postarr)
 }
 
 /** Delete a CF image, silently ignoring errors (already deleted, not found, etc.). */
-function flarep_seed_cf_delete(string $cfId): void
+function FLARELOAD_seed_cf_delete(string $cfId): void
 {
     try {
         \FlareLoad\Api\CloudflareImagesApi::deleteImage($cfId);
@@ -295,7 +295,7 @@ function flarep_seed_cf_delete(string $cfId): void
 }
 
 /** Copy sample image to a new path and return the destination path, or false on failure. */
-function flarep_seed_make_thumb(string $src, string $dir, string $name): string|false
+function FLARELOAD_seed_make_thumb(string $src, string $dir, string $name): string|false
 {
     $dest = $dir . '/' . $name;
     return copy($src, $dest) ? $dest : false;
@@ -305,7 +305,7 @@ function flarep_seed_make_thumb(string $src, string $dir, string $name): string|
  * Returns path to a 100×100 sample JPEG, creating it once if needed.
  * Uses GD if available; falls back to a hardcoded minimal JPEG.
  */
-function flarep_seed_sample_image(string $dir): string
+function FLARELOAD_seed_sample_image(string $dir): string
 {
     $path = $dir . '/flarep-seed-sample.jpg';
     if (file_exists($path)) {
@@ -335,10 +335,10 @@ function flarep_seed_sample_image(string $dir): string
 }
 
 /** Recursively remove a directory. */
-function flarep_seed_rmdir(string $dir): void
+function FLARELOAD_seed_rmdir(string $dir): void
 {
     foreach (glob($dir . '/*') as $item) {
-        is_dir($item) ? flarep_seed_rmdir($item) : wp_delete_file($item);
+        is_dir($item) ? FLARELOAD_seed_rmdir($item) : wp_delete_file($item);
     }
     // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
     rmdir($dir);

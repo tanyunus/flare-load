@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace FlareLoad\Util;
 
@@ -67,7 +67,7 @@ class Utils
     public static function renderTemplate(string $template, array $data = []): void
     {
         extract($data);
-        $file = FLAREP_PATH . 'app/Views/' . $template . '.php';
+        $file = FLARELOAD_PATH . 'app/Views/' . $template . '.php';
 
         if (file_exists($file)) {
             include $file;

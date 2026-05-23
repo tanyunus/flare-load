@@ -1,6 +1,6 @@
 ﻿<?php defined('ABSPATH') || exit; ?>
 <div class="flarep-header">
-    <img height="120" src="<?php echo esc_url(FLAREP_URL . 'dist/images/flarep_logo.png') ?>">
+    <img height="120" src="<?php echo esc_url(FLARELOAD_URL . 'dist/images/FLARELOAD_logo.png') ?>">
     <div>
         <p><?php echo wp_kses(__('DIRECT<br>CLOUDFLARE IMAGES<br>INTEGRATION', 'flare-load'), ['br' => []]); ?></p>
         <a target="_blank" title="<?php echo esc_attr(__('FlareLoad plugin website', 'flare-load')); ?>" href="https://flare-load.com">Website</a>&nbsp;&nbsp;

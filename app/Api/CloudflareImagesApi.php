@@ -65,9 +65,9 @@ class CloudflareImagesApi
         return self::parseResponse($response, '[IMAGES_API][DELETE]');
     }
 
-    public static function getVariants(?string $token = null): array
+    public static function getVariants(?string $token = null, ?string $accountId = null): array
     {
-        $requestUrl = self::buildRequestUrl(Constants::CF_API_MODULE_VARIANTS);
+        $requestUrl = self::buildRequestUrl(Constants::CF_API_MODULE_VARIANTS, $accountId);
 
         if (empty($requestUrl)) {
             throw new Exception('[IMAGES_API][VARIANT_RETRIEVAL] Cannot construct api request url.');
@@ -104,9 +104,9 @@ class CloudflareImagesApi
         return $data;
     }
 
-    private static function buildRequestUrl(string $additional = ''): string
+    private static function buildRequestUrl(string $additional = '', ?string $accountId = null): string
     {
-        $accountId = get_option(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME);
+        $accountId = $accountId ?? get_option(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME);
 
         if (empty($accountId)) {
             return '';

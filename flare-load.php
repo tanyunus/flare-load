@@ -628,12 +628,15 @@ function FLARELOAD_ajax_test_connection(): void
     }
     $accountId = get_option(Constants::DASHBOARD_CF_ACCOUNT_ID_FIELD_NAME);
     if (empty($accountId)) {
+        $accountId = isset($_POST['flareload_test_account_id']) ? sanitize_text_field(wp_unslash($_POST['flareload_test_account_id'])) : '';
+    }
+    if (empty($accountId)) {
         wp_send_json_error(['message' => __('Account ID is required to test the connection.', 'flare-load')]);
         return;
     }
     $testToken = isset($_POST['flareload_test_token']) ? sanitize_text_field(wp_unslash($_POST['flareload_test_token'])) : null;
     try {
-        CloudflareImagesApi::getVariants($testToken);
+        CloudflareImagesApi::getVariants($testToken, $accountId);
         wp_send_json_success();
     } catch (Exception $e) {
         Logger::log(0, '[TEST_CONNECTION] ' . $e->getMessage());

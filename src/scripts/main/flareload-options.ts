@@ -58,6 +58,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 body.append('flareload_test_token', apiTokenInput.value);
             }
 
+            const accountIdInput = document.querySelector<HTMLInputElement>('[name="flareload_cf_account_id"]');
+            if (accountIdInput && accountIdInput.value.trim()) {
+                body.append('flareload_test_account_id', accountIdInput.value.trim());
+            }
+
             try {
                 const response = await fetch((window as any).ajaxurl, { method: 'POST', body });
                 const data = await response.json();

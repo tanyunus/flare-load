@@ -37,7 +37,7 @@
   & > .attachment-preview::after {
     content: "";
     position: absolute;
-    bottom: 0;
+    top: 0;
     right: 0;
     width: 50px;
     height: 18px;
@@ -46,7 +46,7 @@
     background-position: center center;
     background-repeat: no-repeat;
     background-color: #fff;
-    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
   }
 }
 

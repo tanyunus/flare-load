@@ -99,7 +99,7 @@ function FLARELOAD_incomplete_setup_notice(): void
         return;
     }
 
-    echo '<div class="notice notice-warning is-dismissible" id="flarep-setup-notice"><p>' . wp_kses($message, ['a' => ['href' => []]]) . '</p></div>';
+    echo '<div class="notice notice-warning is-dismissible" id="flareload-setup-notice"><p>' . wp_kses($message, ['a' => ['href' => []]]) . '</p></div>';
 }
 
 function FLARELOAD_enqueue_dismiss_notice_script(): void
@@ -116,11 +116,11 @@ function FLARELOAD_enqueue_dismiss_notice_script(): void
     $ajax_url = wp_json_encode(admin_url('admin-ajax.php'));
     $nonce_js = esc_js($nonce);
 
-    wp_register_script('flarep-dismiss-notice', false, [], FLARELOAD_VERSION, true);
-    wp_enqueue_script('flarep-dismiss-notice');
-    wp_add_inline_script('flarep-dismiss-notice',
+    wp_register_script('flareload-dismiss-notice', false, [], FLARELOAD_VERSION, true);
+    wp_enqueue_script('flareload-dismiss-notice');
+    wp_add_inline_script('flareload-dismiss-notice',
         'document.addEventListener("DOMContentLoaded", function() {' .
-        '  var notice = document.getElementById("flarep-setup-notice");' .
+        '  var notice = document.getElementById("flareload-setup-notice");' .
         '  if (!notice) return;' .
         '  notice.addEventListener("click", function(e) {' .
         '    if (e.target.classList.contains("notice-dismiss")) {' .
@@ -758,30 +758,30 @@ function FLARELOAD_manage_media_custom_column(string $columnName, int $attachmen
 
 function FLARELOAD_admin_enqueue_scripts(): void
 {
-    wp_enqueue_style('flarep-main-style', FLARELOAD_URL . 'dist/css/flarep-main.css', [], FLARELOAD_VERSION);
+    wp_enqueue_style('flareload-main-style', FLARELOAD_URL . 'dist/css/flareload-main.css', [], FLARELOAD_VERSION);
 
     // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading $_GET['mode'] for script routing only; no data is modified.
     if (Utils::isAdminPage('upload.php') && (empty($_GET) || sanitize_key(wp_unslash($_GET['mode'] ?? '')) === 'grid')) {
-        wp_enqueue_script('flarep-media-library-grid-script', FLARELOAD_URL . 'dist/main/flarep-media-library-grid.js', ['wp-i18n'], FLARELOAD_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
-        wp_localize_script('flarep-media-library-grid-script', 'flarepConfig', ['pluginUrl' => FLARELOAD_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'locationFilterLabels' => ['all' => __('All locations', 'flare-load'), 'cloudflare' => __('Uploaded to Cloudflare', 'flare-load'), 'server' => __('This server', 'flare-load')]]);
-        wp_set_script_translations('flarep-media-library-grid-script', 'flare-load', FLARELOAD_PATH . 'languages');
+        wp_enqueue_script('flareload-media-library-grid-script', FLARELOAD_URL . 'dist/main/flareload-media-library-grid.js', ['wp-i18n'], FLARELOAD_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
+        wp_localize_script('flareload-media-library-grid-script', 'flarepConfig', ['pluginUrl' => FLARELOAD_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'locationFilterLabels' => ['all' => __('All locations', 'flare-load'), 'cloudflare' => __('Uploaded to Cloudflare', 'flare-load'), 'server' => __('This server', 'flare-load')]]);
+        wp_set_script_translations('flareload-media-library-grid-script', 'flare-load', FLARELOAD_PATH . 'languages');
     }
 
     if (Utils::isAdminPage('media-new.php')) {
-        wp_enqueue_script('flarep-media-new-script', FLARELOAD_URL . 'dist/main/flarep-media-new.js', ['wp-i18n'], FLARELOAD_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
-        wp_localize_script('flarep-media-new-script', 'flarepConfig', ['pluginUrl' => FLARELOAD_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG)]);
-        wp_set_script_translations('flarep-media-new-script', 'flare-load', FLARELOAD_PATH . 'languages');
+        wp_enqueue_script('flareload-media-new-script', FLARELOAD_URL . 'dist/main/flareload-media-new.js', ['wp-i18n'], FLARELOAD_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
+        wp_localize_script('flareload-media-new-script', 'flarepConfig', ['pluginUrl' => FLARELOAD_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG)]);
+        wp_set_script_translations('flareload-media-new-script', 'flare-load', FLARELOAD_PATH . 'languages');
     }
 
     if (Utils::isFpOptionsPage()) {
-        wp_enqueue_script('flarep-options-script', FLARELOAD_URL . 'dist/main/flarep-options.js', ['wp-i18n'], FLARELOAD_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
-        wp_localize_script('flarep-options-script', 'flarepConfig', ['pluginUrl' => FLARELOAD_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'testConnectionNonce' => wp_create_nonce('FLARELOAD_test_connection'), 'restNonce' => wp_create_nonce('wp_rest'), 'restUrl' => rest_url('flare-load/v1/')]);
-        wp_set_script_translations('flarep-options-script', 'flare-load', FLARELOAD_PATH . 'languages');
+        wp_enqueue_script('flareload-options-script', FLARELOAD_URL . 'dist/main/flareload-options.js', ['wp-i18n'], FLARELOAD_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
+        wp_localize_script('flareload-options-script', 'flarepConfig', ['pluginUrl' => FLARELOAD_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'testConnectionNonce' => wp_create_nonce('FLARELOAD_test_connection'), 'restNonce' => wp_create_nonce('wp_rest'), 'restUrl' => rest_url('flare-load/v1/')]);
+        wp_set_script_translations('flareload-options-script', 'flare-load', FLARELOAD_PATH . 'languages');
     }
 
     if (Utils::isFpMigratePage()) {
-        wp_enqueue_script('flarep-migrate-script', FLARELOAD_URL . 'dist/main/flarep-migrate.js', ['wp-i18n'], FLARELOAD_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
-        wp_localize_script('flarep-migrate-script', 'flarepMigrateConfig', [
+        wp_enqueue_script('flareload-migrate-script', FLARELOAD_URL . 'dist/main/flareload-migrate.js', ['wp-i18n'], FLARELOAD_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
+        wp_localize_script('flareload-migrate-script', 'flarepMigrateConfig', [
             'ajaxUrl'        => admin_url('admin-ajax.php'),
             'nonce'          => wp_create_nonce('FLARELOAD_migrate'),
             'defaultVariant' => get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, ''),
@@ -789,13 +789,13 @@ function FLARELOAD_admin_enqueue_scripts(): void
             'migrateUrl'     => admin_url('admin.php?page=' . Constants::DASHBOARD_MIGRATE_PAGE_SLUG),
             'logsUrl'        => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG),
         ]);
-        wp_set_script_translations('flarep-migrate-script', 'flare-load', FLARELOAD_PATH . 'languages');
+        wp_set_script_translations('flareload-migrate-script', 'flare-load', FLARELOAD_PATH . 'languages');
     }
 
     if ((Utils::isPostEditPage() || Utils::isAdminPage('post-new.php') || Utils::isAdminPage('site-editor.php')) && !Utils::isMediaEditPage()) {
-        wp_enqueue_script('flarep-post-script', FLARELOAD_URL . 'dist/main/flarep-post.js', ['wp-i18n'], FLARELOAD_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
-        wp_localize_script('flarep-post-script', 'flarepConfig', ['pluginUrl' => FLARELOAD_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'defaultVariant' => get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, ''), 'variantOptions' => OptionController::getVariantOptions(), 'accountHash' => OptionController::getAccountHash(), 'restUrl' => rest_url('flare-load/v1/')]);
-        wp_set_script_translations('flarep-post-script', 'flare-load', FLARELOAD_PATH . 'languages');
+        wp_enqueue_script('flareload-post-script', FLARELOAD_URL . 'dist/main/flareload-post.js', ['wp-i18n'], FLARELOAD_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
+        wp_localize_script('flareload-post-script', 'flarepConfig', ['pluginUrl' => FLARELOAD_URL, 'logsUrl' => admin_url('admin.php?page=' . Constants::DASHBOARD_LOG_PAGE_SLUG), 'defaultVariant' => get_option(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME, ''), 'variantOptions' => OptionController::getVariantOptions(), 'accountHash' => OptionController::getAccountHash(), 'restUrl' => rest_url('flare-load/v1/')]);
+        wp_set_script_translations('flareload-post-script', 'flare-load', FLARELOAD_PATH . 'languages');
     }
 }
 

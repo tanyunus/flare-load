@@ -134,9 +134,9 @@ class OptionController
     private function renderLogViewer(): void
     {
         ?>
-        <label class="flarep-log-viewer-label">
+        <label class="flareload-log-viewer-label">
             <textarea
-                    class="flarep-log-viewer-textarea"
+                    class="flareload-log-viewer-textarea"
                     id="<?php echo esc_attr(Constants::LOG_VIEWER_FIELD_NAME) ?>"
                     name="<?php echo esc_attr(Constants::LOG_VIEWER_FIELD_NAME) ?>"
                     rows="20"
@@ -324,7 +324,7 @@ class OptionController
         $options      = self::getVariantOptions();
 
         ?>
-        <div class="flarep-sync-button-and-spinner">
+        <div class="flareload-sync-button-and-spinner">
             <select name="<?php echo esc_attr(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME) ?>"
                     id="<?php echo esc_attr(Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME) ?>">
                 <?php foreach ($options as $opt) : ?>
@@ -334,7 +334,7 @@ class OptionController
                 <?php endforeach; ?>
             </select>
             <button id="FLARELOAD_variant_sync_button" type="button" role="button"
-                    class="flarep-variant-sync-button button button-secondary">
+                    class="flareload-variant-sync-button button button-secondary">
                 <span class="dashicons dashicons-update-alt"></span>
                 <?php echo esc_html(__('Sync Variants', 'flare-load')); ?>
             </button>
@@ -384,7 +384,7 @@ class OptionController
     {
         $optionVal = trim(esc_attr(get_option(Constants::DASHBOARD_CF_API_TOKEN_FIELD_NAME)));
         ?>
-        <label class="flarep-api-token-field-label">
+        <label class="flareload-api-token-field-label">
             <input
                     type="password"
                     value="<?php echo !empty($optionVal) ? '••••••••••••••••••••••' : '' ?>"
@@ -399,7 +399,7 @@ class OptionController
             <?php
             if (!empty($optionVal)) {
                 ?>
-                <button id="FLARELOAD_change_api_token_button" class="button button-secondary flarep-change-api-token-button"
+                <button id="FLARELOAD_change_api_token_button" class="button button-secondary flareload-change-api-token-button"
                         type="button" role="button">
                     <span class="dashicons dashicons-edit"></span>
                 </button>
@@ -408,7 +408,7 @@ class OptionController
             ?>
         </label>
         <?php if (!empty($optionVal)) { ?>
-        <div class="flarep-test-connection-wrap" style="margin-top:8px;">
+        <div class="flareload-test-connection-wrap" style="margin-top:8px;">
             <button id="FLARELOAD_test_connection_button" class="button button-secondary" type="button">
                 <?php echo esc_html(__('Test Connection', 'flare-load')); ?>
             </button>
@@ -472,8 +472,8 @@ class OptionController
     {
         if ($columnName === Constants::DASHBOARD_CF_LIST_VIEW_COLUMN_ID && AttachmentController::getCloudflareIdOfAttachment($attachmentId)) {
             echo '<span
-                data-flarep-file-name="' . esc_attr(AttachmentController::getAttachmentFileName($attachmentId)) . '"
-                data-flarep-url="' . esc_attr(get_the_guid($attachmentId)) . '"
+                data-flareload-file-name="' . esc_attr(AttachmentController::getAttachmentFileName($attachmentId)) . '"
+                data-flareload-url="' . esc_attr(get_the_guid($attachmentId)) . '"
                 >
                 <img title="' . esc_attr(__('Uploaded to Cloudflare', 'flare-load')) . '" alt="Cloudflare logo" height="18" src="' . esc_url(FLARELOAD_URL . 'dist/images/cf_logo.png') . '"></span>';
         } else {

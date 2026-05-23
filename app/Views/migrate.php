@@ -1,5 +1,5 @@
-<?php defined('ABSPATH') || exit; ?>
+﻿<?php defined('ABSPATH') || exit; ?>
 <div class="wrap">
     <?php include 'header.php'; ?>
-    <div id="flarep-migrate-root"></div>
+    <div id="flareload-migrate-root"></div>
 </div>

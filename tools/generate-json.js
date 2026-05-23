@@ -24,15 +24,15 @@ const PLUGIN_BASE = 'plugins/flare-load/';
 // key   = relative path of compiled JS from plugin root
 // value = source TS file paths that were bundled into it (as in .po #: refs)
 const BUNDLE_MAP = {
-    'dist/main/flarep-media-library-grid.js': [
+    'dist/main/flareload-media-library-grid.js': [
         'src/scripts/modules/UploadManager.ts',
     ],
-    'dist/main/flarep-media-new.js': [
+    'dist/main/flareload-media-new.js': [
         'src/scripts/modules/UploadManager.ts',
     ],
-    'dist/main/flarep-post.js': [
+    'dist/main/flareload-post.js': [
         'src/scripts/modules/UploadManager.ts',
-        'src/scripts/main/flarep-post.tsx',
+        'src/scripts/main/flareload-post.tsx',
     ],
 };
 

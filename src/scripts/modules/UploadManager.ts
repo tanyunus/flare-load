@@ -117,7 +117,7 @@ export default class UploadManager {
 
     public createSwitcherElement(customClass: string = ''): HTMLLabelElement {
         const label = document.createElement('label');
-        label.className = 'flarep-upload-switcher ' + customClass;
+        label.className = 'flareload-upload-switcher ' + customClass;
         label.style.marginLeft = '10px';
         label.htmlFor = 'flareload_upload_to_cf';
 
@@ -135,7 +135,7 @@ export default class UploadManager {
     public createCfUploadButton(additionalClassName: string = ''): HTMLButtonElement {
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'flarep-cf-upload-button ' + additionalClassName;
+        button.className = 'flareload-cf-upload-button ' + additionalClassName;
         button.appendChild(document.createTextNode(__('Upload to Cloudflare', 'flare-load')));
         button.style.boxShadow = 'inset 0 0 0 1px #f78100, 0 0 0 currentColor';
         button.style.color = '#f78100';
@@ -203,7 +203,7 @@ export default class UploadManager {
             ?? blockEditor
             ?? document.querySelector<HTMLElement>('#wpcontent')
             ?? document.body;
-        const existing = container.querySelector<HTMLElement>('.flarep-upload-error-notice');
+        const existing = container.querySelector<HTMLElement>('.flareload-upload-error-notice');
 
         if (existing) {
             const count = parseInt(existing.dataset.errorCount || '1', 10) + 1;
@@ -214,7 +214,7 @@ export default class UploadManager {
         }
 
         const notice = document.createElement('div');
-        notice.className = 'notice notice-error is-dismissible flarep-upload-error-notice';
+        notice.className = 'notice notice-error is-dismissible flareload-upload-error-notice';
         notice.dataset.errorCount = '1';
         notice.innerHTML = `<p>${this.buildErrorMessage(1)}</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss</span></button>`;
         notice.querySelector('.notice-dismiss')?.addEventListener('click', () => notice.remove());

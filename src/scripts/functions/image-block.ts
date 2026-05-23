@@ -1,18 +1,18 @@
 ﻿import UploadManager from "../modules/UploadManager";
 
 function injectEditorStyles(iframeDoc: Document): void {
-    if (iframeDoc.querySelector('#flarep-editor-styles')) return;
+    if (iframeDoc.querySelector('#flareload-editor-styles')) return;
 
     const style = iframeDoc.createElement('style');
-    style.id = 'flarep-editor-styles';
+    style.id = 'flareload-editor-styles';
     style.textContent = `
-        .flarep-cf-upload-button {
+        .flareload-cf-upload-button {
             display: inline-flex !important;
             align-items: center !important;
             gap: 6px !important;
             white-space: nowrap !important;
         }
-        .flarep-cf-upload-button img {
+        .flareload-cf-upload-button img {
             height: 12px !important;
             width: auto !important;
             flex-shrink: 0 !important;
@@ -38,7 +38,7 @@ export function addSwitcherToImageBlock(uploadManager: UploadManager): void {
             const imagePlaceholders = iframeDoc.querySelectorAll('.block-editor-media-placeholder');
 
             imagePlaceholders.forEach(placeholder => {
-                if (placeholder.querySelector('.flarep-cf-upload-button')) {
+                if (placeholder.querySelector('.flareload-cf-upload-button')) {
                     return;
                 }
 
@@ -51,7 +51,7 @@ export function addSwitcherToImageBlock(uploadManager: UploadManager): void {
                 const blockLabel = placeholder.querySelector('.components-placeholder__label');
 
                 if (uploadButton && blockLabel) {
-                    const cfButton = uploadManager.createCfUploadButton('components-button block-editor-media-placeholder__button block-editor-media-placeholder__upload-button is-next-40px-default-size is-secondary flarep-switcher-for-block-placeholder');
+                    const cfButton = uploadManager.createCfUploadButton('components-button block-editor-media-placeholder__button block-editor-media-placeholder__upload-button is-next-40px-default-size is-secondary flareload-switcher-for-block-placeholder');
 
                     cfButton.addEventListener('click', () => {
                         (window as any).flareload_upload_to_cf_next = true;
@@ -99,7 +99,7 @@ function observeMainDocumentForDropdown(uploadManager: UploadManager): void {
         const menus = document.querySelectorAll('[role="menu"]');
 
         menus.forEach(menu => {
-            if (menu.querySelector('.flarep-cf-upload-toolbar-button')) {
+            if (menu.querySelector('.flareload-cf-upload-toolbar-button')) {
                 return;
             }
 
@@ -113,7 +113,7 @@ function observeMainDocumentForDropdown(uploadManager: UploadManager): void {
             });
 
             if (uploadButton) {
-                const cfButton = uploadManager.createCfUploadButton('is-next-40px-default-size components-button flarep-cf-upload-toolbar-button');
+                const cfButton = uploadManager.createCfUploadButton('is-next-40px-default-size components-button flareload-cf-upload-toolbar-button');
                 cfButton.classList.add('components-menu-item__button');
                 cfButton.style.width = '100%';
                 cfButton.style.justifyContent = 'flex-start';

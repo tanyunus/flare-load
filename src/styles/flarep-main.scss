@@ -1,10 +1,10 @@
-﻿.flarep-upload-switcher {
+﻿.flareload-upload-switcher {
   margin-left: 15px;
   cursor: pointer;
   user-select: none;
 }
 
-.flarep-cf-upload-button {
+.flareload-cf-upload-button {
   display: inline-flex !important;
   align-items: center;
   gap: 8px;
@@ -15,7 +15,7 @@
   }
 }
 
-.flarep-media-modal-switcher {
+.flareload-media-modal-switcher {
   display: block;
   margin-left: 0;
   margin-top: 24px;
@@ -23,9 +23,9 @@
 
 .media-frame {
   &.mode-grid {
-    .flarep-cf-badge.attachment.details,
-    .flarep-cf-badge.attachment,
-    .flarep-cf-badge.selected.attachment {
+    .flareload-cf-badge.attachment.details,
+    .flareload-cf-badge.attachment,
+    .flareload-cf-badge.selected.attachment {
       &:focus {
         box-shadow: inset 0 0 0 2px #f78100;
       }
@@ -33,7 +33,7 @@
   }
 }
 
-.flarep-cf-badge {
+.flareload-cf-badge {
   & > .attachment-preview::after {
     content: "";
     position: absolute;
@@ -57,51 +57,51 @@ body.media-new-php {
 }
 
 
-.flarep-variant-sync-button {
+.flareload-variant-sync-button {
   display: flex !important;
   column-gap: 4px;
   align-items: center;
 }
 
-.flarep-sync-button-and-spinner {
+.flareload-sync-button-and-spinner {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.flarep-sync-button-and-spinner {
+.flareload-sync-button-and-spinner {
   & > .spinner {
     margin-top: 0;
   }
 }
 
-.flarep-api-token-field-label {
+.flareload-api-token-field-label {
   display: flex;
   column-gap: 4px;
   align-items: center;
 }
 
-.flarep-change-api-token-button {
+.flareload-change-api-token-button {
   height: 30px;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
 }
 
-.flarep-switcher-for-block-placeholder {
+.flareload-switcher-for-block-placeholder {
   box-shadow-color: #f78100;
 }
 
-.flarep-log-viewer-label {
+.flareload-log-viewer-label {
   display: block;
   width: 100%;
 }
 
-.flarep-log-viewer-textarea {
+.flareload-log-viewer-textarea {
   width: 100%;
 }
 
-.flarep-header {
+.flareload-header {
   margin-bottom: 50px;
   margin-top: 50px;
   display: flex;
@@ -119,36 +119,36 @@ body.media-new-php {
 
 // ── Migrate Wizard ────────────────────────────────────────────────────────────
 
-.flarep-migrate-wizard {
+.flareload-migrate-wizard {
   max-width: 900px;
 }
 
-.flarep-migrate-step-title {
+.flareload-migrate-step-title {
   font-size: 1.4em;
   margin-top: 0;
 }
 
-.flarep-migrate-loading {
+.flareload-migrate-loading {
   color: #666;
   font-style: italic;
 }
 
-.flarep-migrate-danger-note {
+.flareload-migrate-danger-note {
   color: #cc1818 !important;
 }
 
-.flarep-migrate-resume-prompt {
+.flareload-migrate-resume-prompt {
   padding: 12px 16px;
 }
 
-.flarep-migrate-cards {
+.flareload-migrate-cards {
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
   margin: 20px 0;
 }
 
-.flarep-migrate-card {
+.flareload-migrate-card {
   background: #fff;
   border: 1px solid #ddd;
   border-top: 3px solid #ddd;
@@ -160,33 +160,33 @@ body.media-new-php {
   flex-direction: column;
   align-items: center;
 
-  &.flarep-card-green { border-top-color: #46b450; }
-  &.flarep-card-blue  { border-top-color: #00a0d2; }
-  &.flarep-card-gray  { border-top-color: #999;    }
-  &.flarep-card-red   { border-top-color: #dc3232; }
+  &.flareload-card-green { border-top-color: #46b450; }
+  &.flareload-card-blue  { border-top-color: #00a0d2; }
+  &.flareload-card-gray  { border-top-color: #999;    }
+  &.flareload-card-red   { border-top-color: #dc3232; }
 }
 
-.flarep-migrate-card-num {
+.flareload-migrate-card-num {
   font-size: 2em;
   font-weight: 600;
   line-height: 1;
 }
 
-.flarep-migrate-card-lbl {
+.flareload-migrate-card-lbl {
   font-size: 0.85em;
   color: #555;
   margin-top: 6px;
 }
 
-.flarep-migrate-select-all-label {
+.flareload-migrate-select-all-label {
   display: inline-block;
   margin-bottom: 8px;
 }
 
-.flarep-migrate-image-table {
+.flareload-migrate-image-table {
   margin-bottom: 16px;
 
-  .flarep-migrate-thumb img {
+  .flareload-migrate-thumb img {
     width: 48px;
     height: 48px;
     object-fit: cover;
@@ -194,77 +194,77 @@ body.media-new-php {
     display: block;
   }
 
-  .flarep-migrate-select-check {
+  .flareload-migrate-select-check {
     width: 32px;
     text-align: center;
   }
 }
 
-.flarep-migrate-pagination {
+.flareload-migrate-pagination {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
 }
 
-.flarep-page-info {
+.flareload-page-info {
   color: #646970;
   font-size: 13px;
 }
 
-.flarep-muted {
+.flareload-muted {
   color: #a7aaad;
 }
 
-.flarep-migrate-selected-count {
+.flareload-migrate-selected-count {
   color: #646970;
   font-size: 13px;
   margin-bottom: 0;
 }
 
-.flarep-migrate-badge {
+.flareload-migrate-badge {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 3px;
   font-size: 0.8em;
   font-weight: 500;
 
-  &.flarep-badge-download_needed { background: #edfaef; color: #1a6b1f; }
-  &.flarep-badge-local_copy      { background: #e5f5fb; color: #006799; }
-  &.flarep-badge-no_variant      { background: #f0f0f0; color: #666;    }
+  &.flareload-badge-download_needed { background: #edfaef; color: #1a6b1f; }
+  &.flareload-badge-local_copy      { background: #e5f5fb; color: #006799; }
+  &.flareload-badge-no_variant      { background: #f0f0f0; color: #666;    }
 }
 
-.flarep-migrate-progress-wrap {
+.flareload-migrate-progress-wrap {
   margin: 20px 0;
 }
 
-.flarep-migrate-progress-bar {
+.flareload-migrate-progress-bar {
   height: 16px;
   background: #e0e0e0;
   border-radius: 8px;
   overflow: hidden;
 }
 
-.flarep-migrate-progress-fill {
+.flareload-migrate-progress-fill {
   height: 100%;
   background: #46b450;
   border-radius: 8px;
   transition: width 0.3s ease;
 }
 
-.flarep-migrate-progress-label {
+.flareload-migrate-progress-label {
   margin-top: 6px;
   color: #555;
   font-size: 0.9em;
 }
 
-.flarep-migrate-current-item {
+.flareload-migrate-current-item {
   color: #888;
   font-size: 0.85em;
   margin-top: 4px;
 }
 
-.flarep-migrate-log {
+.flareload-migrate-log {
   max-height: 200px;
   overflow-y: auto;
   border: 1px solid #ddd;
@@ -273,12 +273,12 @@ body.media-new-php {
   border-radius: 3px;
   margin-top: 16px;
 
-  .flarep-log-line {
+  .flareload-log-line {
     margin: 2px 0;
     font-size: 0.85em;
     font-family: monospace;
   }
 
-  .flarep-log-success { color: #1a6b1f; }
-  .flarep-log-error   { color: #cc1818; }
+  .flareload-log-success { color: #1a6b1f; }
+  .flareload-log-error   { color: #cc1818; }
 }

@@ -1,4 +1,4 @@
-﻿<?php defined('ABSPATH') || exit; ?>
+<?php defined('ABSPATH') || exit; ?>
 <div class="flareload-header">
     <img height="120" src="<?php echo esc_url(FLARELOAD_URL . 'dist/images/FLARELOAD_logo.png') ?>">
     <div>

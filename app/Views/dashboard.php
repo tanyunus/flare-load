@@ -1,4 +1,4 @@
-﻿<?php defined('ABSPATH') || exit; ?>
+<?php defined('ABSPATH') || exit; ?>
 <div class="wrap">
     <?php include 'header.php'?>
     <form id="flareload_options_form" method="post" action="options.php">

@@ -1,4 +1,4 @@
-=== FlarePress ===
+﻿=== FlareLoad ===
 Contributors: tanyunus
 Tags: cloudflare, images, cdn, media, upload
 Requires at least: 5.9
@@ -12,7 +12,7 @@ Upload media directly to Cloudflare Images from the WordPress media library.
 
 == Description ==
 
-FlarePress integrates Cloudflare Images as a direct upload destination alongside the default WordPress media uploader. Instead of storing images on your server, you can send them directly to Cloudflare's global CDN — with automatic delivery optimization and variant support built in.
+FlareLoad integrates Cloudflare Images as a direct upload destination alongside the default WordPress media uploader. Instead of storing images on your server, you can send them directly to Cloudflare's global CDN — with automatic delivery optimization and variant support built in.
 
 **Features:**
 
@@ -28,7 +28,7 @@ FlarePress integrates Cloudflare Images as a direct upload destination alongside
 
 1. Upload the `flare-press` folder to the `/wp-content/plugins/` directory, or install it via the WordPress plugin screen.
 2. Activate the plugin through the **Plugins** screen in WordPress.
-3. Go to **FlarePress** in the admin menu and enter your Cloudflare credentials.
+3. Go to **FlareLoad** in the admin menu and enter your Cloudflare credentials.
 4. Click **Sync Variants** to import your Cloudflare image variants.
 5. Set a default variant and save.
 
@@ -48,7 +48,7 @@ Go to **My Profile → API Tokens** in the Cloudflare dashboard. Create a token 
 
 = Will my existing media be affected? =
 
-No. FlarePress only intercepts uploads where you explicitly choose to upload to Cloudflare. Existing media and standard uploads are unaffected.
+No. FlareLoad only intercepts uploads where you explicitly choose to upload to Cloudflare. Existing media and standard uploads are unaffected.
 
 = What happens to local files after upload? =
 
@@ -58,9 +58,9 @@ By default, local files are deleted after a successful Cloudflare upload to save
 
 By default, deleting an attachment from the WordPress media library also removes it from Cloudflare Images. You can disable this in the plugin settings.
 
-= Is FlarePress compatible with image optimisation plugins such as Smush, ShortPixel, or Imagify? =
+= Is FlareLoad compatible with image optimisation plugins such as Smush, ShortPixel, or Imagify? =
 
-It depends on your File Management setting. If **Delete local file after upload** is enabled (the default), the local copy is removed once an image is uploaded to Cloudflare, so optimisation plugins will not be able to process it. If you rely on a local optimisation plugin, enable **Keep local file after upload** in the FlarePress settings.
+It depends on your File Management setting. If **Delete local file after upload** is enabled (the default), the local copy is removed once an image is uploaded to Cloudflare, so optimisation plugins will not be able to process it. If you rely on a local optimisation plugin, enable **Keep local file after upload** in the FlareLoad settings.
 
 == Screenshots ==
 

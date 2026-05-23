@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 /*
-Plugin Name: FlarePress
+Plugin Name: FlareLoad
 Description: WordPress plugin for uploading media directly to Cloudflare Images alongside the default uploader.
 Version:     1.0.3
 Requires at least: 5.9
@@ -72,7 +72,7 @@ function flarep_backfill_cf_post_meta(): void {
     }
 }
 
-add_action('plugins_loaded', 'flarePressInit');
+add_action('plugins_loaded', 'FlareLoadInit');
 
 function flarep_has_complete_credentials(): bool
 {
@@ -85,8 +85,8 @@ function flarep_incomplete_setup_notice(): void
 {
     $url     = admin_url('admin.php?page=' . Constants::DASHBOARD_MENU_SLUG);
     $message = sprintf(
-        /* translators: %s: link to FlarePress settings page */
-        __('FlarePress is not fully configured. Please complete your <a href="%s">Cloudflare settings</a> to enable all features.', 'flare-press'),
+        /* translators: %s: link to FlareLoad settings page */
+        __('FlareLoad is not fully configured. Please complete your <a href="%s">Cloudflare settings</a> to enable all features.', 'flare-press'),
         esc_url($url)
     );
 
@@ -135,7 +135,7 @@ function flarep_enqueue_dismiss_notice_script(): void
     );
 }
 
-function flarePressInit(): void
+function FlareLoadInit(): void
 {
     $credentialsComplete = flarep_has_complete_credentials();
 
@@ -373,7 +373,7 @@ function flarep_rest_api_init(): void
         },
         'update_callback' => null,
         'schema' => array(
-            'description' => 'FlarePress CF upload error',
+            'description' => 'FlareLoad CF upload error',
             'type' => 'string',
             'context' => array('view', 'edit')
         )
@@ -448,7 +448,7 @@ function flarep_admin_upload_error_notice(): void
     $key = 'flarep_upload_error_' . get_current_user_id();
     if (get_transient($key)) {
         delete_transient($key);
-        $message = __('Upload to Cloudflare failed. The image was saved locally. Check FlarePress logs for details.', 'flare-press');
+        $message = __('Upload to Cloudflare failed. The image was saved locally. Check FlareLoad logs for details.', 'flare-press');
         echo '<div class="notice notice-error is-dismissible"><p>' . esc_html($message) . '</p></div>';
     }
 }

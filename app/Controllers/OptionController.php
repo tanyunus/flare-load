@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace FlareLoad\Controllers;
 
@@ -42,8 +42,8 @@ class OptionController
     private function addSettingsPage(): void
     {
         add_menu_page(
-                __('FlarePress Settings', 'flare-press'),
-                __('FlarePress', 'flare-press'),
+                __('FlareLoad Settings', 'flare-press'),
+                __('FlareLoad', 'flare-press'),
                 'manage_options',
                 Constants::DASHBOARD_MENU_SLUG,
                 [$this, 'fpAdminDashboardView'],
@@ -73,7 +73,7 @@ class OptionController
     {
         add_submenu_page(
                 Constants::DASHBOARD_MENU_SLUG,
-                __('FlarePress Logs', 'flare-press'),
+                __('FlareLoad Logs', 'flare-press'),
                 __('Logs', 'flare-press'),
                 'manage_options',
                 Constants::DASHBOARD_LOG_PAGE_SLUG,
@@ -462,7 +462,7 @@ class OptionController
                         <?php checked(!empty($options[Constants::DASHBOARD_KEEP_ON_CF_AFTER_DELETE_FIELD_NAME])); ?> />
                 <?php echo esc_html(__('Keep files on Cloudflare after delete', 'flare-press')); ?>
             </label>
-            <p class="description"><?php echo wp_kses(__('FlarePress deletes the copy of the attachment from Cloudflare during the deletion process.<br/>Enable this setting if you prefer to keep the file on Cloudflare.', 'flare-press'), ['br' => []]); ?></p>
+            <p class="description"><?php echo wp_kses(__('FlareLoad deletes the copy of the attachment from Cloudflare during the deletion process.<br/>Enable this setting if you prefer to keep the file on Cloudflare.', 'flare-press'), ['br' => []]); ?></p>
         </fieldset>
 
         <?php

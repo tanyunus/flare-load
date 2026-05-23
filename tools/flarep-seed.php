@@ -1,9 +1,9 @@
-<?php
+﻿<?php
 
 defined('ABSPATH') || exit;
 
 /**
- * FlarePress test data seeder
+ * FlareLoad test data seeder
  *
  * Creates 5000 posts for migration stress testing:
  *   - 2500 posts each with an image genuinely uploaded to Cloudflare Images
@@ -35,7 +35,7 @@ function flarep_seed_run(): void
     $apiToken    = get_option('flarep_cf_api_token', '');
 
     if (!$accountHash || !$accountId || !$apiToken) {
-        WP_CLI::error('Missing Cloudflare credentials. Configure the FlarePress plugin settings first.');
+        WP_CLI::error('Missing Cloudflare credentials. Configure the FlareLoad plugin settings first.');
     }
 
     $uploadDir = wp_upload_dir();

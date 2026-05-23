@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace FlareLoad\Data;
 
@@ -26,7 +26,7 @@ class Constants
     public const DASHBOARD_MENU_SLUG = 'flare-press-settings';
     public const DASHBOARD_LOG_PAGE_SLUG = 'flare-press-logs';
     public const DASHBOARD_MIGRATE_PAGE_SLUG = 'flare-press-migrate';
-    public const DASHBOARD_MENU_TITLE = 'FlarePress';
+    public const DASHBOARD_MENU_TITLE = 'FlareLoad';
     public const LOG_MENU_TITLE = 'Logs';
     public const MIGRATE_MENU_TITLE = 'Migrate to Local';
     public const LOG_VIEWER_FIELD_NAME = 'flarep_log_viewer';
@@ -49,8 +49,8 @@ class Constants
     public const DASHBOARD_CF_LIST_VIEW_COLUMN_ID = 'flarep_cf_badge_column';
 
     // UI strings — page & section titles
-    public const UI_PAGE_TITLE = 'FlarePress Settings';
-    public const UI_LOG_PAGE_TITLE = 'FlarePress Logs';
+    public const UI_PAGE_TITLE = 'FlareLoad Settings';
+    public const UI_LOG_PAGE_TITLE = 'FlareLoad Logs';
     public const UI_API_SETTINGS_SECTION_TITLE = 'API Settings';
     public const UI_VARIANT_SETTINGS_SECTION_TITLE = 'Variant Settings';
     public const UI_UPLOAD_SETTINGS_SECTION_TITLE = 'Upload Settings';
@@ -83,12 +83,12 @@ class Constants
     public const UI_CF_API_TOKEN_DESCRIPTION = 'You can find it under <i>https://dash.cloudflare.com/<b>your-account-id-here</b>/api-tokens</i>';
     public const UI_DEFAULT_VARIANT_DESCRIPTION = 'Choose the largest variant without cropping as the default. <br/>This ensures the full image is clearly visible and recognizable.';
     public const UI_KEEP_FILES_AFTER_UPLOAD_DESCRIPTION = 'Enable this setting if you prefer to keep a local copy of the uploaded media. The copy of the file will be kept on default upload folder';
-    public const UI_KEEP_ON_CF_AFTER_DELETE_DESCRIPTION = 'FlarePress deletes the copy of the attachment from Cloudflare during the deletion process.<br/>Enable this setting if you prefer to keep the file on Cloudflare.';
+    public const UI_KEEP_ON_CF_AFTER_DELETE_DESCRIPTION = 'FlareLoad deletes the copy of the attachment from Cloudflare during the deletion process.<br/>Enable this setting if you prefer to keep the file on Cloudflare.';
 
     // UI strings — header
     public const UI_HEADER_TAGLINE = 'DIRECT<br>CLOUDFLARE IMAGES<br>INTEGRATION';
-    public const UI_HEADER_WEBSITE_LINK_TITLE = 'FlarePress plugin website';
-    public const UI_HEADER_GITHUB_LINK_TITLE = 'FlarePress developer Github profile';
+    public const UI_HEADER_WEBSITE_LINK_TITLE = 'FlareLoad plugin website';
+    public const UI_HEADER_GITHUB_LINK_TITLE = 'FlareLoad developer Github profile';
 
     // Internal IDs
     public const LOG_VIEWER_SECTION_ID = 'flarep_log_viewer_section';

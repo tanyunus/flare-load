@@ -26,7 +26,7 @@ import {addSwitcherToImageBlock} from "../functions/image-block";
 
 interface ImageBlockAttributes {
     cloudflareVariant?: string;
-    flarep_cf_image_id: string;
+    flareload_cf_image_id: string;
 
     [key: string]: any;
 }

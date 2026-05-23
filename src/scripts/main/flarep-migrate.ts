@@ -106,7 +106,7 @@ class FlarepMigrateWizard {
     async init(): Promise<void> {
         this.render(`<p class="flarep-migrate-loading">${__('Loading…', 'flare-load')}</p>`);
         try {
-            const state = await this.ajax<MigrationState | null>('flarep_migrate_get_state');
+            const state = await this.ajax<MigrationState | null>('flareload_migrate_get_state');
             if (state && state.remaining.length > 0) {
                 this.renderResumePrompt(state);
                 return;
@@ -168,7 +168,7 @@ class FlarepMigrateWizard {
             this.startProgress(state.remaining, state.processed.length + state.failed.length, total);
         });
         this.on('#flarep-fresh-btn', 'click', async () => {
-            await this.ajax('flarep_migrate_cancel').catch(() => {});
+            await this.ajax('flareload_migrate_cancel').catch(() => {});
             this.renderConfig();
         });
     }
@@ -235,7 +235,7 @@ class FlarepMigrateWizard {
 
             let locked: Array<{ id: number; title: string }> = [];
             try {
-                locked = await this.ajax<Array<{ id: number; title: string }>>('flarep_migrate_check_locks');
+                locked = await this.ajax<Array<{ id: number; title: string }>>('flareload_migrate_check_locks');
             } catch { /* proceed if check fails */ }
 
             if (locked.length > 0) {
@@ -274,7 +274,7 @@ class FlarepMigrateWizard {
         this.on('#flarep-lock-recheck', 'click', async () => {
             let locked: Array<{ id: number; title: string }> = [];
             try {
-                locked = await this.ajax<Array<{ id: number; title: string }>>('flarep_migrate_check_locks');
+                locked = await this.ajax<Array<{ id: number; title: string }>>('flareload_migrate_check_locks');
             } catch { /* proceed if check fails */ }
 
             if (locked.length > 0) {
@@ -300,7 +300,7 @@ class FlarepMigrateWizard {
         this.renderSelectShell(page, null);
         let result: ListImagesResult;
         try {
-            result = await this.ajax<ListImagesResult>('flarep_migrate_list', {
+            result = await this.ajax<ListImagesResult>('flareload_migrate_list', {
                 scope:    'all',
                 page,
                 per_page: this.pageSize,
@@ -418,7 +418,7 @@ class FlarepMigrateWizard {
         this.render(`<div class="flarep-migrate-wizard"><p class="flarep-migrate-loading">${__('Analyzing…', 'flare-load')}</p></div>`);
         let result: AnalysisResult;
         try {
-            result = await this.ajax<AnalysisResult>('flarep_migrate_analyze', {
+            result = await this.ajax<AnalysisResult>('flareload_migrate_analyze', {
                 scope: this.scope,
                 ids:   this.selectedIds,
             });
@@ -470,7 +470,7 @@ class FlarepMigrateWizard {
             const btn = this.root.querySelector<HTMLButtonElement>('#flarep-start-btn');
             if (btn) btn.disabled = true;
             try {
-                const state = await this.ajax<MigrationState>('flarep_migrate_start', {
+                const state = await this.ajax<MigrationState>('flareload_migrate_start', {
                     scope:          this.scope,
                     ids:            this.selectedIds,
                     variant:        this.variant,
@@ -558,7 +558,7 @@ class FlarepMigrateWizard {
                 if (currentEl) currentEl.textContent = `${__('Processing', 'flare-load')} #${id}…`;
 
                 try {
-                    const result = await this.ajax<ProcessResult>('flarep_migrate_process', {
+                    const result = await this.ajax<ProcessResult>('flareload_migrate_process', {
                         id,
                         variant:        this.variant,
                         delete_from_cf: this.deleteFromCF ? '1' : '0',
@@ -588,7 +588,7 @@ class FlarepMigrateWizard {
         }
 
         if (!this.paused && this.progressQueue.length === 0) {
-            await this.ajax('flarep_migrate_cancel').catch(() => {});
+            await this.ajax('flareload_migrate_cancel').catch(() => {});
             this.renderSummary();
         }
     }

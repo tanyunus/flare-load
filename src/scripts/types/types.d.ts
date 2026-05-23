@@ -1,4 +1,4 @@
-export interface WordPressMedia {
+﻿export interface WordPressMedia {
     view?: {
         Attachment?: any;
         AttachmentsBrowser?: any;
@@ -47,7 +47,7 @@ export interface AttachmentData {
     type?: string;
     subtype?: string;
     sizes?: any;
-    flarep_cf_image_id?: string;
+    flareload_cf_image_id?: string;
     viewInitialized?: number;
     viewReady?: number;
     thumbnailLoaded?: number;
@@ -149,8 +149,8 @@ declare global {
     interface Window {
         wp?: WordPressGlobal;
         uploader?: PluploadUploader;
-        flarep_upload_to_cf?: number;
-        flarep_upload_to_cf_next?: boolean;
+        flareload_upload_to_cf?: number;
+        flareload_upload_to_cf_next?: boolean;
         flarepConfig?: FpConfig;
         jQuery?: any;
         fetch: typeof fetch;

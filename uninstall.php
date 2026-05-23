@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('WP_UNINSTALL_PLUGIN')) {
     exit;
 }
@@ -14,7 +14,7 @@ use FlareLoad\Data\Constants;
 // migrated to local, update _wp_attached_file and guid so WordPress returns
 // the Cloudflare CDN URL instead of a broken local path.
 
-$flarep_cfIds = get_posts([
+$flareload_cfIds = get_posts([
     'post_type'      => 'attachment',
     'posts_per_page' => -1,
     'fields'         => 'ids',
@@ -34,37 +34,37 @@ $flarep_cfIds = get_posts([
 
 global $wpdb;
 
-foreach ($flarep_cfIds as $flarep_attachmentId) {
+foreach ($flareload_cfIds as $flareload_attachmentId) {
     // Build CF URL while options are still available (deleted later in this script)
-    $flarep_cfId  = get_post_meta($flarep_attachmentId, Constants::UPLOADED_IMAGE_CF_ID_NAME, true);
-    $flarep_cfUrl = $flarep_cfId ? AttachmentController::getDefaultVariantUrl($flarep_cfId) : '';
+    $flareload_cfId  = get_post_meta($flareload_attachmentId, Constants::UPLOADED_IMAGE_CF_ID_NAME, true);
+    $flareload_cfUrl = $flareload_cfId ? AttachmentController::getDefaultVariantUrl($flareload_cfId) : '';
 
-    if ($flarep_cfUrl) {
+    if ($flareload_cfUrl) {
         // guid — canonical URL used by WordPress internally
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- guid update during uninstall; wp_update_post() fires hooks that depend on plugin being present.
-        $wpdb->update($wpdb->posts, ['guid' => $flarep_cfUrl], ['ID' => $flarep_attachmentId], ['%s'], ['%d']);
+        $wpdb->update($wpdb->posts, ['guid' => $flareload_cfUrl], ['ID' => $flareload_attachmentId], ['%s'], ['%d']);
 
         // _wp_attached_file — WordPress supports full HTTP URLs here;
         // wp_get_attachment_url() will return it as-is.
-        update_post_meta($flarep_attachmentId, '_wp_attached_file', $flarep_cfUrl);
+        update_post_meta($flareload_attachmentId, '_wp_attached_file', $flareload_cfUrl);
     }
 
     // Delete the local CF preview thumbnail file from disk
-    AttachmentController::deleteCfThumbnail($flarep_attachmentId);
+    AttachmentController::deleteCfThumbnail($flareload_attachmentId);
 
     // Strip CF-specific keys from _wp_attachment_metadata
-    $flarep_meta = wp_get_attachment_metadata($flarep_attachmentId);
-    if (is_array($flarep_meta)) {
+    $flareload_meta = wp_get_attachment_metadata($flareload_attachmentId);
+    if (is_array($flareload_meta)) {
         unset(
-            $flarep_meta[Constants::UPLOADED_IMAGE_CF_ID_NAME],
-            $flarep_meta[Constants::UPLOADED_IMAGE_CF_FILE_NAME],
-            $flarep_meta[Constants::UPLOADED_IMAGE_CF_THUMBNAIL_NAME]
+            $flareload_meta[Constants::UPLOADED_IMAGE_CF_ID_NAME],
+            $flareload_meta[Constants::UPLOADED_IMAGE_CF_FILE_NAME],
+            $flareload_meta[Constants::UPLOADED_IMAGE_CF_THUMBNAIL_NAME]
         );
-        wp_update_attachment_metadata($flarep_attachmentId, $flarep_meta);
+        wp_update_attachment_metadata($flareload_attachmentId, $flareload_meta);
     }
 
     // Remove CF ID post meta
-    delete_post_meta($flarep_attachmentId, Constants::UPLOADED_IMAGE_CF_ID_NAME);
+    delete_post_meta($flareload_attachmentId, Constants::UPLOADED_IMAGE_CF_ID_NAME);
 }
 
 // ── Delete plugin options ─────────────────────────────────────────────────────
@@ -77,19 +77,19 @@ foreach ([
     Constants::DASHBOARD_VARIANT_LIST_FIELD_NAME,
     Constants::DASHBOARD_DEFAULT_VARIANT_FIELD_NAME,
     Constants::DASHBOARD_UPLOAD_SETTINGS_NAME,
-] as $flarep_option) {
-    delete_option($flarep_option);
+] as $flareload_option) {
+    delete_option($flareload_option);
 }
 
 // ── Delete transients ─────────────────────────────────────────────────────────
 
-delete_transient('flarep_backfill_v1_done');
-delete_transient('flarep_migration_state');
+delete_transient('flareload_backfill_v1_done');
+delete_transient('flareload_migration_state');
 
-// Per-user upload-error transients (pattern: flarep_upload_error_{user_id})
+// Per-user upload-error transients (pattern: flareload_upload_error_{user_id})
 // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Pattern-based transient deletion; delete_transient() requires exact keys which are unknown at uninstall time.
 $wpdb->query(
     "DELETE FROM {$wpdb->options}
-     WHERE option_name LIKE '_transient_flarep_upload_error_%'
-        OR option_name LIKE '_transient_timeout_flarep_upload_error_%'"
+     WHERE option_name LIKE '_transient_flareload_upload_error_%'
+        OR option_name LIKE '_transient_timeout_flareload_upload_error_%'"
 );

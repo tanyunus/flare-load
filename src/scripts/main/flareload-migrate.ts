@@ -265,7 +265,7 @@ class FlarepMigrateWizard {
                         &nbsp;
                         <button id="flareload-lock-recheck" class="button button-primary">${__('Re-check', 'flare-load')}</button>
                         &nbsp;
-                        <button id="flareload-lock-continue" class="button button-link">${__('Continue Anyway', 'flare-load')}</button>
+                        <button id="flareload-lock-continue" class="button button-secondary">${__('Continue Anyway', 'flare-load')}</button>
                     </p>
                 </div>
             </div>

@@ -156,7 +156,7 @@ export default class UploadManager {
                     this.showUploadError();
                 }
             })
-            .catch(() => { console.error('[FlarePress] Upload error check failed.'); });
+            .catch(() => { console.error('[FlareLoad] Upload error check failed.'); });
     }
 
     public listenHeartbeatForErrors(): void {
@@ -187,7 +187,7 @@ export default class UploadManager {
 
     private buildErrorMessage(count: number): string {
         const logsUrl = (window as any).flareloadConfig?.logsUrl ?? '';
-        const logsLink = logsUrl ? ` <a href="${logsUrl}" target="_blank" rel="noopener noreferrer">${__('Check FlarePress logs for details.', 'flare-load')}</a>` : '';
+        const logsLink = logsUrl ? ` <a href="${logsUrl}" target="_blank" rel="noopener noreferrer">${__('Check FlareLoad logs for details.', 'flare-load')}</a>` : '';
 
         if (count === 1) {
             return __('Upload to Cloudflare failed. The image was saved locally.', 'flare-load') + logsLink;

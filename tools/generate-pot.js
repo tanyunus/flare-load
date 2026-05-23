@@ -1,5 +1,5 @@
 ﻿/**
- * POT file generator for FlarePress.
+ * POT file generator for FlareLoad.
  *
  * Extracts translatable strings from:
  *  - app/Data/Constants.php  (PHP constants passed to Utils::localize())
@@ -143,7 +143,7 @@ function buildPot(phpConstEntries, phpSrcEntries, jsEntries) {
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: FlarePress ${VERSION}\\n"
+"Project-Id-Version: FlareLoad ${VERSION}\\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/flare-load\\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
 "Language-Team: LANGUAGE <LL@li.org>\\n"
@@ -152,12 +152,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\\n"
 "POT-Creation-Date: ${now}\\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\\n"
-"X-Generator: FlarePress generate-pot.js\\n"
+"X-Generator: FlareLoad generate-pot.js\\n"
 "X-Domain: ${DOMAIN}\\n"
 
 #. Plugin Name of the plugin
 #: flare-load.php
-msgid "FlarePress"
+msgid "FlareLoad"
 msgstr ""
 
 #. Description of the plugin
@@ -174,7 +174,7 @@ msgstr ""
 
     for (const [msgid, locs] of seen) {
         // Skip the plugin name — already added above as header entry
-        if (msgid === 'FlarePress') continue;
+        if (msgid === 'FlareLoad') continue;
 
         out += locs.map(l => `#: ${l}`).join('\n') + '\n';
         out += `msgid "${escapePot(msgid)}"\n`;

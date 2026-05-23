@@ -1,5 +1,5 @@
 ﻿/**
- * JS translation JSON generator for FlarePress.
+ * JS translation JSON generator for FlareLoad.
  *
  * WordPress loads JS translations from JSON files named:
  *   {domain}-{locale}-{md5( relative-path-from-wp-content )}.json
@@ -88,7 +88,7 @@ function buildJed(entries, locale, pluralForms) {
 
     return {
         'translation-revision-date': new Date().toISOString(),
-        generator: 'FlarePress generate-json.js',
+        generator: 'FlareLoad generate-json.js',
         source: `languages/${DOMAIN}-${locale}.po`,
         domain: 'messages',
         locale_data: { messages },

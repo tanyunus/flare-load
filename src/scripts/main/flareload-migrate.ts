@@ -189,7 +189,7 @@ class FlarepMigrateWizard {
                 <div class="notice notice-warning inline">
                     <p><strong>${__('Before you start:', 'flare-load')}</strong> ${__('Close all post/page editor tabs in every browser window. If an editor containing a Cloudflare image is left open and the post is saved after migration completes, the Cloudflare image reference will be written back into that post.', 'flare-load')}</p>
                 </div>
-                ${noVariants ? `<div class="notice notice-warning inline"><p>${__('No variants found. Please sync your variants in FlarePress settings first.', 'flare-load')}</p></div>` : ''}
+                ${noVariants ? `<div class="notice notice-warning inline"><p>${__('No variants found. Please sync your variants in FlareLoad settings first.', 'flare-load')}</p></div>` : ''}
                 <table class="form-table">
                     <tr>
                         <th scope="row"><label for="flareload-variant-select">${__('Download Variant', 'flare-load')}</label></th>

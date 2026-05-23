@@ -8,7 +8,7 @@ Requires PHP:      8.0
 Author:      Yunus Tan
 Author URI:  https://github.com/tanyunus/
 License:     GPL-3.0+
-Text Domain: flare-load
+Text Domain: flare-press
 */
 
 use FlareLoad\Api\CloudflareImagesApi;
